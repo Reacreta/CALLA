@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Calla Register</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&family=Goudy+Bookletter+1911&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 2px;
+
+    }
+
+    body, html {
+      height: 100%;
+    }
+
+    body {
+      background-image: url('images/USeP_eagle.jpg'); 
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background-color: #7b0000;
+      color: white;
+      padding: 15px 30px;
+      font-family: 'Goudy Bookletter 1911', serif;
+      font-size: 30px;
+    }
+
+    .register-container {
+      background-color: rgba(123, 0, 0, 0.95); 
+      color: white;
+      width: 800px;
+      height: 700px;
+      margin: 40px auto;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    }
+
+    .register-container h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0 50px 0;
+    }
+
+    .form-group input,
+    .form-group select {
+      flex: 1;
+      padding: 12px;        
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+
+    .full-width {
+      width: 100%;
+    }
+
+    .bottom-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .bottom-group a {
+      font-size: 14px;
+      color: #ddd;
+      text-decoration: underline;
+      font-style: italic;
+      margin-left: 10px;
+    }
+
+    .submit-btn {
+      padding: 15px 20px;
+      border: none;
+      border-radius: 6px;
+      background-color: white;
+      color: #7b0000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">CALLA</div>
+
+  <div class="register-container">
+    <h2>REGISTER</h2>
+    <form action="#" method="post">
+
+      <div class="form-group">
+        <input type="text" placeholder="First Name" name="first_name" required>
+        <input type="text" placeholder="Last Name" name="last_name" required>
+        <input type="text" placeholder="Display Name" name="display_name" required>
+      </div>
+
+      <label>Birthday</label>
+      <div class="form-group">
+        <input type="text" placeholder="Month" name="birth_month" required>
+        <input type="text" placeholder="Day" name="birth_day" required>
+        <input type="text" placeholder="Year" name="birth_year" required>
+      </div>
+
+      <div class="form-group">
+        <select id="role" name="role" required>
+          <option value="" disabled selected>Role</option>
+          <option value="admin">Admin</option>
+          <option value="instructor">Instructor</option>
+          <option value="student">Student</option>
+        </select>
+        <input type="text" placeholder="Token" name="token" id="tokenInput" style="display: none;">
+        <select name="gender" class="custom-select" required>
+        <option value="" disabled selected>Select Gender</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="other">Other</option>
+      </select>
+      </div>
+
+      <div class="form-group">
+        <input type="email" placeholder="Email*" name="email" required>
+        <input type="text" placeholder="Contact Number" name="contact" required>
+      </div>
+
+      <div class="form-group">
+        <input class="full-width" type="password" placeholder="Password*" name="password" required>
+      </div>
+
+      <div class="bottom-group">
+        <a href="login.html">Login</a>
+        <button class="submit-btn" type="submit">SUBMIT</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    function toggleTokenField() {
+      const roleSelect = document.getElementById('role');
+      const tokenInput = document.getElementById('tokenInput');
+
+      if (roleSelect.value === 'admin') {
+        tokenInput.style.display = 'block';
+      } else {
+        tokenInput.style.display = 'none';
+      }
+    }
+
+    // Add an event listener to trigger the function when the role is changed
+    document.getElementById('role').addEventListener('change', toggleTokenField);
+  </script>
+</body>
+</html>
