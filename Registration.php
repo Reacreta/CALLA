@@ -1,9 +1,13 @@
+<?php
+  include('database.php');
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Calla Register</title>
+  <title>CALLA Registration</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter&family=Goudy+Bookletter+1911&display=swap" rel="stylesheet">
+  
   <style>
     * {
       box-sizing: border-box;
@@ -94,6 +98,7 @@
       cursor: pointer;
     }
   </style>
+
 </head>
 
 <body>
@@ -101,7 +106,8 @@
 
   <div class="register-container">
     <h2>REGISTER</h2>
-    <form action="#" method="post">
+
+    <form action="authenticationSys.php" method="POST">
 
       <div class="form-group">
         <input type="text" placeholder="First Name" name="first_name" required>
@@ -143,7 +149,7 @@
 
       <div class="bottom-group">
         <a href="index.php">Login</a>
-        <button class="submit-btn" type="submit">SUBMIT</button>
+        <button class="submit-btn" type="submit" name="register">SUBMIT</button>
       </div>
     </form>
   </div>
@@ -165,3 +171,7 @@
   </script>
 </body>
 </html>
+
+<?php
+  mysqli_close($conn);
+?>
