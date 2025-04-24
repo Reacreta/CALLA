@@ -34,13 +34,13 @@
                 // get user role ID
                 switch($accountRole){
                     case 'Admin': 
-                        $stmt = $conn->prepare(:"SELECT adminID FROM admin WHERE userID = ?");
+                        $stmt = $conn->prepare("SELECT adminID FROM admin WHERE userID = ?");
                         break;
                     case 'Instructor':
-                        $stmt = $conn->prepare(:"SELECT instID FROM instructor WHERE userID = ?");
+                        $stmt = $conn->prepare("SELECT instID FROM instructor WHERE userID = ?");
                         break;
                     case 'Student': 
-                        $stmt = $conn->prepare(:"SELECT studentID FROM student WHERE userID = ?");
+                        $stmt = $conn->prepare("SELECT studentID FROM student WHERE userID = ?");
                         break;
                 }
 
@@ -66,16 +66,16 @@
     
     if(isset($_POST['register'])){
         // get form data
-        $userType = $_POST['role'];
-        $userName = $_POST['display_name'];
+        $usertype = $_POST['role'];
+        $username = $_POST['display_name'];
         $email = $_POST['email'];
         $password = $_POST['password'];
-        $contactNo = $_POST['contact'];
+        $contact = $_POST['contact'];
         $firstName = $_POST['first_name'];
         $lastName = $_POST['last_name']; 
         $dateOfBirth = $_POST['birth_year']."-".$_POST['birth_month']."-".$_POST['birth_day'];
         $sex = $_POST['gender'];
-        $activeBool = true;
+        $activebool = true;
         $userID = generateID("U",9);
 
         // check if Email is already registered
@@ -97,7 +97,7 @@
             );
             $stmt->bind_param(
                 "sssssssssi",
-                $userType,
+                $usertype,
                 $username,
                 $email,
                 $password,
@@ -106,7 +106,7 @@
                 $sex,
                 $dateOfBirth,
                 $contact,
-                $active
+                $activebool
             );
 
             if ($stmt->execute()) {

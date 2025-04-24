@@ -101,7 +101,7 @@
 
   <div class="login-container">
     <h1>CALLA</h1>
-    <form action="scripts/login.php" method="POST">
+    <form action="authenticationSys.php" method="POST">
       <label for="email">EMAIL:</label>
       <input type="email" id="email" name="email" required>
 
