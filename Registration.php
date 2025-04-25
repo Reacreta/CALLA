@@ -70,6 +70,32 @@
       font-size: 16px;
     }
 
+    .errorIconContainer {
+
+    }
+
+    .error-icon {
+      position: absolute;
+      right: 110px;
+      bottom: 45px;
+    }
+
+    .error-summary {
+      position: absolute;
+      bottom: 85px;
+      right: 30px;
+      background: #fff4f4;
+      color: #7b0000;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #cc0000;
+      max-width: 300px;
+      font-size: 14px;
+      z-index: 999;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+
 
     .full-width {
       width: 100%;
@@ -118,7 +144,21 @@
 
       <label>Birthday</label>
       <div class="form-group">
-        <input type="text" placeholder="Month" name="birth_month" required>
+        <select placeholder="Month" name="birth_month" required>
+          <option value="" disabled selected>Choose A Month</option>
+          <option value="January">January</option>
+          <option value="February">February</option>
+          <option value="March">March</option>
+          <option value="April">April</option>
+          <option value="May">May</option>
+          <option value="June">June</option>
+          <option value="July">July</option>
+          <option value="August">August</option>
+          <option value="September">September</option>
+          <option value="October">October</option>
+          <option value="November">November</option>
+          <option value="December">December</option>
+        </select>
         <input type="text" placeholder="Day" name="birth_day" required>
         <input type="text" placeholder="Year" name="birth_year" required>
       </div>
@@ -149,13 +189,33 @@
       </div>
 
       <div class="bottom-group">
-        <a href="index.php">Login</a>
-        <button class="submit-btn" type="submit" name="register">SUBMIT</button>
-      </div>
-    </form>
+  <a href="index.php">Login</a>
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <img id="errorIcon" src="images/warning.jpg" alt="!" 
+         style="display:none; width: 30px; height: 30px; cursor: pointer;">
+    <button class="submit-btn" type="submit" name="register">SUBMIT</button>
   </div>
+</div>
+
+<div id="errorSummary" style="
+  display: none;
+  position: absolute;
+  bottom: 90px;
+  right: 100px;
+  width: 300px;
+  background-color: #fff;
+  color: #7b0000;
+  border: 1px solid #7b0000;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 14px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  z-index: 1000;
+"></div>
+
 
   <script>
+    // -- Role Event Listener --
     function toggleTokenField() {
       const roleSelect = document.getElementById('role');
       const tokenInput = document.getElementById('tokenInput');
@@ -166,9 +226,105 @@
         tokenInput.style.display = 'none';
       }
     }
-
     // Add an event listener to trigger the function when the role is changed
     document.getElementById('role').addEventListener('change', toggleTokenField);
+
+    // -- Format Validation Listener -- NEW
+    document.querySelector('form').addEventListener('submit', function (e) {
+    let valid = true;
+    let errorMessages = [];
+
+    document.querySelectorAll('.error').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('input, select').forEach(el => el.classList.remove('invalid'));
+
+    const errorIcon = document.getElementById('errorIcon');
+    const errorSummary = document.getElementById('errorSummary');
+    errorIcon.style.display = 'none';
+    errorSummary.style.display = 'none';
+    errorSummary.innerHTML = "";
+
+    function showError(input, message) {
+      input.classList.add('invalid');
+      valid = false;
+      errorMessages.push(message);
+    }
+
+    const firstName = document.getElementsByName('first_name')[0];
+    if (!/^[A-Za-z\s]+$/.test(firstName.value)) {
+      showError(firstName, "First name: only letters and spaces allowed.");
+    }
+
+    const lastName = document.getElementsByName('last_name')[0];
+    if (!/^[A-Za-z\s]+$/.test(lastName.value)) {
+      showError(lastName, "Last name: only letters and spaces allowed.");
+    }
+
+    const displayName = document.getElementsByName('display_name')[0];
+    if (displayName.value.length > 20) {
+      showError(displayName, "Display name must be 20 characters or fewer.");
+    }
+
+    const birthMonth = document.getElementsByName('birth_month')[0];
+    if (!birthMonth.value) {
+      showError(birthMonth, "Birth month must be selected.");
+    }
+
+    const birthDay = document.getElementsByName('birth_day')[0];
+    const dayVal = parseInt(birthDay.value);
+    if (!/^\d+$/.test(birthDay.value) || dayVal < 1 || dayVal > 31) {
+      showError(birthDay, "Enter a valid birth day (1-31).");
+    }
+
+    const birthYear = document.getElementsByName('birth_year')[0];
+    const yearVal = parseInt(birthYear.value);
+    const currentYear = new Date().getFullYear();
+    if (!/^\d+$/.test(birthYear.value) || yearVal > currentYear) {
+      showError(birthYear, "Enter a valid birth year.");
+    }
+
+    const role = document.getElementById('role');
+    if (!role.value) {
+      showError(role, "Role must be selected.");
+    }
+
+    const token = document.getElementById('tokenInput');
+    if (role.value === 'Administrator' && token.value.trim() !== 'ADMIN123') {
+      showError(token, "Invalid admin token.");
+    }
+
+    const gender = document.getElementsByName('gender')[0];
+    if (!gender.value) {
+      showError(gender, "Gender must be selected.");
+    }
+
+    const email = document.getElementsByName('email')[0];
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email.value)) {
+      showError(email, "Invalid email format.");
+    }
+
+    const contact = document.getElementsByName('contact')[0];
+    if (!/^\d{11}$/.test(contact.value)) {
+      showError(contact, "Contact must be exactly 11 digits.");
+    }
+
+    const password = document.getElementsByName('password')[0];
+    if (password.value.length < 8) {
+      showError(password, "Password must be at least 8 characters.");
+    }
+
+    if (!valid) {
+      e.preventDefault();
+      errorIcon.style.display = 'inline';
+      errorSummary.innerHTML = `<strong>Please fix the following:</strong><ul>${errorMessages.map(e => `<li>${e}</li>`).join('')}</ul>`;
+    }
+  });
+
+  document.getElementById('errorIcon').addEventListener('click', function () {
+    const summary = document.getElementById('errorSummary');
+    summary.style.display = summary.style.display === 'none' ? 'block' : 'none';
+  });
+
   </script>
 </body>
 </html>
