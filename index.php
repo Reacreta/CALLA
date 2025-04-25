@@ -21,7 +21,7 @@
 
     // if it doesnt: send error
     if($qrySel->num_rows === 0){
-        echo "Account credentials are wrong";
+        $loginError = true;
     }
 
     // else check if password matches password from database        
@@ -31,7 +31,7 @@
         // if it doesnt match: send error
         if (!password_verify($password, $account['password'])){
             debug_console('wrong credentials');
-            echo "Account credentials are wrong";
+            $loginError = true;
         }
         else{
             // else save account details to session
@@ -64,7 +64,7 @@
             switch($accountRole){
                 case 'Administrator':
                     debug_console('Redirect to Administrator');
-                    redirect("admin.php");
+                    redirect("Admin.php");
                     break;
                 case 'Instructor':
                     redirect("instructor.php"); 
@@ -170,6 +170,39 @@
     letter-spacing: 2px ;   
   } 
 
+    .error-section {
+      position: relative; /* anchor point for absolute children */
+      height: 30px;        /* prevent collapsing height */
+    }
+
+    .errorIcon {
+      position: absolute;
+      bottom: 25px;
+      left: 60px;
+      display: none;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+    }
+
+    .errorSummary {
+      position: absolute;
+      bottom: 10px;
+      left: 100px;
+      display: none;
+      width: 300px;
+      background-color: #fff;
+      color: #7b0000;
+      border: 1px solid #7b0000;
+      border-radius: 10px;
+      padding: 15px;
+      font-size: 14px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+
+
+
 
   </style>
 </head>
@@ -186,10 +219,58 @@
 
       <a href="Registration.php">SIGN UP</a>
 
-      <button type="submit" name="login">LOGIN</button>
+      <div class="error-section">
+        <img class="errorIcon" id="errorIcon" src="images/warning.jpg" alt="!">
+        <div id="errorSummary" class="errorSummary"></div>
+      </div>
+
+      <div class="submit-section">
+        <button class="submit-btn" type="submit" name="login">Login</button>
+      </div>
     </form>
 
   </div>
+
+  <script>
+  const form = document.querySelector('form');
+  const email = document.getElementsByName('email')[0];
+  const password = document.getElementsByName('password')[0];
+  const errorIcon = document.getElementById('errorIcon');
+  const errorSummary = document.getElementById('errorSummary');
+
+  form.addEventListener('submit', function (e) {
+    let valid = true;
+    email.classList.remove('invalid');
+    password.classList.remove('invalid');
+    errorIcon.style.display = 'none';
+    errorSummary.style.display = 'none';
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+      email.classList.add('invalid');
+      valid = false;
+    }
+
+    if (password.value.length < 8) {
+      password.classList.add('invalid');
+      valid = false;
+    }
+
+    <?php if ($loginError): ?>
+      valid = false;
+    <?php endif; ?>
+
+    if (!valid) {
+      e.preventDefault();
+      errorIcon.style.display = 'inline';
+      errorSummary.style.display = 'block';
+      errorSummary.innerHTML = `<strong>Invalid Email or Password</strong>`;
+    }
+  });
+
+  errorIcon.addEventListener('click', () => {
+    errorSummary.style.display = errorSummary.style.display === 'none' ? 'block' : 'none';
+  });
+</script>
 
 </body>
 </html>
