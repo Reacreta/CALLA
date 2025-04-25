@@ -1,6 +1,7 @@
 <?php
+    ob_start();
     session_start();
-    require_once 'database.php';
+    include ('database.php');
 
     if(isset($_POST['login'])){
         // get form information
@@ -44,20 +45,22 @@
                         break;
                 }
 
-                $stmt->bind_param("s",$userID);
+                $stmt->bind_param("s", $userID);
                 $stmt->execute();
-                $_SESSION['roleID'] = $roleID = $stmt->fetch_assoc();
+                $res = $stmt->get_result();
+                $row = $res->fetch_assoc();
+                $_SESSION['roleID'] = array_values($row)[0];
                 
                 // redirect according to role
                 switch($accountRole){
                     case 'Admin': 
-                        header("Location: admin.php");
+                        redirect("admin.php");
                         break;
                     case 'Instructor':
-                        header("Location: instructor.php"); 
+                        redirect("instructor.php"); 
                         break;
                     case 'Student':
-                        header("Location: student.php"); 
+                        redirect("Location: student.php"); 
                         break;
                 }
             }
@@ -66,10 +69,12 @@
     
     if(isset($_POST['register'])){
         // get form data
+        debug_console("Getting form data");
+
         $usertype = $_POST['role'];
         $username = $_POST['display_name'];
         $email = $_POST['email'];
-        $password = $_POST['password'];
+        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
         $contact = $_POST['contact'];
         $firstName = $_POST['first_name'];
         $lastName = $_POST['last_name']; 
@@ -77,9 +82,10 @@
         $sex = $_POST['gender'];
         $activebool = true;
         $userID = generateID("U",9);
-        echo $usertype;
 
         // check if Email is already registered
+        debug_console("Checking user email");
+
         $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?"); // preparation 
         $stmt->bind_param('s', $email); // subtitute ? with variable
         $stmt->execute(); 
@@ -87,89 +93,116 @@
 
         // if it does: send error
         if($qrySel->num_rows > 0){
-            echo "Email is registered";
-            exit();
+            debug_console("Email is already registered");
+            redirect('index.php');
+            exit;
         }
 
         else{
-            // insert to user
-            $stmt = $conn->prepare("INSERT INTO users (
-                userID, usertype, username, email, password, firstName, lastName, sex, dateOfBirth, contact, active) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
-            );
-            $stmt->bind_param(
-                "ssssssssssi",
-                $userID,
-                $usertype,
-                $username,
-                $email,
-                $password,
-                $firstName,
-                $lastName,
-                $sex,
-                $dateOfBirth,
-                $contact,
-                $activebool
-            );
-
             // check role
+            debug_console("Checking role");
+
             switch($usertype){
                 case "Administrator":
+
+                    debug_console("Adding to Administrator: ".$userID);
+
                     //get admin info
                     $adminID = generateID("A",9);
                     $adminToken = $_POST['token'];
-                    echo $adminToken;
+                    debug_console("Admin Token: ".$adminToken);
 
                     //check adminToken 
+                    debug_console("checking Admin Token");
+
                     $stmt = $conn->prepare("SELECT adminTokenID FROM admin WHERE adminTokenID = ?"); 
                     $stmt->bind_param('s', $adminToken);
                     $stmt->execute(); 
                     $qrySel = $stmt->get_result();
 
-                    if($qrySel->num_rows >= 1) // Check if token is occupied
-                        echo "Token is occupied";
-                    
-                    elseif($qrySel->num_rows <= 0) // Check if token exists
-                        echo "Token does not exist";
-                    
-                    else{ // inserts admin
-                        $stmt = $conn->prepare("INSERT INTO admin (adminID, adminTokenID, userID) VALUES (?,?,?)"); // preparation 
-                        $stmt->bind_param('sss', $adminID, $adminToken, $userID);
-                        $stmt->execute(); 
+                    if($qrySel->num_rows >= 1){ // Check if token is occupied
+                        debug_console($adminToken." is occupied");
+                        break;
                     }
 
+                    // inserts admin
+                    insertUser(
+                        $conn,
+                        $userID,
+                        $usertype,
+                        $username,
+                        $email,
+                        $password,
+                        $firstName,
+                        $lastName,
+                        $sex,
+                        $dateOfBirth,
+                        $contact,
+                        $activebool);
+
+                    $stmt = $conn->prepare("INSERT INTO admin (adminID, adminTokenID, userID) VALUES (?,?,?)"); // preparation 
+                    $stmt->bind_param('sss', $adminID, $adminToken, $userID);
+                    debug_console("insert: ".$stmt->execute());
                     break;
 
                 case "Instructor":
+                    debug_console("Adding to Instructor: ".$userID);
+
                     $instID = generateID("I",9);
+
+                    insertUser(
+                        $conn,
+                        $userID,
+                        $usertype,
+                        $username,
+                        $email,
+                        $password,
+                        $firstName,
+                        $lastName,
+                        $sex,
+                        $dateOfBirth,
+                        $contact,
+                        $activebool);
 
                     $stmt = $conn->prepare("INSERT INTO instructor (instID, userID) VALUES (?,?)"); // preparation 
                     $stmt->bind_param('ss', $instID, $userID);
-                    $stmt->execute(); 
-
+                    debug_console("insert: ".$stmt->execute());
                     break;
 
                 case "Student":
+                    debug_console("Adding to Student: ".$userID);
+
                     $studentID = generateID("S",9);
+
+                    insertUser(
+                        $conn,
+                        $userID,
+                        $usertype,
+                        $username,
+                        $email,
+                        $password,
+                        $firstName,
+                        $lastName,
+                        $sex,
+                        $dateOfBirth,
+                        $contact,
+                        $activebool);
 
                     $stmt = $conn->prepare("INSERT INTO student (studentID, userID) VALUES (?,?)"); // preparation 
                     $stmt->bind_param('ss', $studentID, $userID);
-                    $stmt->execute(); 
-
+                    debug_console("insert: ".$stmt->execute());
                     break;
-                    
-                default:
-                header("Location: index.php");
-                break;
             }
 
-        // redirect to login
-        header("Location: index.php");
+            // redirect to login
+            debug_console("Redirecting to login");
+            redirect('index.php');
+            exit;
         }
     }
 
     function generateID($prefix = 'NU', $length = 8){
-        return $prefix . generateRandomString();
+        return $prefix . generateRandomString($length);
     }
 
     function generateRandomString($length = 8) {
@@ -179,5 +212,65 @@
             $randomString .= $characters[random_int(0, strlen($characters) - 1)];
         }
         return $randomString;
+    }
+
+    function insertUser(
+        $db,
+        $userID,
+        $usertype,
+        $username,
+        $email,
+        $password,
+        $firstName,
+        $lastName,
+        $sex,
+        $dateOfBirth,
+        $contact,
+        $activebool
+    ){
+        debug_console("Inserting to Database");
+
+        $stmt = $db->prepare("INSERT INTO users (
+            userID, usertype, username, email, password, firstName, lastName, sex, dateOfBirth, contact, active) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+        );
+
+        $stmt->bind_param(
+            "ssssssssssi",
+            $userID,
+            $usertype,
+            $username,
+            $email,
+            $password,
+            $firstName,
+            $lastName,
+            $sex,
+            $dateOfBirth,
+            $contact,
+            $activebool
+        );
+
+        if($stmt->execute()){
+            debug_console("Successfully inserted");
+        }
+        else{
+            debug_console("Failed insert");
+        }
+    }
+
+    function debug_console($data) {
+        $output = $data;
+        if (is_array($output))
+            $output = implode(',', $output);
+
+        echo "<script>console.log('Debug Objects: " . $output . "' );</script>";
+    }
+
+    function redirect($url){
+        echo "<script type='text/javascript'>
+            setTimeout(function() {
+                window.location.href = '$url';
+            }, 2000);
+        </script>";
     }
 ?>
