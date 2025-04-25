@@ -332,7 +332,11 @@
       color: #444;
     }
 
-
+    .classroom-search-icon {
+      font-size: 20px;
+      color: #333;
+      cursor: pointer;
+    }
 
     .module-list {
       display: flex;
@@ -408,6 +412,88 @@
     .partners-role {
       font-size: 14px;
       color: #444;
+    }
+
+    .create-overlay { 
+      display: none;
+      position: absolute;
+      border: 2px solid white;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      top: 10%;
+      left: 30%;
+      height: fit-content;
+      width: fit-content;
+      background: rgba(241, 241, 241, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 20;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .create-overlay.show {
+      display: block;
+    }
+
+    .create-list {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .create-item1,
+    .create-item2 {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .create-info {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .create-info label {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .create-info input,
+    .create-info textarea {
+      width: 500px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    /* Specific textarea styling */
+    .create-info textarea {
+      height: 150px;
+      resize: none;
+    }
+
+    .create-SC {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .create-SC .creates {
+      background: #e6e6e6;
+      border: none;
+      color: #7b0000;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+      padding: 10px 50px;
+      border-radius: 6px;
+      font-size: 20px;
+    }
+
+    .create-SC .creates:hover {
+      background-color: #fff;
     }
 
   </style>
@@ -553,7 +639,7 @@
         
         <div class="tabs">
           <button class="tab active">Partners</button>
-          <button class="tab">New</button>
+          <button class="tab" onclick="toggleCreatePartnersOverlay()">New</button>
           <div class="right-buttons">
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
@@ -582,6 +668,42 @@
             </a>
           </div>
           <?php } ?>
+        </div>
+
+        <div id="createPartnersOverlay" class="create-overlay">
+          <button class="close-btn" onclick="hideCreateOverlay('createPartnersOverlay')">×</button>
+          <h2 style="color: #7b0000; margin-bottom: 20px;">Create a Partner</h2>
+
+          <div class="create-list">
+            <div class="create-item1">
+              <div class="create-info">
+                <label for="partnerName">Partner Name:</label>
+                <input type="text" id="partnerName" name="partnerName" placeholder="Partner Name" required>
+              </div>
+            </div>
+             <div class="create-item1">
+              <div class="create-info">
+                <label for="partnerContact">Contact Number:</label>
+                <input type="tel" id="partnerContact" name="partnerContact" placeholder="Contact Number" required>
+              </div>
+            </div>
+            <div class="create-item1">
+              <div class="create-info">
+                <label for="partnerEmail">Email:</label>
+                <input type="email" id="partnerEmail" name="partnerEmail" placeholder="Partner Email" required>
+              </div>
+            </div>
+            <div class="create-item2">
+              <div class="create-info">
+                <label for="partnerDesc">Partner Description:</label>
+                <textarea id="partnerDesc" name="partnerDesc" placeholder="Partner Description" required></textarea>
+              </div>
+            </div>
+            <div class="create-SC">
+              <button class="creates" type="submit" onclick="createPartner()">Create</button>
+              <button class="creates" onclick="hideCreateOverlay('createPartnersOverlay')">Cancel</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -695,6 +817,15 @@ function closeInput(input) {
   showOverlay('partnersOverlay'); 
   }
 
+  function toggleCreatePartnersOverlay() {
+    const overlay = document.getElementById('createPartnersOverlay');
+    if (overlay.classList.contains('show')) {
+      hideCreateOverlay('createPartnersOverlay');
+    } else {
+      showCreateOverlay('createPartnersOverlay');
+    }
+  }
+
   function setUserTab(role) {
     const cards = document.querySelectorAll('.user-card');
     const tabs = document.querySelectorAll('.tab');
@@ -710,22 +841,76 @@ function closeInput(input) {
   }
 
   function loadModules(type, clickedBtn) {
-  // Remove 'active' from all tabs
-  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-  // Add 'active' to the clicked one
-  clickedBtn.classList.add('active');
+    // Remove 'active' from all tabs
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    // Add 'active' to the clicked one
+    clickedBtn.classList.add('active');
 
-  // Send AJAX request
-  fetch('adminFunctions.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'type=' + encodeURIComponent(type)
-  })
-  .then(res => res.text())
-  .then(html => {
-    document.getElementById('moduleContainer').innerHTML = html;
-  });
-}
+    // Send AJAX request
+    fetch('adminFunctions.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'type=' + encodeURIComponent(type)
+    })
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('moduleContainer').innerHTML = html;
+    });
+  }
+
+  function createPartner() {
+      // Get values from the form
+      const partnerName = document.getElementById('partnerName').value;
+      const partnerEmail = document.getElementById('partnerEmail').value;
+      const partnerContact = document.getElementById('partnerContact').value; // <-- Added contact field
+      const partnerDesc = document.getElementById('partnerDesc').value;
+      
+      // Basic validation
+      if (!partnerName || !partnerEmail) {
+        alert('Please enter both partner name and email');
+        return;
+      }
+
+      // Create FormData object
+      const formData = new FormData();
+      formData.append('partnerName', partnerName);
+      formData.append('partnerEmail', partnerEmail);
+      formData.append('partnerContact', partnerContact); // <-- Add contact to form data
+      formData.append('partnerDesc', partnerDesc);
+      
+      // Send data to server using fetch API
+      fetch('createPartner.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Partner created successfully');
+          hideCreateOverlay('createPartnersOverlay');
+          // Reload page to see the new partner
+          location.reload();
+        } else {
+          alert('Error creating partner: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Error creating partner. Please try again.');
+      });
+  }
+
+  function showCreateOverlay(targetId) {
+    const target = document.getElementById(targetId);
+    target.classList.add('show');
+  }
+
+  function hideCreateOverlay(targetId) {
+    const target = document.getElementById(targetId);
+    target.classList.remove('show');
+  }
+
+  
 
 // Load default on page load
 window.onload = () => loadModules('All', document.querySelector('.tab.active'));
