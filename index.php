@@ -1,14 +1,22 @@
 <?php
   ob_start();
   session_start();
+
   require_once 'database.php';
   require_once 'authfunctions.php';
+
+  if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
+    session_unset();  
+    session_destroy(); 
+    session_start(); 
+    debug_console("Session state: " . json_encode($_SESSION)); // check if same session
+  }
 
   if(isset($_POST['login'])){
     // get form information
     $email = $_POST['email'];
     $password = $_POST['password'];
-    $loginError = false;
+    $_SESSION['loginError'] = false;
 
     // check if email exists in database
     $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?"); // preparation 
@@ -23,7 +31,7 @@
     // if it doesnt: send error
     if($qrySel->num_rows === 0){
         debug_console('nothing');
-        $loginError = true;
+        $_SESSION['loginError'] = true;
     }
 
     // else check if password matches password from database        
@@ -33,7 +41,7 @@
         // if it doesnt match: send error
         if (!password_verify($password, $account['password'])){
             debug_console('wrong credentials');
-            $loginError = true;
+            $_SESSION['loginError'] = true;
         }
         else{
             // else save account details to session
@@ -234,6 +242,12 @@
   </div>
 
   <script>
+
+  <?php
+    $loginError = $_SESSION['loginError'] ?? false;
+    $_SESSION['loginError'] = false; // Reset for next load
+  ?>
+
   const form = document.querySelector('form');
   const email = document.getElementsByName('email')[0];
   const password = document.getElementsByName('password')[0];

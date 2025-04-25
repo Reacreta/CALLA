@@ -425,7 +425,7 @@
     <div class="profile-container" onclick="toggleLogoutDropdown()">
       <div class="profile-pic" style="background-image: url('images/profile.jpg');"></div>
       <div class="logout-dropdown" id="logoutDropdown">
-        <a href="">Logout</a>
+        <a href="logout.php">Logout</a>
       </div>
     </div>
   </div>

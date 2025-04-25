@@ -412,7 +412,7 @@
     if (role.value === 'Administrator') {
       const tokenPattern = /^adm\d{7}$/;
       if (!tokenPattern.test(token.value.trim())) {
-        showError(token);
+        showError(token, "Invalid Token.");
       }
     }
 
