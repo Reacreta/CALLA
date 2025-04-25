@@ -3,8 +3,6 @@
   session_start();
   require_once 'database.php';
   require_once 'authfunctions.php';
-
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -416,9 +414,6 @@
       color: #444;
     }
 
-
-
-
   </style>
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
@@ -469,8 +464,9 @@
         </div>
         <div class="user-list">
 
+        <!-- Dynamic User Table -->
         <?php
-          $sql = "SELECT username, userType FROM users WHERE usertype <> 'Administrator'";
+          $sql = "SELECT * FROM users WHERE usertype <> 'Administrator'";
           $result = $conn->query($sql);
 
           while ($row = $result->fetch_assoc()) {
@@ -510,6 +506,7 @@
         </div>
         
         <div class="classroom-list">
+<<<<<<< Updated upstream
 
           <div class="classroom-item">
             <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
@@ -521,19 +518,33 @@
               <img src="images/Search_Icon.jpg" alt="View Classroom" class="search-image-icon">
             </a>
           </div>
+=======
+          <!-- Dynamic Classroom  Table -->
+          <?php
+            $sql = "SELECT classroom.className, users.username 
+                    FROM classroom 
+                    JOIN instructor ON classroom.instID = instructor.instID 
+                    JOIN users ON instructor.userID = users.userID;";
+            $result = $conn->query($sql);
+>>>>>>> Stashed changes
 
-          <div class="classroom-item">
-            <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
-            <div class="classroom-info">
-              <div class="classroom-title">Math 4</div>
-              <div class="classroom-creator">Mr. Santos</div>
+            while ($row = $result->fetch_assoc()) {
+              $className = htmlspecialchars($row['className']);
+              $creatorName = htmlspecialchars($row['username']);
+              debug_console($className);
+              debug_console($creatorName);
+          ?>
+            <div class="classroom-item">
+              <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
+              <div class="classroom-info">
+                <div class="classroom-title"><?php echo $className; ?></div>
+                <div class="classroom-creator"><?php echo $creatorName; ?></div>
+              </div>
+              <a href="classroom-details.html?classId=math4" class="search-icon-link">
+                <img src="images/Search_Icon.jpg" alt="View Classroom" class="search-image-icon">
+              </a>
             </div>
-            <a href="classroom-details.html?classId=math4" class="search-icon-link">
-              <img src="images/Search_Icon.jpg" alt="View Classroom" class="search-image-icon">
-            </a>
-          </div>
-
-          <!-- Add more classroom-item divs as needed -->
+          <?php } ?>
         </div>
       </div>
 
@@ -543,6 +554,7 @@
         <h2 style="color: #7b0000; margin-bottom: 20px;">Modules</h2>
 
         <div class="tabs">
+<<<<<<< Updated upstream
           <button class="tab active">All</button>
           <button class="tab">Partner</button>
           <button class="tab">Classroom</button>
@@ -552,6 +564,11 @@
               <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
             </div>
           </div>
+=======
+          <button class="tab" action="setModuleTab('All')">All</button>
+          <button class="tab" action="setModuleTab('Partner')">Partner</button>
+          <button class="tab" action="setModuleTab('Classroom')">Classroom</button>
+>>>>>>> Stashed changes
         </div>
 
         <div class="module-list">
@@ -603,6 +620,13 @@
 
 
   <script>
+  // On Webpage Load
+  window.addEventListener('DOMContentLoaded', () => {
+    setUserTab('All');
+    setModuleTab('All');
+  });
+
+
   function toggleLogoutDropdown() {
     const dropdown = document.getElementById('logoutDropdown');
     dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
@@ -626,6 +650,9 @@
     target.classList.add('show');
 
     bg.style.display = 'none';
+
+    setUserTab('All');
+    setModuleTab('All');
   }
 
   function hideOverlay(targetId) {
@@ -715,19 +742,23 @@ function closeInput(input) {
     if (activeTab) activeTab.classList.add('active');
   }
 
-  // Automatically select "All" when the page loads
-  window.addEventListener('DOMContentLoaded', () => {
-    setUserTab('All');
-  });
+  function setModuleTab(local){ 
+    const tabs = document.querySelectorAll('.tabs .tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
 
-  function setModuleTab(){
+    // highlight active tab
+    [...tabs].find(t => t.textContent === type || (type === 'All' && t.textContent === 'All'))?.classList.add('active');
 
+    const cards = document.querySelectorAll('.module-card');
+    cards.forEach(card => {
+      if (type === 'All' || card.dataset.type === type) {
+        card.style.display = 'flex';
+      } else {
+        card.style.display = 'none';
+      }
+    });
   }
 
-
-
-
 </script>
-
 </body>
 </html>
