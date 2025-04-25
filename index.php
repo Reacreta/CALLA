@@ -8,6 +8,7 @@
     // get form information
     $email = $_POST['email'];
     $password = $_POST['password'];
+    $loginError = false;
 
     // check if email exists in database
     $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?"); // preparation 
@@ -21,6 +22,7 @@
 
     // if it doesnt: send error
     if($qrySel->num_rows === 0){
+        debug_console('nothing');
         $loginError = true;
     }
 
