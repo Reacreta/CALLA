@@ -7,15 +7,17 @@
   if(isset($_POST['login'])){
     // get form information
     $email = $_POST['email'];
-    debug_console($email);
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    debug_console($password);
+    $password = $_POST['password'];
 
     // check if email exists in database
     $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?"); // preparation 
+    debug_console('prep');
     $stmt->bind_param('s', $email); // subtitute ? with variable
+    debug_console('sub');
     $stmt->execute(); 
+    debug_console('exec');
     $qrySel = $stmt->get_result();
+    debug_console('query');
 
     // if it doesnt: send error
     if($qrySel->num_rows === 0){
@@ -28,18 +30,20 @@
 
         // if it doesnt match: send error
         if (!password_verify($password, $account['password'])){
+            debug_console('wrong credentials');
             echo "Account credentials are wrong";
         }
-
         else{
             // else save account details to session
             $_SESSION['userID'] = $userID =  $account['userID'];
             $accountRole = $account['userType'];
+            debug_console('Check role');
 
             // get user role ID
             switch($accountRole){
-                case 'Admin': 
+                case 'Administrator': 
                     $stmt = $conn->prepare("SELECT adminID FROM admin WHERE userID = ?");
+                    debug_console('admin prep');
                     break;
                 case 'Instructor':
                     $stmt = $conn->prepare("SELECT instID FROM instructor WHERE userID = ?");
@@ -54,11 +58,13 @@
             $res = $stmt->get_result();
             $row = $res->fetch_assoc();
             $_SESSION['roleID'] = array_values($row)[0];
+            debug_console($_SESSION['roleID']);
             
             // redirect according to role
             switch($accountRole){
-                case 'Admin': 
-                    redirect("admin.php");
+                case 'Administrator':
+                    debug_console('Redirect to Administrator');
+                    redirect("Admin.php");
                     break;
                 case 'Instructor':
                     redirect("instructor.php"); 
@@ -77,7 +83,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Calla Login</title>
-   	<link href="https://fonts.googleapis.com/css2?family=Goudy+Bookletter+1911&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Goudy+Bookletter+1911&family=Inter:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
     * {
@@ -129,40 +135,40 @@
     .login-container input[type="email"],
     .login-container input[type="password"] {
       width: 80%;
-	  padding: 16px 14px;
-	  margin: 0 auto 20px;
-	  display: block;
-	  border: none;
-	  border-radius: 10px;
-	  font-size: 18px;
-	  background-color: #fdfdfd;
+    padding: 16px 14px;
+    margin: 0 auto 20px;
+    display: block;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    background-color: #fdfdfd;
     }
 
     .login-container a {
       font-size: 12px;
-	  color: #ddd;
-	  text-decoration: underline;
-	  display: block;
-	  text-align: center;
-	  margin: 20px 0 0 350px;
-	  font-style: italic;
-	  letter-spacing: 2px;
+    color: #ddd;
+    text-decoration: underline;
+    display: block;
+    text-align: center;
+    margin: 20px 0 0 350px;
+    font-style: italic;
+    letter-spacing: 2px;
     }
 
     .login-container button {
-	  width: 50%;             
-	  padding: 15px 0;         
-	  border: none;
-	  border-radius: 6px;
-	  background-color: white;
-	  color: #7b0000;
-	  font-weight: bold;
-	  font-size: 16px;
-	  cursor: pointer;
-	  display: block;          
-	  margin: 70px 0 0 140px;
-	  letter-spacing: 2px ;   
-	}	
+    width: 50%;             
+    padding: 15px 0;         
+    border: none;
+    border-radius: 6px;
+    background-color: white;
+    color: #7b0000;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    display: block;          
+    margin: 70px 0 0 140px;
+    letter-spacing: 2px ;   
+  } 
 
 
   </style>
