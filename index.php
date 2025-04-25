@@ -77,10 +77,10 @@
                     redirect("Admin.php");
                     break;
                 case 'Instructor':
-                    redirect("instructor.php"); 
+                    redirect("Instructor.php"); 
                     break;
                 case 'Student':
-                    redirect("student.php"); 
+                    redirect("Student.php"); 
                     break;
             }
         }
