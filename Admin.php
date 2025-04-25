@@ -506,19 +506,7 @@
         </div>
         
         <div class="classroom-list">
-<<<<<<< Updated upstream
 
-          <div class="classroom-item">
-            <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
-            <div class="classroom-info">
-              <div class="classroom-title">English 101</div>
-              <div class="classroom-creator">Ms. Reyes</div>
-            </div>
-            <a href="classroom-details.html?classId=english101" class="search-icon-link">
-              <img src="images/Search_Icon.jpg" alt="View Classroom" class="search-image-icon">
-            </a>
-          </div>
-=======
           <!-- Dynamic Classroom  Table -->
           <?php
             $sql = "SELECT classroom.className, users.username 
@@ -526,7 +514,6 @@
                     JOIN instructor ON classroom.instID = instructor.instID 
                     JOIN users ON instructor.userID = users.userID;";
             $result = $conn->query($sql);
->>>>>>> Stashed changes
 
             while ($row = $result->fetch_assoc()) {
               $className = htmlspecialchars($row['className']);
