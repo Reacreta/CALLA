@@ -32,12 +32,12 @@
     body {
       display: flex;
       flex-direction: column;
-    }
-
-    .header {
       background-image: var(--gradient);
       background-size: 300% 100%;
       background-repeat: no-repeat;
+    }
+
+    .header {
       animation: grad-anim 10s infinite alternate;
       color: white;
       padding: 15px 30px;
@@ -107,9 +107,6 @@
     }
 
     .sidebar {
-      background-image: var(--gradient2);
-      background-size: 300% 100%;
-      background-repeat: no-repeat;
       animation: grad-anim 10s infinite alternate;
       animation-delay: 2s;
       width: 250px;
@@ -158,6 +155,7 @@
     .main-content {
       flex: 1;
       position: relative;
+      background-color: lightgray;
     }
 
     .background-content {
@@ -335,11 +333,6 @@
       gap: 15px;
     }
 
-   
-
-
-
-
   </style>
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
@@ -350,7 +343,7 @@
     <div class="profile-container" onclick="toggleLogoutDropdown()">
       <div class="profile-pic" style="background-image: url('images/profile.jpg');"></div>
       <div class="logout-dropdown" id="logoutDropdown">
-        <a href="logout.html">Logout</a>
+        <a href="logout.php">Logout</a>
       </div>
     </div>
   </div>
