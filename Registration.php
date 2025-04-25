@@ -206,8 +206,8 @@
       font-size: 16px;
     }
 
-    .errorIconContainer {
-
+    .submit-section{
+      display: flex; align-items: center; gap: 10px;
     }
 
     .error-icon {
@@ -216,22 +216,21 @@
       bottom: 45px;
     }
 
-    .error-summary {
+    .errorSummary {
+      display: none;
       position: absolute;
-      bottom: 85px;
-      right: 30px;
-      background: #fff4f4;
+      bottom: 90px;
+      right: 100px;
+      width: 300px;
+      background-color: #fff;
       color: #7b0000;
-      padding: 15px;
+      border: 1px solid #7b0000;
       border-radius: 10px;
-      border: 1px solid #cc0000;
-      max-width: 300px;
+      padding: 15px;
       font-size: 14px;
-      z-index: 999;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      z-index: 1000;
     }
-
-
 
     .full-width {
       width: 100%;
@@ -270,7 +269,7 @@
   <div class="register-container">
     <h2>REGISTER</h2>
 
-    <form action="authenticationSys.php" method="POST">
+    <form method="POST">
 
       <div class="form-group">
         <input type="text" placeholder="First Name" name="first_name" required>
@@ -282,18 +281,18 @@
       <div class="form-group">
         <select placeholder="Month" name="birth_month" required>
           <option value="" disabled selected>Choose A Month</option>
-          <option value="January">January</option>
-          <option value="February">February</option>
-          <option value="March">March</option>
-          <option value="April">April</option>
-          <option value="May">May</option>
-          <option value="June">June</option>
-          <option value="July">July</option>
-          <option value="August">August</option>
-          <option value="September">September</option>
-          <option value="October">October</option>
-          <option value="November">November</option>
-          <option value="December">December</option>
+          <option value="01">January</option>
+          <option value="02">February</option>
+          <option value="03">March</option>
+          <option value="04">April</option>
+          <option value="05">May</option>
+          <option value="06">June</option>
+          <option value="07">July</option>
+          <option value="08">August</option>
+          <option value="09">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
         </select>
         <input type="text" placeholder="Day" name="birth_day" required>
         <input type="text" placeholder="Year" name="birth_year" required>
@@ -326,28 +325,14 @@
 
       <div class="bottom-group">
   <a href="index.php">Login</a>
-  <div style="display: flex; align-items: center; gap: 10px;">
+  <div class="submit-section">
     <img id="errorIcon" src="images/warning.jpg" alt="!" 
          style="display:none; width: 30px; height: 30px; cursor: pointer;">
     <button class="submit-btn" type="submit" name="register">SUBMIT</button>
   </div>
 </div>
 
-<div id="errorSummary" style="
-  display: none;
-  position: absolute;
-  bottom: 90px;
-  right: 100px;
-  width: 300px;
-  background-color: #fff;
-  color: #7b0000;
-  border: 1px solid #7b0000;
-  border-radius: 10px;
-  padding: 15px;
-  font-size: 14px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
-  z-index: 1000;
-"></div>
+<div class="errorSummary" id="errorSummary"></div>
 
 
   <script>
