@@ -67,6 +67,8 @@
     }
 
     function redirect($url){
+        debug_console("Debugging to ".$url);
+        
         echo "<script type='text/javascript'>
             setTimeout(function() {
                 window.location.href = '$url';

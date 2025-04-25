@@ -7,7 +7,9 @@
   if(isset($_POST['login'])){
     // get form information
     $email = $_POST['email'];
-    $password = $_POST['password'];
+    debug_console($email);
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    debug_console($password);
 
     // check if email exists in database
     $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?"); // preparation 
@@ -28,6 +30,7 @@
         if (!password_verify($password, $account['password'])){
             echo "Account credentials are wrong";
         }
+
         else{
             // else save account details to session
             $_SESSION['userID'] = $userID =  $account['userID'];
@@ -61,7 +64,7 @@
                     redirect("instructor.php"); 
                     break;
                 case 'Student':
-                    redirect("Location: student.php"); 
+                    redirect("student.php"); 
                     break;
             }
         }
@@ -177,7 +180,7 @@
 
       <a href="Registration.php">SIGN UP</a>
 
-      <button type="submit">LOGIN</button>
+      <button type="submit" name="login">LOGIN</button>
     </form>
 
   </div>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 25, 2025 at 04:05 AM
+-- Generation Time: Apr 25, 2025 at 01:58 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -45,6 +45,13 @@ CREATE TABLE `admin` (
   `adminTokenID` varchar(10) NOT NULL,
   `userID` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admin`
+--
+
+INSERT INTO `admin` (`adminID`, `adminTokenID`, `userID`) VALUES
+('ApkC3Gt5ac', 'adm0098583', 'UToeP9gsk5');
 
 -- --------------------------------------------------------
 
@@ -236,7 +243,7 @@ CREATE TABLE `users` (
   `userType` enum('Administrator','Instructor','Student') NOT NULL,
   `username` varchar(20) NOT NULL,
   `email` varchar(50) NOT NULL,
-  `password` varchar(20) NOT NULL,
+  `password` varchar(255) NOT NULL,
   `firstName` varchar(35) NOT NULL,
   `lastName` varchar(35) NOT NULL,
   `sex` varchar(10) NOT NULL,
@@ -250,8 +257,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`userID`, `userType`, `username`, `email`, `password`, `firstName`, `lastName`, `sex`, `dateOfBirth`, `contact`, `active`) VALUES
-('UnDyVpJQ8', 'Instructor', 't3riteki', 'gobythebox@gmail.com', 'gabriel123', 'gab', 'de guzman', 'male', '2004-12-23', '09156119882', 1),
-('Uz4tzZ0Nq', 'Administrator', 'learrrr', 'learrrr1027@gmail.com', 'lear1027', 'earl', 'lumata', 'male', '2004-10-27', '09156119882', 1);
+('UToeP9gsk5', 'Administrator', 't3riteki', 'gobythebox@gmail.com', '$2y$10$NYLS3CsclsXHlRFVJrf6c.1rkcbUeFObMGhimnDih3rFRBd/Jv6ZK', 'gab', 'de guzman', 'male', '2004-12-23', '09156119882', 1);
 
 -- --------------------------------------------------------
 
