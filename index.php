@@ -208,8 +208,52 @@
       font-style: normal;
     }
 
+    .password-wrapper {
+      position: relative;
+      width: 80%;
+      margin: 0 auto 20px;
+    }
 
+    .password-wrapper {
+      position: relative;
+      width: 80%; /* control wrapper width */
+      margin: 0 auto 20px;
+    }
 
+    .password-wrapper input[type="password"] {
+      width: 100%;
+      padding: 16px 45px 16px 14px; /* <-- add right padding to make room for eye */
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      background-color: #fdfdfd;
+      box-sizing: border-box;
+    }
+
+    .password-wrapper input[type="text"] {
+      width: 100%;
+      padding: 16px 45px 16px 14px; /* <-- add right padding to make room for eye */
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      background-color: #fdfdfd;
+      box-sizing: border-box;
+    }
+
+    .password-wrapper .eyeIcon {
+      position: absolute;
+      top: 50%;
+      right: 15px;
+      transform: translateY(-50%);
+      height: 24px;
+      width: 24px;
+      cursor: pointer;
+    }
+
+    }
+    .eyeIcon:hover {
+      opacity: 1;
+    }
 
   </style>
 </head>
@@ -222,7 +266,10 @@
       <input type="email" id="email" name="email" required>
 
       <label for="password">PASSWORD:</label>
-      <input type="password" id="password" name="password" required>
+      <div class="password-wrapper">
+          <input type="password" id="password" name="password" required>
+          <img class="eyeIcon" id="eyeIcon" src="images/eye-close.jpg" alt="Toggle Password">
+        </div>
 
       <a href="Registration.php">SIGN UP</a>
 
@@ -283,6 +330,26 @@
   errorIcon.addEventListener('click', () => {
     errorSummary.style.display = errorSummary.style.display === 'none' ? 'block' : 'none';
   });
+
+  //eye script
+  const passwordInput = document.getElementById('password');
+  const eyeIcon = document.getElementById('eyeIcon');
+
+  eyeIcon.addEventListener('mousedown', () => {
+    passwordInput.type = 'text';
+    eyeIcon.src = 'images/eye-open.jpg';
+  });
+
+  eyeIcon.addEventListener('mouseup', () => {
+    passwordInput.type = 'password';
+    eyeIcon.src = 'images/eye-close.jpg';
+  });
+
+  eyeIcon.addEventListener('mouseleave', () => {
+    passwordInput.type = 'password';
+    eyeIcon.src = 'images/eye-close.jpg';
+  });
+
 </script>
 
 </body>
