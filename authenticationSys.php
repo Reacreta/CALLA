@@ -157,7 +157,8 @@
                     $stmt->execute(); 
 
                     break;
-                default: 
+                    
+                default:
                 header("Location: index.php");
                 break;
             }
