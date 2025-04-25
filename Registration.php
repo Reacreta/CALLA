@@ -1,6 +1,142 @@
 <?php
+  ob_start();
   session_start();
-  include('database.php');
+  require_once 'database.php';
+  require_once 'authFunctions.php';
+
+  if(isset($_POST['register'])){
+    // get form data
+    debug_console("Getting form data");
+
+    $usertype = $_POST['role'];
+    $username = $_POST['display_name'];
+    $email = $_POST['email'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $contact = $_POST['contact'];
+    $firstName = $_POST['first_name'];
+    $lastName = $_POST['last_name']; 
+    $dateOfBirth = $_POST['birth_year']."-".$_POST['birth_month']."-".$_POST['birth_day'];
+    $sex = $_POST['gender'];
+    $activebool = true;
+    $userID = generateID("U",9);
+
+    // check if Email is already registered
+    debug_console("Checking user email");
+
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?"); // preparation 
+    $stmt->bind_param('s', $email); // subtitute ? with variable
+    $stmt->execute(); 
+    $qrySel = $stmt->get_result();
+
+    // if it does: send error
+    if($qrySel->num_rows > 0){
+        debug_console("Email is already registered");
+        redirect('index.php');
+        exit;
+    }
+
+    else{
+        // check role
+        debug_console("Checking role");
+
+        switch($usertype){
+            case "Administrator":
+
+                debug_console("Adding to Administrator: ".$userID);
+
+                //get admin info
+                $adminID = generateID("A",9);
+                $adminToken = $_POST['token'];
+                debug_console("Admin Token: ".$adminToken);
+
+                //check adminToken 
+                debug_console("checking Admin Token");
+
+                $stmt = $conn->prepare("SELECT adminTokenID FROM admin WHERE adminTokenID = ?"); 
+                $stmt->bind_param('s', $adminToken);
+                $stmt->execute(); 
+                $qrySel = $stmt->get_result();
+
+                if($qrySel->num_rows >= 1){ // Check if token is occupied
+                    debug_console($adminToken." is occupied");
+                    break;
+                }
+
+                // inserts admin
+                insertUser(
+                    $conn,
+                    $userID,
+                    $usertype,
+                    $username,
+                    $email,
+                    $password,
+                    $firstName,
+                    $lastName,
+                    $sex,
+                    $dateOfBirth,
+                    $contact,
+                    $activebool);
+
+                $stmt = $conn->prepare("INSERT INTO admin (adminID, adminTokenID, userID) VALUES (?,?,?)"); // preparation 
+                $stmt->bind_param('sss', $adminID, $adminToken, $userID);
+                debug_console("insert: ".$stmt->execute());
+                break;
+
+            case "Instructor":
+                debug_console("Adding to Instructor: ".$userID);
+
+                $instID = generateID("I",9);
+
+                insertUser(
+                    $conn,
+                    $userID,
+                    $usertype,
+                    $username,
+                    $email,
+                    $password,
+                    $firstName,
+                    $lastName,
+                    $sex,
+                    $dateOfBirth,
+                    $contact,
+                    $activebool);
+
+                $stmt = $conn->prepare("INSERT INTO instructor (instID, userID) VALUES (?,?)"); // preparation 
+                $stmt->bind_param('ss', $instID, $userID);
+                debug_console("insert: ".$stmt->execute());
+                break;
+
+            case "Student":
+                debug_console("Adding to Student: ".$userID);
+
+                $studentID = generateID("S",9);
+
+                insertUser(
+                    $conn,
+                    $userID,
+                    $usertype,
+                    $username,
+                    $email,
+                    $password,
+                    $firstName,
+                    $lastName,
+                    $sex,
+                    $dateOfBirth,
+                    $contact,
+                    $activebool);
+
+                $stmt = $conn->prepare("INSERT INTO student (studentID, userID) VALUES (?,?)"); // preparation 
+                $stmt->bind_param('ss', $studentID, $userID);
+                debug_console("insert: ".$stmt->execute());
+                break;
+        }
+
+        // redirect to login
+        debug_console("Redirecting to login");
+        redirect('index.php');
+        exit;
+    }
+  }
 ?>
 <!DOCTYPE html>
 <html lang="en">

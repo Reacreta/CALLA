@@ -1,5 +1,72 @@
 <?php
-  include("database.php");
+  ob_start();
+  session_start();
+  require_once 'database.php';
+  require_once 'authfunctions.php';
+
+  if(isset($_POST['login'])){
+    // get form information
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    // check if email exists in database
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?"); // preparation 
+    $stmt->bind_param('s', $email); // subtitute ? with variable
+    $stmt->execute(); 
+    $qrySel = $stmt->get_result();
+
+    // if it doesnt: send error
+    if($qrySel->num_rows === 0){
+        echo "Account credentials are wrong";
+    }
+
+    // else check if password matches password from database        
+    else{
+        $account = $qrySel->fetch_assoc();
+
+        // if it doesnt match: send error
+        if (!password_verify($password, $account['password'])){
+            echo "Account credentials are wrong";
+        }
+        else{
+            // else save account details to session
+            $_SESSION['userID'] = $userID =  $account['userID'];
+            $accountRole = $account['userType'];
+
+            // get user role ID
+            switch($accountRole){
+                case 'Admin': 
+                    $stmt = $conn->prepare("SELECT adminID FROM admin WHERE userID = ?");
+                    break;
+                case 'Instructor':
+                    $stmt = $conn->prepare("SELECT instID FROM instructor WHERE userID = ?");
+                    break;
+                case 'Student': 
+                    $stmt = $conn->prepare("SELECT studentID FROM student WHERE userID = ?");
+                    break;
+            }
+
+            $stmt->bind_param("s", $userID);
+            $stmt->execute();
+            $res = $stmt->get_result();
+            $row = $res->fetch_assoc();
+            $_SESSION['roleID'] = array_values($row)[0];
+            
+            // redirect according to role
+            switch($accountRole){
+                case 'Admin': 
+                    redirect("admin.php");
+                    break;
+                case 'Instructor':
+                    redirect("instructor.php"); 
+                    break;
+                case 'Student':
+                    redirect("Location: student.php"); 
+                    break;
+            }
+        }
+    }
+  }
 ?>
 
 <!DOCTYPE html>
@@ -101,7 +168,7 @@
 
   <div class="login-container">
     <h1>CALLA</h1>
-    <form action="authenticationSys.php" method="POST">
+    <form action="" method="POST">
       <label for="email">EMAIL:</label>
       <input type="email" id="email" name="email" required>
 
