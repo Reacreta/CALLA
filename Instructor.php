@@ -2,17 +2,33 @@
   ob_start();
   session_start();
   require_once 'database.php';
-  require_once 'authfunctions.php';
+  require_once 'authFunctions.php';
 
-
+  // Read Tables
+  $sql = "SELECT * FROM tbl_users";
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>CALLA Admin Dashboard</title>
+  <title>CALLA Instructor Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter&family=Goudy+Bookletter+1911&display=swap" rel="stylesheet">
   <style>
+    /* ANIMATION */
+    :root {
+      --gradient: linear-gradient(45deg,  #330000, #4A0303, #7B0000, #A30505, #C0660E, #D59004);
+    }
+
+    @keyframes grad-anim {
+      0%{
+        background-position: left;}
+      100%{
+          background-position: right;
+        }
+    }
+    /* ---------------------------------------------------------------------- */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -28,10 +44,13 @@
     body {
       display: flex;
       flex-direction: column;
+      background-image: var(--gradient);
+      background-size: 300% 100%;
+      animation: grad-anim 10s infinite alternate;
     }
 
     .header {
-      background-color: #7b0000;
+      border: none;
       color: white;
       padding: 15px 30px;
       display: flex;
@@ -91,16 +110,16 @@
       text-decoration: none;
       color: #7b0000;
       font-weight: bold;
-
     }
 
+    /* DASH */
     .dashboard-container {
       display: flex;
       height: 100%;
     }
 
     .sidebar {
-      background-color: #7b0000;
+      border: none;
       width: 250px;
       padding: 20px 10px;
       display: flex;
@@ -147,10 +166,12 @@
     .main-content {
       flex: 1;
       position: relative;
+      background-color: lightgray;
     }
 
     .background-content {
       background-image: url('images/USeP_eagle.jpg');
+      opacity: 70%;
       background-size: cover;
       background-position: center;
       height: 100%;
@@ -159,14 +180,14 @@
       justify-content: center;
       align-items: center;
       color: white;
-      font-size: 24px;
+      font-size: 30px;
       font-family: 'Goudy Bookletter 1911', serif;
       font-style: italic;
-      font-weight: bold;
-      
+      font-weight: bold; 
     }
 
 
+    /* OVERLAYS */
     .user-overlay { 
       display: none;
       position: absolute;
@@ -180,7 +201,24 @@
       overflow-y: auto;
     }
 
-    .user-overlay.show {
+    .create-overlay { 
+      display: none;
+      position: absolute;
+      border: 2px solid white;
+      border-radius: 6px 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      top: 10%;
+      left: 30%;
+      height: fit-content;
+      width: fit-content;
+      background: rgba(241, 241, 241, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 20;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
+    .user-overlay.show, .create-overlay.show {
       display: block;
     }
 
@@ -194,9 +232,10 @@
       cursor: pointer;
     }
 
-    .tabs {
+    /* Tabs */
+    .tabs { 
       display: flex;
-      gap: 10px;
+      gap: 20px;
       margin-bottom: 10px;
     }
 
@@ -206,7 +245,19 @@
     margin-left: auto; 
     }
 
-    .tab {
+    .create-SC .creates{
+      background: #e6e6e6;
+      border: none;
+      color: #7b0000;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 50px;
+      padding: 10px 50px;
+      border-radius: 6px 6px;
+      font-size: 20px;
+    }
+
+    .tabs .tab {
       background: none;
       border: none;
       color: #7b0000;
@@ -218,70 +269,28 @@
       font-size: 20px;
     }
 
-    .tab:hover{
-      background-color: lightgray;
+    .tabs .tab.active {
+      background-color: #fff;
+      border-bottom: 2px solid #7b0000;
+    }
+    
+    .tabs .tab.add:hover, .SearchButton:hover{
+      transform: scale(1.1); 
     }
 
-    .tab:focus{
+    .create-SC .creates:hover{
+      background-color: #fff;
+    }
+    
+    .tabs .tab:not(.search, .add):hover {
       background-color: #fff;
       border-bottom: 2px solid #7b0000;
     }
 
-    .user-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .tabs .tab:not(.search, .add):focus {
+      background-color: #fff;
+      border-bottom: 2px solid #7b0000;
     }
-
-    .user-card {
-      background: #e0e0e0;
-      padding: 10px 15px;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .user-info i {
-      font-size: 24px;
-    }
-
-    .search-container {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .search-input {
-      width: 0;
-      padding: 0;
-      border: none;
-      outline: none;
-      transition: all 0.3s ease;
-      overflow: hidden;
-    }
-
-    .SearchButton {
-      background-color: #7b0000;
-      margin-right: 15px;
-      color: white;
-      border: none;
-      border-radius: 20px;
-      padding: 10px 15px;
-      cursor: pointer;
-      z-index: 1;
-    }
-
-    .search-input {
-      transition: width 0.3s ease, padding 0.3s ease, border 0.3s ease;
-    }
-
 
     .search-image-icon {
       width: 35px;
@@ -340,6 +349,62 @@
       cursor: pointer;
     }
 
+    /* CREATE CLASS */
+    .create-list {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    #className {
+      width: 500px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+     /* SEARCH INPUTS */
+    .search-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      width: 0;
+      padding: 0;
+      border: none;
+      outline: none;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .SearchButton {
+      background-color: #7b0000;
+      margin-right: 15px;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 15px;
+      cursor: pointer;
+      z-index: 1;
+    }
+
+    .search-input {
+      transition: width 0.3s ease, padding 0.3s ease, border 0.3s ease;
+    }
+
+
+    textarea {
+      width: 625px;
+      height: 200px;
+      padding: 15px;
+      resize: none;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+
     .module-list {
       display: flex;
       flex-direction: column;
@@ -384,53 +449,18 @@
       gap: 15px;
     }
 
-    .partners-card {
-      background-color: #e0e0e0;
-      padding: 15px 20px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
 
-    .partners-icon {
-      height: 50px;
-      width: 50px;
-      border-radius: 10px;
-      object-fit: cover;
-    }
-
-    .partners-info {
-      flex: 1;
-      margin-left: 15px;
-    }
-
-    .partners-title {
-      font-weight: bold;
-      font-size: 16px;
-      color: #000;
-    }
-
-    .partners-role {
-      font-size: 14px;
-      color: #444;
-    }
-
-
-
-
+    
   </style>
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
-
   <div class="header">
-    <div class="title">CALLA <span>admin</span></div>
+    <div class="title">CALLA <span>instructor</span></div>
     <div class="profile-container" onclick="toggleLogoutDropdown()">
       <div class="profile-pic" style="background-image: url('images/profile.jpg');"></div>
       <div class="logout-dropdown" id="logoutDropdown">
-        <a href="">Logout</a>
+        <a href="Login.html">Logout</a>
       </div>
     </div>
   </div>
@@ -438,28 +468,26 @@
   <div class="dashboard-container">
     <div class="sidebar">
       <div class="nav-group">
-      <button class="nav-btn" onclick="toggleUserOverlay()"><img src="images/Human_Icon.jpg" class="User-icon" alt="User Icon"> Users</button>
       <button class="nav-btn" onclick="toggleClassroomOverlay()"><img src="images/Class_Icon.jpg" class="User-icon" alt="Classroom Icon"> Classrooms</button>
       <button class="nav-btn" onclick="toggleModuleOverlay()"><img src="images/Module_Icon.jpg" class="User-icon" alt="Module Icon"> Modules</button>
-      <button class="nav-btn" onclick="togglePartnersOverlay()"><img src="images/Partners_Icon.jpg" class="User-icon" alt="Partners Icon"> Partners</button>
       </div>
     </div>
-
+  
     <div class="main-content">
       <!-- Background Main Content -->
       <div id="backgroundContent" class="background-content">
-        Welcome to the Admin Dashboard
+        Welcome to the Instructor Dashboard
       </div>
 
-      <!-- Users Overlay -->
-      <div id="userOverlay" class="user-overlay">
-        <button class="close-btn" onclick="hideOverlay('userOverlay')">×</button>
-        <h2 style="color: #7b0000; margin-bottom: 20px;">Users</h2>
+      <!-- Classroom Overlay -->
+      <div id="classroomOverlay" class="user-overlay">
+        <button class="close-btn" onclick="hideOverlay('classroomOverlay')">×</button>
+        <h2 style="color: #7b0000; margin-bottom: 20px;">Classrooms</h2>
 
         <div class="tabs">
-          <button class="tab" onclick="setUserTab('All')">All</button>
-          <button class="tab" onclick="setUserTab('Student')">Students</button>
-          <button class="tab" onclick="setUserTab('Instructor')">Instructors</button>
+        <button class="tab" onclick="setUserTab('All')">All</button>
+        <button class="tab" onclick="setUserTab('Student')">Students</button>
+          <button class="tab" onclick="toggleCreateOverlay()">Create</button>
           <div class="right-buttons">
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
@@ -467,8 +495,8 @@
             </div>
           </div>
         </div>
-        <div class="user-list">
-
+        
+        <div class="classroom-list">
         <?php
           $sql = "SELECT username, userType FROM users WHERE usertype <> 'Administrator'";
           $result = $conn->query($sql);
@@ -491,51 +519,33 @@
           </div>
         <?php } ?>
         </div>
+
       </div>
 
-      <!-- Classroom Overlay -->
-      <div id="classroomOverlay" class="user-overlay">
-        <button class="close-btn" onclick="hideOverlay('classroomOverlay')">×</button>
-        <h2 style="color: #7b0000; margin-bottom: 20px;">Classrooms</h2>
+        <div id="createOverlay" class="create-overlay">
+          <button class="close-btn" onclick="hideCreateOverlay('createOverlay')">×</button>
+          <h2 style="color: #7b0000; margin-bottom: 20px;">Create a Class</h2>
 
-        <div class="tabs">
-          <button class="tab active">All</button>
-          <button class="tab">Partner</button>
-          <div class="right-buttons">
-            <div class="search-container">
-              <input type="text" placeholder="Search..." class="search-input">
-              <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
+          <div class = create-list>
+            <div class = create-item1>
+              <div class = create-info>
+                <label for="className">Class Name:</label>
+                <input type="text" id="className" name="className"placeholder="Class Name" required>
+              </div>
+            </div>
+            <div class = create-item2>
+              <div class = create-info>
+                <textarea rows="20" cols="100" id="classDesc" name="classDesc" placeholder="Class Description" required></textarea>
+              </div>
+            </div>
+            <div class = create-SC>
+              <button class = creates type="submit">Create</button>
+              <button class = creates onclick="hideCreateOverlay('createOverlay')">Cancel</button>
             </div>
           </div>
+
+
         </div>
-        
-        <div class="classroom-list">
-
-          <div class="classroom-item">
-            <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
-            <div class="classroom-info">
-              <div class="classroom-title">English 101</div>
-              <div class="classroom-creator">Ms. Reyes</div>
-            </div>
-            <a href="classroom-details.html?classId=english101" class="search-icon-link">
-              <img src="images/Search_Icon.jpg" alt="View Classroom" class="search-image-icon">
-            </a>
-          </div>
-
-          <div class="classroom-item">
-            <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
-            <div class="classroom-info">
-              <div class="classroom-title">Math 4</div>
-              <div class="classroom-creator">Mr. Santos</div>
-            </div>
-            <a href="classroom-details.html?classId=math4" class="search-icon-link">
-              <img src="images/Search_Icon.jpg" alt="View Classroom" class="search-image-icon">
-            </a>
-          </div>
-
-          <!-- Add more classroom-item divs as needed -->
-        </div>
-      </div>
 
       <!-- Modules Overlay -->
       <div id="moduleOverlay" class="user-overlay">
@@ -555,51 +565,33 @@
         </div>
 
         <div class="module-list">
-          <div class="module-card">
-            <img src="images/Module_Icon.jpg" alt="Module Icon" class="module-icon">
-            <div class="module-info">
-              <div class="module-title">English Basics</div>
-              <div class="module-creator">By Ms. Lim</div>
-            </div>
-            <a href="module-details.html?moduleId=engbasics" class="search-icon-link">
-              <img src="images/Search_Icon.jpg" alt="View Module" class="search-image-icon">
-            </a>
-          </div>
 
-          <!-- More module-card entries as needed -->
+          <?php
+            $sql = "SELECT username, userType FROM users WHERE usertype <> 'Administrator'";
+            $result = $conn->query($sql);
+
+            while ($row = $result->fetch_assoc()) {
+              $displayName = htmlspecialchars($row['username']);
+              $role = htmlspecialchars($row['userType']);
+          ?>
+            <div class="user-card" data-role="<?php echo $role; ?>">
+              <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <div>
+                  <div><strong><?php echo $displayName; ?></strong></div>
+                  <div><?php echo $role; ?></div>
+                </div>
+              </div>
+              <a href="user-details.html" class="search-icon-link user-search">
+                <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon"> 
+              </a>
+            </div>
+          <?php } ?>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- Partners Overlay -->
-      <div id="partnersOverlay" class="user-overlay">
-        <button class="close-btn" onclick="hideOverlay('partnersOverlay')">x</button>
-        
-        <div class="tabs">
-          <button class="tab active">Partners</button>
-          <button class="tab">New</button>
-          <div class="right-buttons">
-            <div class="search-container">
-              <input type="text" placeholder="Search..." class="search-input">
-              <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
-            </div>
-          </div>
-        </div>
-
-        <div class="partners-list">
-          <div class="partners-card">
-            <img src="images/Partners_Icon.jpg" alt="Partners Icon" class="partners-icon">
-            <div class="partners-info">
-              <div class="partners-title">DepEd</div>
-              <div class="partners-role">Distributor</div>
-            </div>
-            <a href="partners-details.html?partnersId=DepEd" class="search-icon-link">
-              <img src="images/Search_Icon.jpg" alt="View Partners" class="search-image-icon">
-            </a>
-          </div>
-
-          <!-- More partners-card entries as needed -->
-        </div>
-      </div>
 
 
   <script>
@@ -615,29 +607,6 @@
       dropdown.style.display = 'none';
     }
   });
-
-  function showOverlay(targetId) {
-    const overlays = ['userOverlay', 'classroomOverlay',  'moduleOverlay', 'partnersOverlay'];
-    const bg = document.getElementById('backgroundContent');
-
-    overlays.forEach(id => document.getElementById(id).classList.remove('show'));
-
-    const target = document.getElementById(targetId);
-    target.classList.add('show');
-
-    bg.style.display = 'none';
-  }
-
-  function hideOverlay(targetId) {
-    const target = document.getElementById(targetId);
-    target.classList.remove('show');
-
-    // If no overlays are visible, show the background
-    const anyOpen = document.querySelectorAll('.user-overlay.show').length > 0;
-    if (!anyOpen) {
-      document.getElementById('backgroundContent').style.display = 'flex';
-    }
-  }
 
   function toggleSearch(label) {
   const container = label.closest('.search-container');
@@ -684,11 +653,42 @@ function closeInput(input) {
   input.value = '';
 }
 
-  // Aliases for buttons
-  function toggleUserOverlay() {
-    showOverlay('userOverlay');
+  function showOverlay(targetId, backgroundId = null) {
+  const overlays = ['classroomOverlay', 'moduleOverlay', 'createOverlay'];
+  const bg = document.getElementById('backgroundContent');
+  overlays.forEach(id => {
+    const overlay = document.getElementById(id);
+    const shouldShow = (
+      id === targetId || 
+      (backgroundId && id === backgroundId)
+    );
+    overlay.classList.toggle('show', shouldShow);
+  });
+  bg.style.display = 'none';
+}
+
+  function hideOverlay(targetId) {
+    const target = document.getElementById(targetId);
+    target.classList.remove('show');
+    // If no overlays are visible, show the background
+    const anyOpen = document.querySelectorAll('.user-overlay.show').length > 0;
+    if (!anyOpen) {
+      document.getElementById('backgroundContent').style.display = 'flex';
+    }
   }
 
+  function hideCreateOverlay(targetId) {
+    const target = document.getElementById(targetId);
+    target.classList.remove('show');
+    // If no overlays are visible, show the background
+    const anyOpen = document.querySelectorAll('.user-overlay.show').length > 0;
+    if (!anyOpen) {
+      document.getElementById('classroomOverlay').classList.add('show');
+    }
+  }
+
+
+  // Aliases for buttons
   function toggleClassroomOverlay() {
     showOverlay('classroomOverlay');
   }
@@ -696,9 +696,8 @@ function closeInput(input) {
   function toggleModuleOverlay() {
   showOverlay('moduleOverlay');
   }
-
-  function togglePartnersOverlay() {
-  showOverlay('partnersOverlay'); 
+  function toggleCreateOverlay() {
+  showOverlay('createOverlay', 'classroomOverlay');
   }
 
   function setUserTab(role) {
@@ -720,14 +719,11 @@ function closeInput(input) {
     setUserTab('All');
   });
 
-  function setModuleTab(){
-
-  }
-
-
-
-
 </script>
 
 </body>
 </html>
+
+<?php
+  mysqli_close($conn);
+?>
