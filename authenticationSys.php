@@ -77,6 +77,7 @@
         $sex = $_POST['gender'];
         $activebool = true;
         $userID = generateID("U",9);
+        echo $usertype;
 
         // check if Email is already registered
         $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?"); // preparation 
@@ -87,16 +88,18 @@
         // if it does: send error
         if($qrySel->num_rows > 0){
             echo "Email is registered";
+            exit();
         }
 
         else{
             // insert to user
             $stmt = $conn->prepare("INSERT INTO users (
-                userType, username, email, password, firstName, lastName, sex, dateOfBirth, contact, active) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+                userID, usertype, username, email, password, firstName, lastName, sex, dateOfBirth, contact, active) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             );
             $stmt->bind_param(
-                "sssssssssi",
+                "ssssssssssi",
+                $userID,
                 $usertype,
                 $username,
                 $email,
@@ -109,28 +112,27 @@
                 $activebool
             );
 
-            if ($stmt->execute()) {
-                echo "User inserted successfully!";
-            } else {
-                echo "Error: " . $stmt->error;
-            }
-
             // check role
-            switch($userType){
-                case "Admin":
+            switch($usertype){
+                case "Administrator":
+                    //get admin info
                     $adminID = generateID("A",9);
                     $adminToken = $_POST['token'];
+                    echo $adminToken;
 
-                    $stmt = $conn->prepare("SELECT adminTokenID FROM admin WHERE adminTokenID = ?"); // preparation 
+                    //check adminToken 
+                    $stmt = $conn->prepare("SELECT adminTokenID FROM admin WHERE adminTokenID = ?"); 
                     $stmt->bind_param('s', $adminToken);
                     $stmt->execute(); 
                     $qrySel = $stmt->get_result();
 
-                    if($qrySel->number_rows > 1){
-                        echo "Token is invalid";
-                    }
-
-                    else{
+                    if($qrySel->num_rows >= 1) // Check if token is occupied
+                        echo "Token is occupied";
+                    
+                    elseif($qrySel->num_rows <= 0) // Check if token exists
+                        echo "Token does not exist";
+                    
+                    else{ // inserts admin
                         $stmt = $conn->prepare("INSERT INTO admin (adminID, adminTokenID, userID) VALUES (?,?,?)"); // preparation 
                         $stmt->bind_param('sss', $adminID, $adminToken, $userID);
                         $stmt->execute(); 
@@ -155,6 +157,9 @@
                     $stmt->execute(); 
 
                     break;
+                default: 
+                header("Location: index.php");
+                break;
             }
 
         // redirect to login

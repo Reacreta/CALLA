@@ -1,4 +1,5 @@
 <?php
+  session_start();
   include('database.php');
 ?>
 <!DOCTYPE html>
@@ -125,9 +126,9 @@
       <div class="form-group">
         <select id="role" name="role" required>
           <option value="" disabled selected>Role</option>
-          <option value="admin">Admin</option>
-          <option value="instructor">Instructor</option>
-          <option value="student">Student</option>
+          <option value="Administrator">Admin</option>
+          <option value="Instructor">Instructor</option>
+          <option value="Student">Student</option>
         </select>
         <input type="text" placeholder="Token" name="token" id="tokenInput" style="display: none;">
         <select name="gender" class="custom-select" required>
@@ -159,7 +160,7 @@
       const roleSelect = document.getElementById('role');
       const tokenInput = document.getElementById('tokenInput');
 
-      if (roleSelect.value === 'admin') {
+      if (roleSelect.value === 'Administrator') {
         tokenInput.style.display = 'block';
       } else {
         tokenInput.style.display = 'none';
