@@ -187,8 +187,8 @@
 
     .errorIcon {
       position: absolute;
-      bottom: 25px;
-      left: 60px;
+      bottom: 15px;
+      left: 75px;
       display: none;
       width: 30px;
       height: 30px;
@@ -201,14 +201,11 @@
       left: 100px;
       display: none;
       width: 300px;
-      background-color: #fff;
-      color: #7b0000;
-      border: 1px solid #7b0000;
-      border-radius: 10px;
+      color: #fff;
       padding: 15px;
-      font-size: 14px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      font-size: 12px;
       z-index: 1000;
+      font-style: normal;
     }
 
 
@@ -279,7 +276,7 @@
       e.preventDefault();
       errorIcon.style.display = 'inline';
       errorSummary.style.display = 'block';
-      errorSummary.innerHTML = `<strong>Invalid Email or Password</strong>`;
+      errorSummary.innerHTML = `Invalid Email or Password`;
     }
   });
 
