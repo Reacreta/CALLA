@@ -200,7 +200,7 @@
       margin-bottom: 10px;
     }
 
-    .tabs .tab {
+    .tab {
       background: none;
       border: none;
       color: #7b0000;
@@ -212,7 +212,11 @@
       font-size: 20px;
     }
 
-    .tabs .tab.active {
+    .tab:hover{
+      background-color: lightgray;
+    }
+
+    .tab:focus {
       background-color: #fff;
       border-bottom: 2px solid #7b0000;
 
@@ -390,7 +394,7 @@
     <div class="profile-container" onclick="toggleLogoutDropdown()">
       <div class="profile-pic" style="background-image: url('images/profile.jpg');"></div>
       <div class="logout-dropdown" id="logoutDropdown">
-        <a href="logout.html">Logout</a>
+        <a href="">Logout</a>
       </div>
     </div>
   </div>
