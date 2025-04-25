@@ -1,3 +1,11 @@
+<?php
+  ob_start();
+  session_start();
+  require_once 'database.php';
+  require_once 'authfunctions.php';
+
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -407,24 +415,33 @@
       <div id="userOverlay" class="user-overlay">
         <button class="close-btn" onclick="hideOverlay('userOverlay')">×</button>
         <div class="tabs">
-          <button class="tab active">All</button>
-          <button class="tab">Students</button>
-          <button class="tab">Instructors</button>
+          <button class="tab" onclick="setUserTab('All')">All</button>
+          <button class="tab" onclick="setUserTab('Student')">Students</button>
+          <button class="tab" onclick="setUserTab('Instructor')">Instructors</button>
         </div>
         <div class="user-list">
-          <div class="user-card">
+
+        <?php
+          $sql = "SELECT username, userType FROM users WHERE usertype <> 'Administrator'";
+          $result = $conn->query($sql);
+
+          while ($row = $result->fetch_assoc()) {
+            $displayName = htmlspecialchars($row['username']);
+            $role = htmlspecialchars($row['userType']);
+        ?>
+          <div class="user-card" data-role="<?php echo $role; ?>">
             <div class="user-info">
               <i class="fas fa-user-circle"></i>
               <div>
-                <div><strong>Display Name</strong></div>
-                <div>Role</div>
+                <div><strong><?php echo $displayName; ?></strong></div>
+                <div><?php echo $role; ?></div>
               </div>
             </div>
             <a href="user-details.html" class="search-icon-link user-search">
               <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon"> 
             </a>
           </div>
-          <!-- More user cards can be added here -->
+        <?php } ?>
         </div>
       </div>
 
@@ -566,6 +583,31 @@
   function togglePartnersOverlay() {
   showOverlay('partnersOverlay'); 
   }
+
+  function setUserTab(role) {
+    const cards = document.querySelectorAll('.user-card');
+    const tabs = document.querySelectorAll('.tab');
+
+    cards.forEach(card => {
+      const cardRole = card.getAttribute('data-role');
+      card.style.display = (role === 'All' || cardRole === role) ? 'flex' : 'none';
+    });
+
+    tabs.forEach(tab => tab.classList.remove('active'));
+    const activeTab = Array.from(tabs).find(t => t.textContent === role);
+    if (activeTab) activeTab.classList.add('active');
+  }
+
+  // Automatically select "All" when the page loads
+  window.addEventListener('DOMContentLoaded', () => {
+    setUserTab('All');
+  });
+
+  function setModuleTab(){
+
+  }
+
+
 
 
 </script>

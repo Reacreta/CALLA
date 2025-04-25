@@ -64,7 +64,7 @@
             switch($accountRole){
                 case 'Administrator':
                     debug_console('Redirect to Administrator');
-                    redirect("Admin.php");
+                    redirect("admin.php");
                     break;
                 case 'Instructor':
                     redirect("instructor.php"); 
