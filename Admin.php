@@ -3,6 +3,22 @@
   session_start();
   require_once 'database.php';
   require_once 'authfunctions.php';
+
+  if(isset($_POST["createPartner"])){
+    $partnerName = $_POST["partnerName"];
+    $partnerDesc = $_POST["partnerDesc"];
+    $partnerEmail = $_POST["partnerEmail"];
+    $partnerContact = $_POST["partnerContact"];
+    $partnerID = generateID("P",9);
+
+    $stmt = $conn->prepare("INSERT INTO partner VALUES(?,?,?,?,?)"); // preparation 
+    $stmt->bind_param('sssss', $partnerID,$partnerName,$partnerDesc,$partnerEmail,$partnerContact); // subtitute ? with variable
+    $stmt->execute(); 
+    $stmt->close();
+
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+  }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -332,7 +348,11 @@
       color: #444;
     }
 
-
+    .classroom-search-icon {
+      font-size: 20px;
+      color: #333;
+      cursor: pointer;
+    }
 
     .module-list {
       display: flex;
@@ -408,6 +428,88 @@
     .partners-role {
       font-size: 14px;
       color: #444;
+    }
+
+    .create-overlay { 
+      display: none;
+      position: absolute;
+      border: 2px solid white;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      top: 10%;
+      left: 30%;
+      height: fit-content;
+      width: fit-content;
+      background: rgba(241, 241, 241, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 20;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .create-overlay.show {
+      display: block;
+    }
+
+    .create-list {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .create-item1,
+    .create-item2 {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .create-info {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .create-info label {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .create-info input,
+    .create-info textarea {
+      width: 500px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    /* Specific textarea styling */
+    .create-info textarea {
+      height: 150px;
+      resize: none;
+    }
+
+    .create-SC {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .create-SC .creates {
+      background: #e6e6e6;
+      border: none;
+      color: #7b0000;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+      padding: 10px 50px;
+      border-radius: 6px;
+      font-size: 20px;
+    }
+
+    .create-SC .creates:hover {
+      background-color: #fff;
     }
 
   </style>
@@ -553,7 +655,7 @@
         
         <div class="tabs">
           <button class="tab active">Partners</button>
-          <button class="tab">New</button>
+          <button class="tab" onclick="toggleCreatePartnersOverlay()">New</button>
           <div class="right-buttons">
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
@@ -582,6 +684,44 @@
             </a>
           </div>
           <?php } ?>
+        </div>
+
+        <div id="createPartnersOverlay" class="create-overlay">
+          <button class="close-btn" onclick="hideCreateOverlay('createPartnersOverlay')">×</button>
+          <h2 style="color: #7b0000; margin-bottom: 20px;">Create a Partner</h2>
+
+          <div class="create-list">
+            <form action="" method="post">
+              <div class="create-item1">
+                <div class="create-info">
+                  <label for="partnerName">Partner Name:</label>
+                  <input type="text" id="partnerName" name="partnerName" placeholder="Partner Name" required>
+                </div>
+              </div>
+                <div class="create-item1">
+                <div class="create-info">
+                  <label for="partnerContact">Contact Number:</label>
+                  <input type="tel" id="partnerContact" name="partnerContact" placeholder="Contact Number" required>
+                </div>
+              </div>
+              <div class="create-item1">
+                <div class="create-info">
+                  <label for="partnerEmail">Email:</label>
+                  <input type="email" id="partnerEmail" name="partnerEmail" placeholder="Partner Email" required>
+                </div>
+              </div>
+              <div class="create-item2">
+                <div class="create-info">
+                  <label for="partnerDesc">Partner Description:</label>
+                  <textarea id="partnerDesc" name="partnerDesc" placeholder="Partner Description" required></textarea>
+                </div>
+              </div>
+              <div class="create-SC">
+                <button class="creates" type="submit" name="createPartner">Create</button>
+                <button class="creates" onclick="hideCreateOverlay('createPartnersOverlay')">Cancel</button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
 
@@ -695,6 +835,15 @@ function closeInput(input) {
   showOverlay('partnersOverlay'); 
   }
 
+  function toggleCreatePartnersOverlay() {
+    const overlay = document.getElementById('createPartnersOverlay');
+    if (overlay.classList.contains('show')) {
+      hideCreateOverlay('createPartnersOverlay');
+    } else {
+      showCreateOverlay('createPartnersOverlay');
+    }
+  }
+
   function setUserTab(role) {
     const cards = document.querySelectorAll('.user-card');
     const tabs = document.querySelectorAll('.tab');
@@ -710,22 +859,34 @@ function closeInput(input) {
   }
 
   function loadModules(type, clickedBtn) {
-  // Remove 'active' from all tabs
-  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-  // Add 'active' to the clicked one
-  clickedBtn.classList.add('active');
+    // Remove 'active' from all tabs
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    // Add 'active' to the clicked one
+    clickedBtn.classList.add('active');
 
-  // Send AJAX request
-  fetch('adminFunctions.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'type=' + encodeURIComponent(type)
-  })
-  .then(res => res.text())
-  .then(html => {
-    document.getElementById('moduleContainer').innerHTML = html;
-  });
-}
+    // Send AJAX request
+    fetch('adminFunctions.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'type=' + encodeURIComponent(type)
+    })
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('moduleContainer').innerHTML = html;
+    });
+  }
+
+  function showCreateOverlay(targetId) {
+    const target = document.getElementById(targetId);
+    target.classList.add('show');
+  }
+
+  function hideCreateOverlay(targetId) {
+    const target = document.getElementById(targetId);
+    target.classList.remove('show');
+  }
+
+  
 
 // Load default on page load
 window.onload = () => loadModules('All', document.querySelector('.tab.active'));

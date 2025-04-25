@@ -68,6 +68,7 @@
 
     function redirect($url){
         debug_console("Debugging to ".$url);
+        if ($url == 'Admin.php' || $url == 'Instructor.php' || $url == 'Student.php')
         echo "<div style='
         position: absolute;
         display: flex;
@@ -83,6 +84,7 @@
         text-align: center;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     '>Logged In Successfully</div>";
+
         echo "<script type='text/javascript'>
             setTimeout(function() {
                 window.location.href = '$url';
