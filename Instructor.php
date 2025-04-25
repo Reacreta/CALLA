@@ -455,7 +455,7 @@
     <div class="profile-container" onclick="toggleLogoutDropdown()">
       <div class="profile-pic" style="background-image: url('images/profile.jpg');"></div>
       <div class="logout-dropdown" id="logoutDropdown">
-        <a href="Login.html">Logout</a>
+        <a href="logout.php">Logout</a>
       </div>
     </div>
   </div>
@@ -508,7 +508,7 @@
                 <div><?php echo $role; ?></div>
               </div>
             </div>
-            <a href="user-details.html" class="search-icon-link user-search">
+            <a href="" class="search-icon-link user-search">
               <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon"> 
             </a>
           </div>
