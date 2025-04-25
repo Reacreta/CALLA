@@ -268,11 +268,6 @@
       border-bottom: 2px solid transparent;
       font-size: 20px;
     }
-
-    .tabs .tab.active {
-      background-color: #fff;
-      border-bottom: 2px solid #7b0000;
-    }
     
     .tabs .tab.add:hover, .SearchButton:hover{
       transform: scale(1.1); 
