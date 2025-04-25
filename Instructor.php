@@ -493,26 +493,29 @@
         
         <div class="classroom-list">
         <?php
-          $sql = "SELECT username, userType FROM users WHERE usertype <> 'Administrator'";
-          $result = $conn->query($sql);
+            $sql = "SELECT classroom.className, users.username 
+                    FROM classroom 
+                    JOIN instructor ON classroom.instID = instructor.instID 
+                    JOIN users ON instructor.userID = users.userID;";
+            $result = $conn->query($sql);
 
-          while ($row = $result->fetch_assoc()) {
-            $displayName = htmlspecialchars($row['username']);
-            $role = htmlspecialchars($row['userType']);
-        ?>
-          <div class="user-card" data-role="<?php echo $role; ?>">
-            <div class="user-info">
-              <i class="fas fa-user-circle"></i>
-              <div>
-                <div><strong><?php echo $displayName; ?></strong></div>
-                <div><?php echo $role; ?></div>
+            while ($row = $result->fetch_assoc()) {
+              $className = htmlspecialchars($row['className']);
+              $creatorName = htmlspecialchars($row['username']);
+              debug_console($className);
+              debug_console($creatorName);
+          ?>
+            <div class="classroom-item">
+              <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
+              <div class="classroom-info">
+                <div class="classroom-title"><?php echo $className; ?></div>
+                <div class="classroom-creator"><?php echo $creatorName; ?></div>
               </div>
+              <a href="classroom-details.html?classId=math4" class="search-icon-link">
+                <img src="images/Search_Icon.jpg" alt="View Classroom" class="search-image-icon">
+              </a>
             </div>
-            <a href="" class="search-icon-link user-search">
-              <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon"> 
-            </a>
-          </div>
-        <?php } ?>
+          <?php } ?>
         </div>
 
       </div>
