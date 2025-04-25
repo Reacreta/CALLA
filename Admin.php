@@ -3,6 +3,22 @@
   session_start();
   require_once 'database.php';
   require_once 'authfunctions.php';
+
+  if(isset($_POST["createPartner"])){
+    $partnerName = $_POST["partnerName"];
+    $partnerDesc = $_POST["partnerDesc"];
+    $partnerEmail = $_POST["partnerEmail"];
+    $partnerContact = $_POST["partnerContact"];
+    $partnerID = generateID("P",9);
+
+    $stmt = $conn->prepare("INSERT INTO partner VALUES(?,?,?,?,?)"); // preparation 
+    $stmt->bind_param('sssss', $partnerID,$partnerName,$partnerDesc,$partnerEmail,$partnerContact); // subtitute ? with variable
+    $stmt->execute(); 
+    $stmt->close();
+
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+  }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -675,34 +691,36 @@
           <h2 style="color: #7b0000; margin-bottom: 20px;">Create a Partner</h2>
 
           <div class="create-list">
-            <div class="create-item1">
-              <div class="create-info">
-                <label for="partnerName">Partner Name:</label>
-                <input type="text" id="partnerName" name="partnerName" placeholder="Partner Name" required>
+            <form action="" method="post">
+              <div class="create-item1">
+                <div class="create-info">
+                  <label for="partnerName">Partner Name:</label>
+                  <input type="text" id="partnerName" name="partnerName" placeholder="Partner Name" required>
+                </div>
               </div>
-            </div>
-             <div class="create-item1">
-              <div class="create-info">
-                <label for="partnerContact">Contact Number:</label>
-                <input type="tel" id="partnerContact" name="partnerContact" placeholder="Contact Number" required>
+                <div class="create-item1">
+                <div class="create-info">
+                  <label for="partnerContact">Contact Number:</label>
+                  <input type="tel" id="partnerContact" name="partnerContact" placeholder="Contact Number" required>
+                </div>
               </div>
-            </div>
-            <div class="create-item1">
-              <div class="create-info">
-                <label for="partnerEmail">Email:</label>
-                <input type="email" id="partnerEmail" name="partnerEmail" placeholder="Partner Email" required>
+              <div class="create-item1">
+                <div class="create-info">
+                  <label for="partnerEmail">Email:</label>
+                  <input type="email" id="partnerEmail" name="partnerEmail" placeholder="Partner Email" required>
+                </div>
               </div>
-            </div>
-            <div class="create-item2">
-              <div class="create-info">
-                <label for="partnerDesc">Partner Description:</label>
-                <textarea id="partnerDesc" name="partnerDesc" placeholder="Partner Description" required></textarea>
+              <div class="create-item2">
+                <div class="create-info">
+                  <label for="partnerDesc">Partner Description:</label>
+                  <textarea id="partnerDesc" name="partnerDesc" placeholder="Partner Description" required></textarea>
+                </div>
               </div>
-            </div>
-            <div class="create-SC">
-              <button class="creates" type="submit" onclick="createPartner()">Create</button>
-              <button class="creates" onclick="hideCreateOverlay('createPartnersOverlay')">Cancel</button>
-            </div>
+              <div class="create-SC">
+                <button class="creates" type="submit" name="createPartner">Create</button>
+                <button class="creates" onclick="hideCreateOverlay('createPartnersOverlay')">Cancel</button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -856,48 +874,6 @@ function closeInput(input) {
     .then(html => {
       document.getElementById('moduleContainer').innerHTML = html;
     });
-  }
-
-  function createPartner() {
-      // Get values from the form
-      const partnerName = document.getElementById('partnerName').value;
-      const partnerEmail = document.getElementById('partnerEmail').value;
-      const partnerContact = document.getElementById('partnerContact').value; // <-- Added contact field
-      const partnerDesc = document.getElementById('partnerDesc').value;
-      
-      // Basic validation
-      if (!partnerName || !partnerEmail) {
-        alert('Please enter both partner name and email');
-        return;
-      }
-
-      // Create FormData object
-      const formData = new FormData();
-      formData.append('partnerName', partnerName);
-      formData.append('partnerEmail', partnerEmail);
-      formData.append('partnerContact', partnerContact); // <-- Add contact to form data
-      formData.append('partnerDesc', partnerDesc);
-      
-      // Send data to server using fetch API
-      fetch('createPartner.php', {
-        method: 'POST',
-        body: formData
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          alert('Partner created successfully');
-          hideCreateOverlay('createPartnersOverlay');
-          // Reload page to see the new partner
-          location.reload();
-        } else {
-          alert('Error creating partner: ' + data.message);
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('Error creating partner. Please try again.');
-      });
   }
 
   function showCreateOverlay(targetId) {
