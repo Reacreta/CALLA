@@ -216,10 +216,9 @@
       background-color: lightgray;
     }
 
-    .tab:focus {
+    .tab:focus , .active{
       background-color: #fff;
       border-bottom: 2px solid #7b0000;
-
     }
 
     .user-list {
