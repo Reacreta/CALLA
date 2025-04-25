@@ -409,8 +409,11 @@
     }
 
     const token = document.getElementById('tokenInput');
-    if (role.value === 'Administrator' && token.value.trim() !== 'ADMIN123') {
-      showError(token, "Invalid admin token.");
+    if (role.value === 'Administrator') {
+      const tokenPattern = /^adm\d{7}$/;
+      if (!tokenPattern.test(token.value.trim())) {
+        showError(token);
+      }
     }
 
     const gender = document.getElementsByName('gender')[0];
