@@ -332,11 +332,7 @@
       color: #444;
     }
 
-    .classroom-search-icon {
-      font-size: 20px;
-      color: #333;
-      cursor: pointer;
-    }
+
 
     .module-list {
       display: flex;
