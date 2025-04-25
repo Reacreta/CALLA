@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 18, 2025 at 08:13 AM
+-- Generation Time: Apr 25, 2025 at 04:05 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `calla`
+-- Database: `db_calla`
 --
 
 -- --------------------------------------------------------
@@ -55,6 +55,22 @@ CREATE TABLE `admin` (
 CREATE TABLE `admintoken` (
   `adminTokenID` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admintoken`
+--
+
+INSERT INTO `admintoken` (`adminTokenID`) VALUES
+('adm0098583'),
+('adm0947581'),
+('adm1028847'),
+('adm1128472'),
+('adm1248912'),
+('adm1501287'),
+('adm1928471'),
+('adm3498788'),
+('adm6854740'),
+('adm8894245');
 
 -- --------------------------------------------------------
 
@@ -188,18 +204,6 @@ CREATE TABLE `personalmodule` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `session`
---
-
-CREATE TABLE `session` (
-  `sessionID` varchar(10) NOT NULL,
-  `userID` varchar(10) NOT NULL,
-  `dateTimeCreated` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `student`
 --
 
@@ -240,6 +244,14 @@ CREATE TABLE `users` (
   `contact` varchar(15) NOT NULL,
   `active` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`userID`, `userType`, `username`, `email`, `password`, `firstName`, `lastName`, `sex`, `dateOfBirth`, `contact`, `active`) VALUES
+('UnDyVpJQ8', 'Instructor', 't3riteki', 'gobythebox@gmail.com', 'gabriel123', 'gab', 'de guzman', 'male', '2004-12-23', '09156119882', 1),
+('Uz4tzZ0Nq', 'Administrator', 'learrrr', 'learrrr1027@gmail.com', 'lear1027', 'earl', 'lumata', 'male', '2004-10-27', '09156119882', 1);
 
 -- --------------------------------------------------------
 
@@ -354,13 +366,6 @@ ALTER TABLE `personalmodule`
   ADD KEY `pmID` (`pmID`);
 
 --
--- Indexes for table `session`
---
-ALTER TABLE `session`
-  ADD PRIMARY KEY (`sessionID`),
-  ADD KEY `userID` (`userID`);
-
---
 -- Indexes for table `student`
 --
 ALTER TABLE `student`
@@ -458,12 +463,6 @@ ALTER TABLE `partnermodule`
 ALTER TABLE `personalmodule`
   ADD CONSTRAINT `personalmodule_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `users` (`userID`),
   ADD CONSTRAINT `personalmodule_ibfk_2` FOREIGN KEY (`pmID`) REFERENCES `partnermodule` (`pmID`);
-
---
--- Constraints for table `session`
---
-ALTER TABLE `session`
-  ADD CONSTRAINT `session_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `users` (`userID`);
 
 --
 -- Constraints for table `student`
