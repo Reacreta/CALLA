@@ -248,6 +248,7 @@
       height: 24px;
       width: 24px;
       cursor: pointer;
+      border-radius: 10px;
     }
 
     }
