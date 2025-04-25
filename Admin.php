@@ -541,39 +541,16 @@
         <h2 style="color: #7b0000; margin-bottom: 20px;">Modules</h2>
 
         <div class="tabs">
-<<<<<<< Updated upstream
-          <button class="tab active">All</button>
-          <button class="tab">Partner</button>
-          <button class="tab">Classroom</button>
-          <div class="right-buttons">
-            <div class="search-container">
-              <input type="text" placeholder="Search..." class="search-input">
-              <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
-            </div>
-          </div>
-=======
-          <button class="tab" action="setModuleTab('All')">All</button>
-          <button class="tab" action="setModuleTab('Partner')">Partner</button>
-          <button class="tab" action="setModuleTab('Classroom')">Classroom</button>
->>>>>>> Stashed changes
+          <button class="tab active" onclick="loadModules('All', this)">All</button>
+          <button class="tab" onclick="loadModules('Partner', this)">Partner</button>
+          <button class="tab" onclick="loadModules('Classroom', this)">Classroom</button>
         </div>
 
-        <div class="module-list">
-          <div class="module-card">
-            <img src="images/Module_Icon.jpg" alt="Module Icon" class="module-icon">
-            <div class="module-info">
-              <div class="module-title">English Basics</div>
-              <div class="module-creator">By Ms. Lim</div>
-            </div>
-            <a href="module-details.html?moduleId=engbasics" class="search-icon-link">
-              <img src="images/Search_Icon.jpg" alt="View Module" class="search-image-icon">
-            </a>
-          </div>
-
-          <!-- More module-card entries as needed -->
+        <div class="module-list" id="moduleContainer">
+          <!-- Modules will load here -->
         </div>
+        
       </div>
-
       <!-- Partners Overlay -->
       <div id="partnersOverlay" class="user-overlay">
         <button class="close-btn" onclick="hideOverlay('partnersOverlay')">x</button>
@@ -729,22 +706,26 @@ function closeInput(input) {
     if (activeTab) activeTab.classList.add('active');
   }
 
-  function setModuleTab(local){ 
-    const tabs = document.querySelectorAll('.tabs .tab');
-    tabs.forEach(tab => tab.classList.remove('active'));
+  function loadModules(type, clickedBtn) {
+  // Remove 'active' from all tabs
+  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+  // Add 'active' to the clicked one
+  clickedBtn.classList.add('active');
 
-    // highlight active tab
-    [...tabs].find(t => t.textContent === type || (type === 'All' && t.textContent === 'All'))?.classList.add('active');
+  // Send AJAX request
+  fetch('adminFunctions.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'type=' + encodeURIComponent(type)
+  })
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById('moduleContainer').innerHTML = html;
+  });
+}
 
-    const cards = document.querySelectorAll('.module-card');
-    cards.forEach(card => {
-      if (type === 'All' || card.dataset.type === type) {
-        card.style.display = 'flex';
-      } else {
-        card.style.display = 'none';
-      }
-    });
-  }
+// Load default on page load
+window.onload = () => loadModules('All', document.querySelector('.tab.active'));
 
 </script>
 </body>

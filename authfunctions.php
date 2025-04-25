@@ -75,4 +75,8 @@
             }, 2000);
         </script>";
     }
+
+    function logout(){
+        
+    }
 ?>
