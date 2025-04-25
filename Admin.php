@@ -567,18 +567,25 @@
         </div>
 
         <div class="partners-list">
-          <div class="partners-card">
+        <?php
+            $sql = "SELECT * FROM partner";
+            $result = $conn->query($sql);
+
+            while ($row = $result->fetch_assoc()) {
+              $partnerName = htmlspecialchars($row['partnerName']);
+              $partnerEmail = htmlspecialchars($row['email']);
+          ?>
+            <div class="partners-card">
             <img src="images/Partners_Icon.jpg" alt="Partners Icon" class="partners-icon">
             <div class="partners-info">
-              <div class="partners-title">DepEd</div>
-              <div class="partners-role">Distributor</div>
+              <div class="partners-title"><?php echo $partnerName?></div>
+              <div class="partners-role"><?php echo $partnerEmail?></div>
             </div>
             <a href="partners-details.html?partnersId=DepEd" class="search-icon-link">
               <img src="images/Search_Icon.jpg" alt="View Partners" class="search-image-icon">
             </a>
           </div>
-
-          <!-- More partners-card entries as needed -->
+          <?php } ?>
         </div>
       </div>
 
