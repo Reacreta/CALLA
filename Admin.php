@@ -27,6 +27,20 @@
   <title>CALLA Admin Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter&family=Goudy+Bookletter+1911&display=swap" rel="stylesheet">
   <style>
+    /* ANIMATION */
+    :root {
+      --gradient: linear-gradient(45deg,  #330000, #4A0303, #7B0000, #A30505, #C0660E, #D59004);
+    }
+
+    @keyframes grad-anim {
+      0%{
+        background-position: left;}
+      100%{
+          background-position: right;
+        }
+    }
+    /* ---------------------------------------------------------------------- */
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -42,10 +56,13 @@
     body {
       display: flex;
       flex-direction: column;
+      background-image: var(--gradient);
+      background-size: 300% 100%;
+      animation: grad-anim 10s infinite alternate;
     }
 
     .header {
-      background-color: #7b0000;
+      border: none;
       color: white;
       padding: 15px 30px;
       display: flex;
@@ -108,13 +125,14 @@
 
     }
 
+    /* DASH */
     .dashboard-container {
       display: flex;
       height: 100%;
     }
 
     .sidebar {
-      background-color: #7b0000;
+      border: none;
       width: 250px;
       padding: 20px 10px;
       display: flex;
@@ -158,13 +176,16 @@
       background-color: rgba(255, 255, 255, 0.2);
     }
 
+
     .main-content {
       flex: 1;
       position: relative;
+      background-color: lightgray;
     }
 
     .background-content {
       background-image: url('images/USeP_eagle.jpg');
+      opacity: 70%;
       background-size: cover;
       background-position: center;
       height: 100%;
@@ -180,7 +201,7 @@
       
     }
 
-
+    /* User Overlays */
     .user-overlay { 
       display: none;
       position: absolute;
@@ -563,10 +584,10 @@
         <div class="user-list">
 
         <!-- Dynamic User Table -->
-        <?php
-          $sql = "SELECT * FROM users WHERE usertype <> 'Administrator'";
+       <?php
+          // This will select only students and instructors, but not administrators
+          $sql = "SELECT * FROM users WHERE usertype = 'Student' OR usertype = 'Instructor'";
           $result = $conn->query($sql);
-
           while ($row = $result->fetch_assoc()) {
             $displayName = htmlspecialchars($row['username']);
             $role = htmlspecialchars($row['userType']);
@@ -652,6 +673,7 @@
       <!-- Partners Overlay -->
       <div id="partnersOverlay" class="user-overlay">
         <button class="close-btn" onclick="hideOverlay('partnersOverlay')">x</button>
+        <h2 style="color: #7b0000; margin-bottom: 20px;">Partners</h2>
         
         <div class="tabs">
           <button class="tab active">Partners</button>
