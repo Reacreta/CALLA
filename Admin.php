@@ -19,6 +19,45 @@
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
   }
+  // Pagination setup: get current page and items per page
+  // Set up tab filtering
+  $activeTab = isset($_GET['tab']) ? $_GET['tab'] : 'All';
+  $validTabs = ['All', 'Student', 'Instructor'];
+  if (!in_array($activeTab, $validTabs)) {
+      $activeTab = 'All';
+  }
+
+  // Pagination setup
+  $items_per_page = isset($_GET['items']) ? max(1, (int)$_GET['items']) : 10;
+  $current_page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+
+  // Build the WHERE clause based on active tab
+  $whereClause = "WHERE usertype IN ('Student', 'Instructor')";
+  if ($activeTab != 'All') {
+      $whereClause = "WHERE usertype = '" . $conn->real_escape_string($activeTab) . "'";
+  }
+
+  // Count total users for pagination
+  $count_sql = "SELECT COUNT(*) AS total FROM users $whereClause";
+  $count_result = $conn->query($count_sql);
+  $total_users = $count_result->fetch_assoc()['total'];
+
+  // Calculate pagination values
+  $total_pages = max(1, ceil($total_users / $items_per_page));
+  $current_page = min($current_page, $total_pages); // Make sure we don't exceed max pages
+  $offset = ($current_page - 1) * $items_per_page;
+
+  // Get users for the current page
+  $sql = "SELECT * FROM users $whereClause LIMIT $items_per_page OFFSET $offset";
+  $result = $conn->query($sql);
+
+  // For debugging (uncomment if needed)
+  // debug_console("Active Tab: $activeTab");
+  // debug_console("Total users: $total_users");
+  // debug_console("Current page: $current_page of $total_pages");
+  // debug_console("Items per page: $items_per_page");
+  // debug_console("SQL Query: $sql");
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -263,6 +302,7 @@
     }
 
     .user-list {
+      flex-grow: 1;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -533,6 +573,68 @@
       background-color: #fff;
     }
 
+    /* Pagination User */
+    .user-list-wrapper {
+      display: flex;
+      flex-direction: column;
+      height: 85%;
+      justify-content: space-between; /* Ensures pagination stays at the bottom */
+    }
+    .pagination-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #e0e0e0;
+      border-radius: 8px;
+      font-family: sans-serif;
+      font-size: 14px;
+      color: #333;    
+    }
+    
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .pagination-arrow {
+      display: inline-block;
+      padding: 5px 10px;
+      color: #7b0000;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+    
+    .pagination-arrow:hover {
+      background-color: #d0d0d0;
+    }
+    
+    .pagination-arrow.disabled {
+      color: #aaa;
+      pointer-events: none;
+    }
+    
+    .pagination-info {
+      margin: 0 10px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .items-per-page {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .items-per-page select {
+      padding: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
   </style>
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
@@ -565,48 +667,72 @@
         Welcome to the Admin Dashboard
       </div>
 
-      <!-- Users Overlay -->
-      <div id="userOverlay" class="user-overlay">
-        <button class="close-btn" onclick="hideOverlay('userOverlay')">×</button>
-        <h2 style="color: #7b0000; margin-bottom: 20px;">Users</h2>
+          <!-- Users Overlay -->
+            <div id="userOverlay" class="user-overlay">
+              <button class="close-btn" onclick="hideOverlay('userOverlay')">×</button>
+              <h2 style="color: #7b0000; margin-bottom: 20px;">Users</h2>
 
-        <div class="tabs">
-          <button class="tab" onclick="setUserTab('All')">All</button>
-          <button class="tab" onclick="setUserTab('Student')">Students</button>
-          <button class="tab" onclick="setUserTab('Instructor')">Instructors</button>
-          <div class="right-buttons">
-            <div class="search-container">
-              <input type="text" placeholder="Search..." class="search-input">
-              <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
-            </div>
-          </div>
-        </div>
-        <div class="user-list">
+              <div class="tabs">
+                <a href="?tab=All&page=1&items=<?php echo $items_per_page; ?>" class="tab <?php if($activeTab == 'All') echo 'active'; ?>">All</a>
+                <a href="?tab=Student&page=1&items=<?php echo $items_per_page; ?>" class="tab <?php if($activeTab == 'Student') echo 'active'; ?>">Students</a>
+                <a href="?tab=Instructor&page=1&items=<?php echo $items_per_page; ?>" class="tab <?php if($activeTab == 'Instructor') echo 'active'; ?>">Instructors</a>
+                <div class="right-buttons">
+                  <div class="search-container">
+                    <input type="text" placeholder="Search..." class="search-input">
+                    <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
+                  </div>
+                </div>
+              </div>
 
-        <!-- Dynamic User Table -->
-       <?php
-          // This will select only students and instructors, but not administrators
-          $sql = "SELECT * FROM users WHERE usertype = 'Student' OR usertype = 'Instructor'";
-          $result = $conn->query($sql);
-          while ($row = $result->fetch_assoc()) {
-            $displayName = htmlspecialchars($row['username']);
-            $role = htmlspecialchars($row['userType']);
-        ?>
-          <div class="user-card" data-role="<?php echo $role; ?>">
-            <div class="user-info">
-              <i class="fas fa-user-circle"></i>
-              <div>
-                <div><strong><?php echo $displayName; ?></strong></div>
-                <div><?php echo $role; ?></div>
+              <div class="user-list-wrapper">
+                <div class="user-list">
+                  <?php 
+                  if ($result && $result->num_rows > 0) {
+                    // Loop through and display users
+                    while ($row = $result->fetch_assoc()) {
+                      $displayName = htmlspecialchars($row['username']);
+                      $role = htmlspecialchars($row['userType']);
+                  ?>
+                    <div class="user-card" data-role="<?php echo $role; ?>">
+                      <div class="user-info">
+                        <i class="fas fa-user-circle"></i>
+                        <div>
+                          <div><strong><?php echo $displayName; ?></strong></div>
+                          <div><?php echo $role; ?></div>
+                        </div>
+                      </div>
+                      <a href="user-details.html" class="search-icon-link user-search">
+                        <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
+                      </a>
+                    </div>
+                  <?php 
+                    }
+                  } else {
+                    echo "<div style='text-align:center;padding:20px;'>No users found</div>";
+                  }
+                  
+                  // Debug: Show how many users were loaded
+                  echo "<script>console.log('Number of users loaded: " . ($result ? $result->num_rows : 0) . "');</script>";
+                  ?>
+                </div>
+
+                <!-- Pagination controls -->
+                <div class="pagination-container">
+                  <div class="pagination-controls">
+                    <a href="?page=1" class="pagination-arrow <?php if($current_page == 1) echo 'disabled'; ?>">⟪</a>
+                    <a href="?page=<?php echo max(1, $current_page - 1); ?>" class="pagination-arrow <?php if($current_page == 1) echo 'disabled'; ?>">⟨</a>
+
+                    <span class="pagination-info">
+                      Page <?php echo $current_page; ?> of <?php echo $total_pages; ?>
+                    </span>
+
+                    <a href="?page=<?php echo min($total_pages, $current_page + 1); ?>" class="pagination-arrow <?php if($current_page == $total_pages) echo 'disabled'; ?>">⟩</a>
+                    <a href="?page=<?php echo $total_pages; ?>" class="pagination-arrow <?php if($current_page == $total_pages) echo 'disabled'; ?>">⟫</a>
+                  </div>
+                </div>
               </div>
             </div>
-            <a href="user-details.html" class="search-icon-link user-search">
-              <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon"> 
-            </a>
-          </div>
-        <?php } ?>
-        </div>
-      </div>
+                  
 
       <!-- Classroom Overlay -->
       <div id="classroomOverlay" class="user-overlay">
@@ -654,6 +780,7 @@
         </div>
       </div>
 
+      
       <!-- Modules Overlay -->
       <div id="moduleOverlay" class="user-overlay">
         <button class="close-btn" onclick="hideOverlay('moduleOverlay')">×</button>
@@ -670,6 +797,8 @@
         </div>
         
       </div>
+      
+
       <!-- Partners Overlay -->
       <div id="partnersOverlay" class="user-overlay">
         <button class="close-btn" onclick="hideOverlay('partnersOverlay')">x</button>
@@ -746,6 +875,7 @@
           </div>
         </div>
       </div>
+    </div>  
 
 
   <script>
@@ -868,16 +998,34 @@ function closeInput(input) {
 
   function setUserTab(role) {
     const cards = document.querySelectorAll('.user-card');
-    const tabs = document.querySelectorAll('.tab');
+    const tabs = document.querySelectorAll('#userOverlay .tab');
 
-    cards.forEach(card => {
-      const cardRole = card.getAttribute('data-role');
-      card.style.display = (role === 'All' || cardRole === role) ? 'flex' : 'none';
+    // Update tab styling
+    tabs.forEach(tab => {
+      if (tab.textContent.trim() === role) {
+        tab.classList.add('active');
+        tab.focus(); // This will apply the focus styling
+      } else {
+        tab.classList.remove('active');
+      }
     });
 
-    tabs.forEach(tab => tab.classList.remove('active'));
-    const activeTab = Array.from(tabs).find(t => t.textContent === role);
-    if (activeTab) activeTab.classList.add('active');
+    // Filter cards based on role
+    if (role === 'All') {
+      cards.forEach(card => card.style.display = 'flex');
+    } else {
+      cards.forEach(card => {
+        const cardRole = card.getAttribute('data-role');
+        card.style.display = (cardRole === role) ? 'flex' : 'none';
+      });
+    }
+    
+    // Reset to first page when changing tabs
+    if (window.location.search.includes('page=')) {
+      const url = new URL(window.location);
+      url.searchParams.set('page', '1');
+      window.history.replaceState({}, '', url);
+    }
   }
 
   function loadModules(type, clickedBtn) {
@@ -906,6 +1054,16 @@ function closeInput(input) {
   function hideCreateOverlay(targetId) {
     const target = document.getElementById(targetId);
     target.classList.remove('show');
+  }
+
+
+  /* Pagination Script */
+    function changeTab(role) {
+    setUserTab(role);
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('page', '1'); // Reset to first page
+    window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
+  
   }
 
   
