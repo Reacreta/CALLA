@@ -648,77 +648,93 @@
       </div>
     </div>
 
-    <div class="main-content">
-      <!-- Background Main Content -->
-      <div id="backgroundContent" class="background-content">
+  <div class="main-content">
+    <!-- Background Main Content -->
+    <div id="backgroundContent" class="background-content">
         Welcome to the Admin Dashboard
-      </div>
+    </div>
 
-          <!-- Users Overlay -->
-            <div id="userOverlay" class="user-overlay">
-              <button class="close-btn" onclick="hideOverlay('userOverlay')">×</button>
-              <h2 style="color: #7b0000; margin-bottom: 20px;">Users</h2>
+      <!-- Users Overlay -->
+      <div id="userOverlay" class="user-overlay">
+        <!-- Close Button -->
+        <button class="close-btn" onclick="hideOverlay('userOverlay')">×</button>
 
-              <div class="tabs">
-                <button class="tab" onclick="setUserTab('All')">All</button>
-                <button class="tab" onclick="setUserTab('Student')">Students</button>
-                <button class="tab" onclick="setUserTab('Instructor')">Instructors</button>
-                <div class="right-buttons">
-                  <div class="search-container">
-                    <input type="text" placeholder="Search..." class="search-input">
-                    <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
-                  </div>
-                </div>
-              </div>
+        <!-- Title -->
+        <h2 style="color: #7b0000; margin-bottom: 20px;">Users</h2>
 
-              <div class="user-list-wrapper">
-                <div class="user-list">
-                  <?php 
-                  if ($result && $result->num_rows > 0) {
-                    // Loop through and display users
-                    while ($row = $result->fetch_assoc()) {
-                      $displayName = htmlspecialchars($row['username']);
-                      $role = htmlspecialchars($row['userType']);
-                  ?>
-                    <div class="user-card" data-role="<?php echo $role; ?>">
-                      <div class="user-info">
-                        <i class="fas fa-user-circle"></i>
-                        <div>
-                          <div><strong><?php echo $displayName; ?></strong></div>
-                          <div><?php echo $role; ?></div>
-                        </div>
-                      </div>
-                      <a href="user-details.html" class="search-icon-link user-search">
-                        <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
-                      </a>
-                    </div>
-                  <?php 
-                    }
-                  } else {
-                    echo "<div style='text-align:center;padding:20px;'>No users found</div>";
-                  }
-                  
-                  // Debug: Show how many users were loaded
-                  echo "<script>console.log('Number of users loaded: " . ($result ? $result->num_rows : 0) . "');</script>";
-                  ?>
-                </div>
+        <!-- Tabs and Search -->
+        <div class="tabs">
+          <!-- User Type Tabs -->
+          <button class="tab" onclick="setUserTab('All')">All</button>
+          <button class="tab" onclick="setUserTab('Student')">Students</button>
+          <button class="tab" onclick="setUserTab('Instructor')">Instructors</button>
 
-                <!-- Pagination controls -->
-                <div class="pagination-container">
-                  <div class="pagination-controls">
-                    <a href="?page=1" class="pagination-arrow <?php if($current_page == 1) echo 'disabled'; ?>">⟪</a>
-                    <a href="?page=<?php echo max(1, $current_page - 1); ?>" class="pagination-arrow <?php if($current_page == 1) echo 'disabled'; ?>">⟨</a>
-
-                    <span class="pagination-info">
-                      Page <?php echo $current_page; ?> of <?php echo $total_pages; ?>
-                    </span>
-
-                    <a href="?page=<?php echo min($total_pages, $current_page + 1); ?>" class="pagination-arrow <?php if($current_page == $total_pages) echo 'disabled'; ?>">⟩</a>
-                    <a href="?page=<?php echo $total_pages; ?>" class="pagination-arrow <?php if($current_page == $total_pages) echo 'disabled'; ?>">⟫</a>
-                  </div>
-                </div>
-              </div>
+          <!-- Search Box -->
+          <div class="right-buttons">
+            <div class="search-container">
+              <input type="text" placeholder="Search..." class="search-input">
+              <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
             </div>
+          </div>
+        </div>
+
+        <!-- User List Section -->
+        <div class="user-list-wrapper">
+          <div class="user-list">
+            <?php 
+              if ($result && $result->num_rows > 0) {
+                // Loop through users and display each
+                while ($row = $result->fetch_assoc()) {
+                  $displayName = htmlspecialchars($row['username']);
+                  $role = htmlspecialchars($row['userType']);
+            ?>
+            <!-- User Card -->
+            <div class="user-card" data-role="<?php echo $role; ?>">
+              <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <div>
+                  <div><strong><?php echo $displayName; ?></strong></div>
+                  <div><?php echo $role; ?></div>
+                </div>
+              </div>
+              <a href="user-details.html" class="search-icon-link user-search">
+                <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
+              </a>
+            </div>
+            <?php 
+                }
+              } else {
+                echo "<div style='text-align:center;padding:20px;'>No users found</div>";
+              }
+
+              // Debugging Info
+              echo "<script>console.log('Number of users loaded: " . ($result ? $result->num_rows : 0) . "');</script>";
+            ?>
+          </div>
+
+          <!-- Pagination Controls -->
+          <div class="pagination-container">
+            <div class="pagination-controls">
+              <!-- First Page -->
+              <a href="?page=1" class="pagination-arrow <?php if($current_page == 1) echo 'disabled'; ?>">⟪</a>
+
+              <!-- Previous Page -->
+              <a href="?page=<?php echo max(1, $current_page - 1); ?>" class="pagination-arrow <?php if($current_page == 1) echo 'disabled'; ?>">⟨</a>
+
+              <!-- Page Info -->
+              <span class="pagination-info">
+                Page <?php echo $current_page; ?> of <?php echo $total_pages; ?>
+              </span>
+
+              <!-- Next Page -->
+              <a href="?page=<?php echo min($total_pages, $current_page + 1); ?>" class="pagination-arrow <?php if($current_page == $total_pages) echo 'disabled'; ?>">⟩</a>
+
+              <!-- Last Page -->
+              <a href="?page=<?php echo $total_pages; ?>" class="pagination-arrow <?php if($current_page == $total_pages) echo 'disabled'; ?>">⟫</a>
+            </div>
+          </div>
+        </div>
+      </div>
                   
 
       <!-- Classroom Overlay -->
@@ -912,13 +928,17 @@
     }
   }
 
-  function toggleSearch(label) {
+ function toggleSearch(label) {
   const container = label.closest('.search-container');
   const input = container.querySelector('.search-input');
   const isOpen = input.style.width === '200px';
 
   if (isOpen) {
-    closeInput(input);
+    if (input.value.trim()) {
+      searchUsers(input.value);
+    } else {
+      closeInput(input);
+    }
   } else {
     openInput(input);
 
@@ -934,12 +954,35 @@
     input.addEventListener('keydown', function handleKey(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
-        console.log(input.value); 
-        closeInput(input);
+        searchUsers(input.value);
+        // Don't close the input after search so user can modify
         input.removeEventListener('keydown', handleKey); 
       }
     });
+    
+    // Also add input event for real-time search
+    input.addEventListener('input', function() {
+      searchUsers(input.value);
+    });
   }
+}
+
+function searchUsers(query) {
+  const activeTab = document.querySelector('#userOverlay .tab.active')?.textContent.trim() || 'All';
+  const cards = document.querySelectorAll('.user-card');
+  
+  cards.forEach(card => {
+    // Get the username and role from the card
+    const username = card.querySelector('.user-info strong').textContent.toLowerCase();
+    const role = card.getAttribute('data-role');
+    
+    // Check if the card matches both the search query and the active tab filter
+    const matchesSearch = username.includes(query.toLowerCase());
+    const matchesTab = (activeTab === 'All') || (role === activeTab);
+    
+    // Show the card only if it matches both conditions
+    card.style.display = (matchesSearch && matchesTab) ? 'flex' : 'none';
+  });
 }
 
 function openInput(input) {
@@ -986,6 +1029,7 @@ function closeInput(input) {
   function setUserTab(role) {
     const cards = document.querySelectorAll('.user-card');
     const tabs = document.querySelectorAll('#userOverlay .tab');
+    const searchInput = document.querySelector('#userOverlay .search-input');
 
     // Update tab styling
     tabs.forEach(tab => {
@@ -996,6 +1040,12 @@ function closeInput(input) {
         tab.classList.remove('active');
       }
     });
+
+    // Clear any active search
+    if (searchInput) {
+      searchInput.value = '';
+      closeInput(searchInput);
+    }
 
     // Filter cards based on role
     if (role === 'All') {
