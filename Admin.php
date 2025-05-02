@@ -20,43 +20,30 @@
     exit();
   }
   // Pagination setup: get current page and items per page
-  // Set up tab filtering
-  $activeTab = isset($_GET['tab']) ? $_GET['tab'] : 'All';
-  $validTabs = ['All', 'Student', 'Instructor'];
-  if (!in_array($activeTab, $validTabs)) {
-      $activeTab = 'All';
-  }
-
-  // Pagination setup
-  $items_per_page = isset($_GET['items']) ? max(1, (int)$_GET['items']) : 10;
+  // Hardcode 10 users per page
+  $items_per_page = 10;
   $current_page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 
-  // Build the WHERE clause based on active tab
-  $whereClause = "WHERE usertype IN ('Student', 'Instructor')";
-  if ($activeTab != 'All') {
-      $whereClause = "WHERE usertype = '" . $conn->real_escape_string($activeTab) . "'";
-  }
-
-  // Count total users for pagination
-  $count_sql = "SELECT COUNT(*) AS total FROM users $whereClause";
+  // Count total users
+  $count_sql = "SELECT COUNT(*) AS total FROM users WHERE usertype IN ('Student', 'Instructor')";
   $count_result = $conn->query($count_sql);
   $total_users = $count_result->fetch_assoc()['total'];
 
-  // Calculate pagination values
-  $total_pages = max(1, ceil($total_users / $items_per_page));
-  $current_page = min($current_page, $total_pages); // Make sure we don't exceed max pages
+  // Calculate total pages
+  $total_pages = ceil($total_users / $items_per_page);
+  $current_page = min($current_page, max(1, $total_pages));
   $offset = ($current_page - 1) * $items_per_page;
 
-  // Get users for the current page
-  $sql = "SELECT * FROM users $whereClause LIMIT $items_per_page OFFSET $offset";
+  // Get users for this page with explicit LIMIT
+  $sql = "SELECT * FROM users WHERE usertype IN ('Student', 'Instructor') LIMIT $items_per_page OFFSET $offset";
   $result = $conn->query($sql);
 
-  // For debugging (uncomment if needed)
-  // debug_console("Active Tab: $activeTab");
-  // debug_console("Total users: $total_users");
-  // debug_console("Current page: $current_page of $total_pages");
-  // debug_console("Items per page: $items_per_page");
-  // debug_console("SQL Query: $sql");
+  // Debug info - you can keep or remove this after fixing
+  echo "<script>console.log('Total users: " . $total_users . "');</script>";
+  echo "<script>console.log('Items per page: " . $items_per_page . "');</script>";
+  echo "<script>console.log('Current page: " . $current_page . "');</script>";
+  echo "<script>console.log('Total pages: " . $total_pages . "');</script>";
+  echo "<script>console.log('Offset: " . $offset . "');</script>";
 
 ?>
 <!DOCTYPE html>
@@ -673,9 +660,9 @@
               <h2 style="color: #7b0000; margin-bottom: 20px;">Users</h2>
 
               <div class="tabs">
-                <a href="?tab=All&page=1&items=<?php echo $items_per_page; ?>" class="tab <?php if($activeTab == 'All') echo 'active'; ?>">All</a>
-                <a href="?tab=Student&page=1&items=<?php echo $items_per_page; ?>" class="tab <?php if($activeTab == 'Student') echo 'active'; ?>">Students</a>
-                <a href="?tab=Instructor&page=1&items=<?php echo $items_per_page; ?>" class="tab <?php if($activeTab == 'Instructor') echo 'active'; ?>">Instructors</a>
+                <button class="tab" onclick="setUserTab('All')">All</button>
+                <button class="tab" onclick="setUserTab('Student')">Students</button>
+                <button class="tab" onclick="setUserTab('Instructor')">Instructors</button>
                 <div class="right-buttons">
                   <div class="search-container">
                     <input type="text" placeholder="Search..." class="search-input">
