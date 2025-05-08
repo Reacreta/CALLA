@@ -3,7 +3,7 @@
   session_start();
 
   require_once 'database.php';
-  require_once 'authfunctions.php';
+  require_once 'authFunctions.php';
 
   if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     session_unset();  
