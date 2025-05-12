@@ -19,31 +19,31 @@
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
   }
-  // Pagination setup: get current page and items per page
-  // Hardcode 10 users per page
+  // Setup
   $items_per_page = 10;
   $current_page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+  $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+  $search_param = "%" . $conn->real_escape_string($search) . "%";
 
-  // Count total users
-  $count_sql = "SELECT COUNT(*) AS total FROM users WHERE usertype IN ('Student', 'Instructor')";
+  // Filter clause
+  $where_clause = "usertype IN ('Student', 'Instructor')";
+  if (!empty($search)) {
+      $where_clause .= " AND username LIKE '$search_param'";
+  }
+
+  // Count total matching users
+  $count_sql = "SELECT COUNT(*) AS total FROM users WHERE $where_clause";
   $count_result = $conn->query($count_sql);
-  $total_users = $count_result->fetch_assoc()['total'];
+  $total_users = $count_result->fetch_assoc()['total'] ?? 0;
 
-  // Calculate total pages
+  // Pagination
   $total_pages = ceil($total_users / $items_per_page);
   $current_page = min($current_page, max(1, $total_pages));
   $offset = ($current_page - 1) * $items_per_page;
 
-  // Get users for this page with explicit LIMIT
-  $sql = "SELECT * FROM users WHERE usertype IN ('Student', 'Instructor') LIMIT $items_per_page OFFSET $offset";
+  // Fetch matching users
+  $sql = "SELECT * FROM users WHERE $where_clause LIMIT $items_per_page OFFSET $offset";
   $result = $conn->query($sql);
-
-  // Debug info - you can keep or remove this after fixing
-  echo "<script>console.log('Total users: " . $total_users . "');</script>";
-  echo "<script>console.log('Items per page: " . $items_per_page . "');</script>";
-  echo "<script>console.log('Current page: " . $current_page . "');</script>";
-  echo "<script>console.log('Total pages: " . $total_pages . "');</script>";
-  echo "<script>console.log('Offset: " . $offset . "');</script>";
 
 ?>
 <!DOCTYPE html>
