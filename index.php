@@ -3,7 +3,7 @@
   session_start();
 
   require_once 'database.php';
-  require_once 'authfunctions.php';
+  require_once 'authFunctions.php';
 
   if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     session_unset();  
@@ -101,6 +101,7 @@
       margin: 0;
       padding: 0;
       font-family: 'Inter', sans-serif;
+
     }
 
     body, html {
@@ -111,72 +112,121 @@
       background-image: url("images/USeP_eagle.jpg");
       background-size: cover;
       background-position: center;
+      
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
     .login-container {
+      display: flex;
+      flex-direction: column;
       background-color: #7b0000; /* deep red */
       color: white;
-      padding: 40px;
-      padding-top: 150px;
+      padding: 100px 0;
       border-radius: 20px;
       width: 650px;
-      height: 700px;
+      height: auto;
       box-shadow: 0 0 15px rgba(0,0,0,0.3);
     }
 
-    .login-container h1 {
+    #header h1 {
       text-align: center;
-      font-size: 70px;
+      font-size: 64px;
       margin-bottom: 25px;
-      font-family: 'Goudy Bookletter 1911', serif;
-      letter-spacing: 10px;
+      font-family: 'Goudy Bookletter 1911';
+
     }
 
-    .login-container label {
-      font-size: 14px;
-      display: block;
-      margin: 0 0 5px 60px;
-      letter-spacing: 2px;
+    .input-field-group{
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+
+      width: fit-content;
+      margin: auto;
     }
 
-    .login-container input[type="email"],
-    .login-container input[type="password"] {
-      width: 80%;
-    padding: 16px 14px;
-    margin: 0 auto 20px;
-    display: block;
+    .login-container input[type="email"]{
+    width: 505px;
+    height: auto;
+    padding: 25px 15px;
+    margin: auto;
     border: none;
     border-radius: 10px;
     font-size: 18px;
     background-color: #fdfdfd;
     }
 
+    .password-wrapper {
+      position: relative;
+      width: 505px;
+      height: fit-content;
+      margin: auto;
+    }
+
+    .password-wrapper input[type="password"] {
+      width: 505px;
+      padding: 25px 45px 25px 15px; /* <-- add right padding to make room for eye */
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      background-color: #fdfdfd;
+      box-sizing: border-box;
+    }
+
+    .password-wrapper input[type="text"] {
+      width: 505px;
+      padding: 25px 45px 25px 15px; /* <-- add right padding to make room for eye */
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      background-color: #fdfdfd;
+      box-sizing: border-box;
+    }
+
+    .password-wrapper .eyeIcon {
+      position: absolute;
+      top: 50%;
+      right: 15px;
+      transform: translateY(-50%);
+      height: 24px;
+      width: 24px;
+      cursor: pointer;
+      border-radius: 10px;
+    }
+    
+    .eyeIcon:hover {
+      opacity: 1;
+    }
+
+    #regButton{
+      width: 100%;
+    }
+
     .login-container a {
-      font-size: 12px;
+    font-size: 15px;
     color: #ddd;
     text-decoration: underline;
-    display: block;
-    text-align: center;
-    margin: 20px 0 0 350px;
+    text-align: right;
+    font-weight: bold;
     font-style: italic;
     letter-spacing: 2px;
     }
 
-    .login-container button {
-    width: 50%;             
-    padding: 15px 0;         
+    .login-container button {                      
     border: none;
-    border-radius: 6px;
+    border-radius: 15px;
     background-color: white;
+
     color: #7b0000;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 20px;
+
     cursor: pointer;
     display: block;          
-    margin: 70px 0 0 140px;
+    margin: auto;
+    padding: 15px 45px;
     letter-spacing: 2px ;   
   } 
 
@@ -208,82 +258,36 @@
       font-style: normal;
     }
 
-    .password-wrapper {
-      position: relative;
-      width: 80%;
-      margin: 0 auto 20px;
-    }
-
-    .password-wrapper {
-      position: relative;
-      width: 80%; /* control wrapper width */
-      margin: 0 auto 20px;
-    }
-
-    .password-wrapper input[type="password"] {
-      width: 100%;
-      padding: 16px 45px 16px 14px; /* <-- add right padding to make room for eye */
-      border: none;
-      border-radius: 10px;
-      font-size: 18px;
-      background-color: #fdfdfd;
-      box-sizing: border-box;
-    }
-
-    .password-wrapper input[type="text"] {
-      width: 100%;
-      padding: 16px 45px 16px 14px; /* <-- add right padding to make room for eye */
-      border: none;
-      border-radius: 10px;
-      font-size: 18px;
-      background-color: #fdfdfd;
-      box-sizing: border-box;
-    }
-
-    .password-wrapper .eyeIcon {
-      position: absolute;
-      top: 50%;
-      right: 15px;
-      transform: translateY(-50%);
-      height: 24px;
-      width: 24px;
-      cursor: pointer;
-      border-radius: 10px;
-    }
-
-    }
-    .eyeIcon:hover {
-      opacity: 1;
-    }
-
   </style>
 </head>
 <body>
+    <div class="login-container">
+      <div id="header">
+        <!--<img src="images/" alt="Calla logo"> if mag send na si earl og logo--> 
+        <h1>LOGIN</h1>
+      </div>
+      <form action="" method="POST">
+        <div class="input-field-group">
+          <input type="email" id="email" placeholder="Email" name="email" required>
 
-  <div class="login-container">
-    <h1>CALLA</h1>
-    <form action="" method="POST">
-      <label for="email">EMAIL:</label>
-      <input type="email" id="email" name="email" required>
+          <div class="password-wrapper">
+              <input type="password" id="password" placeholder="Password" name="password" required>
+              <img class="eyeIcon" id="eyeIcon" src="images/eye-close.jpg" alt="Toggle Password">
+          </div>
 
-      <label for="password">PASSWORD:</label>
-      <div class="password-wrapper">
-          <input type="password" id="password" name="password" required>
-          <img class="eyeIcon" id="eyeIcon" src="images/eye-close.jpg" alt="Toggle Password">
+          <div id="regButton">
+            <a href="Registration.php">SIGN UP</a>
+            <div class="error-section">
+              <img class="errorIcon" id="errorIcon" src="images/warning.jpg" alt="!">
+            <div id="errorSummary" class="errorSummary"></div>
+        </div>
+          </div>
         </div>
 
-      <a href="Registration.php">SIGN UP</a>
-
-      <div class="error-section">
-        <img class="errorIcon" id="errorIcon" src="images/warning.jpg" alt="!">
-        <div id="errorSummary" class="errorSummary"></div>
-      </div>
-
-      <div class="submit-section">
-        <button class="submit-btn" type="submit" name="login">Login</button>
-      </div>
-    </form>
-
+        <div class="submit-section">
+          <button class="submit-btn" type="submit" name="login">Sign In</button>
+        </div>
+      </form>
   </div>
 
   <script>

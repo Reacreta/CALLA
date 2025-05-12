@@ -2,7 +2,7 @@
   ob_start();
   session_start();
   require_once 'database.php';
-  require_once 'authfunctions.php';
+  require_once 'authFunctions.php';
 
   if(isset($_POST["createPartner"])){
     $partnerName = $_POST["partnerName"];

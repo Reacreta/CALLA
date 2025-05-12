@@ -167,28 +167,34 @@
       flex-direction: column;
     }
 
-    .header {
-      background-color: #7b0000;
-      color: white;
-      padding: 15px 30px;
-      font-family: 'Goudy Bookletter 1911', serif;
-      font-size: 30px;
+
+    #contCon{
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 100%;
     }
 
     .register-container {
       background-color: rgba(123, 0, 0, 0.95); 
       color: white;
       width: 800px;
-      height: 700px;
-      margin: 40px auto;
+      height: auto;
+      margin: auto;
       padding: 30px;
       border-radius: 15px;
       box-shadow: 0 0 10px rgba(0,0,0,0.4);
     }
 
     .register-container h2 {
-      font-size: 24px;
-      margin-bottom: 20px;
+      font-size: 30px;
+      margin-bottom: 30px;
+      font-family: 'Goudy Bookletter 1911';
+
+    }
+
+    #names.form-group input{
+      max-width: 240px;
     }
 
     .form-group {
@@ -243,10 +249,11 @@
     }
 
     .bottom-group a {
-      font-size: 14px;
+      font-size: 15px;
       color: #ddd;
       text-decoration: underline;
       font-style: italic;
+      font-weight: bold;
       margin-left: 10px;
     }
 
@@ -264,71 +271,71 @@
 </head>
 
 <body>
-  <div class="header">CALLA</div>
+  <div id="contCon">
+    <div class="register-container">
+      <h2>REGISTER</h2>
 
-  <div class="register-container">
-    <h2>REGISTER</h2>
+      <form method="POST">
+        <label>Names</label>
+        <div id="names" class="form-group">
+          <input type="text" placeholder="First Name" name="first_name" required>
+          <input type="text" placeholder="Last Name" name="last_name" required>
+          <input type="text" placeholder="Display Name" name="display_name" required>
+        </div>
 
-    <form method="POST">
+        <label>Birthday</label>
+        <div class="form-group">
+          <select placeholder="Month" name="birth_month" required>
+            <option value="" disabled selected>Choose A Month</option>
+            <option value="01">January</option>
+            <option value="02">February</option>
+            <option value="03">March</option>
+            <option value="04">April</option>
+            <option value="05">May</option>
+            <option value="06">June</option>
+            <option value="07">July</option>
+            <option value="08">August</option>
+            <option value="09">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+          <input type="text" placeholder="Day" name="birth_day" required>
+          <input type="text" placeholder="Year" name="birth_year" required>
+        </div>
 
-      <div class="form-group">
-        <input type="text" placeholder="First Name" name="first_name" required>
-        <input type="text" placeholder="Last Name" name="last_name" required>
-        <input type="text" placeholder="Display Name" name="display_name" required>
-      </div>
-
-      <label>Birthday</label>
-      <div class="form-group">
-        <select placeholder="Month" name="birth_month" required>
-          <option value="" disabled selected>Choose A Month</option>
-          <option value="01">January</option>
-          <option value="02">February</option>
-          <option value="03">March</option>
-          <option value="04">April</option>
-          <option value="05">May</option>
-          <option value="06">June</option>
-          <option value="07">July</option>
-          <option value="08">August</option>
-          <option value="09">September</option>
-          <option value="10">October</option>
-          <option value="11">November</option>
-          <option value="12">December</option>
+        <div class="form-group">
+          <select id="role" name="role" required>
+            <option value="" disabled selected>Role</option>
+            <option value="Administrator">Admin</option>
+            <option value="Instructor">Instructor</option>
+            <option value="Student">Student</option>
+          </select>
+          <input type="text" placeholder="Token" name="token" id="tokenInput" style="display: none;">
+          <select name="gender" class="custom-select" required>
+          <option value="" disabled selected>Select Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
         </select>
-        <input type="text" placeholder="Day" name="birth_day" required>
-        <input type="text" placeholder="Year" name="birth_year" required>
-      </div>
+        </div>
 
-      <div class="form-group">
-        <select id="role" name="role" required>
-          <option value="" disabled selected>Role</option>
-          <option value="Administrator">Admin</option>
-          <option value="Instructor">Instructor</option>
-          <option value="Student">Student</option>
-        </select>
-        <input type="text" placeholder="Token" name="token" id="tokenInput" style="display: none;">
-        <select name="gender" class="custom-select" required>
-        <option value="" disabled selected>Select Gender</option>
-        <option value="male">Male</option>
-        <option value="female">Female</option>
-        <option value="other">Other</option>
-      </select>
-      </div>
+        <div class="form-group">
+          <input type="email" placeholder="Email*" name="email" required>
+          <input type="text" placeholder="Contact Number" name="contact" required>
+        </div>
 
-      <div class="form-group">
-        <input type="email" placeholder="Email*" name="email" required>
-        <input type="text" placeholder="Contact Number" name="contact" required>
-      </div>
+        <div class="form-group">
+          <input class="full-width" type="password" placeholder="Password*" name="password" required>
+        </div>
 
-      <div class="form-group">
-        <input class="full-width" type="password" placeholder="Password*" name="password" required>
-      </div>
-
-      <div class="bottom-group">
-  <a href="index.php">Login</a>
-  <div class="submit-section">
-    <img id="errorIcon" src="images/warning.jpg" alt="!" 
-         style="display:none; width: 30px; height: 30px; cursor: pointer;">
-    <button class="submit-btn" type="submit" name="register">SUBMIT</button>
+        <div class="bottom-group">
+    <a href="index.php">Login</a>
+    <div class="submit-section">
+      <img id="errorIcon" src="images/warning.jpg" alt="!" 
+          style="display:none; width: 30px; height: 30px; cursor: pointer;">
+      <button class="submit-btn" type="submit" name="register">SUBMIT</button>
+    </div>
   </div>
 </div>
 
