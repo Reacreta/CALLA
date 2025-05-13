@@ -19,31 +19,12 @@
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
   }
-  // Setup
-  $items_per_page = 10;
-  $current_page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-  $search = isset($_GET['search']) ? trim($_GET['search']) : '';
-  $search_param = "%" . $conn->real_escape_string($search) . "%";
+  // Fetch all users
+$sql = "SELECT * FROM users";
+$result = $conn->query($sql);
 
-  // Filter clause
-  $where_clause = "usertype IN ('Student', 'Instructor')";
-  if (!empty($search)) {
-      $where_clause .= " AND username LIKE '$search_param'";
-  }
-
-  // Count total matching users
-  $count_sql = "SELECT COUNT(*) AS total FROM users WHERE $where_clause";
-  $count_result = $conn->query($count_sql);
-  $total_users = $count_result->fetch_assoc()['total'] ?? 0;
-
-  // Pagination
-  $total_pages = ceil($total_users / $items_per_page);
-  $current_page = min($current_page, max(1, $total_pages));
-  $offset = ($current_page - 1) * $items_per_page;
-
-  // Fetch matching users
-  $sql = "SELECT * FROM users WHERE $where_clause LIMIT $items_per_page OFFSET $offset";
-  $result = $conn->query($sql);
+// Optional: Count total users (if you still need it)
+$total_users = $result ? $result->num_rows : 0;
 
 ?>
 <!DOCTYPE html>
@@ -314,6 +295,14 @@
       font-size: 24px;
     }
 
+    .scrollable-user-list {
+      max-height: 750px; /* or whatever height you want */
+      overflow-y: auto;
+      
+      padding-right: 10px; /* add padding to avoid scrollbar overlap */
+    }
+
+
     .search-container {
       position: relative;
       display: flex;
@@ -559,56 +548,6 @@
     .create-SC .creates:hover {
       background-color: #fff;
     }
-
-    /* Pagination User */
-    .user-list-wrapper {
-      display: flex;
-      flex-direction: column;
-      height: 85%;
-      justify-content: space-between; /* Ensures pagination stays at the bottom */
-    }
-    .pagination-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 20px;
-      padding: 10px;
-      background-color: #e0e0e0;
-      border-radius: 8px;
-      font-family: sans-serif;
-      font-size: 14px;
-      color: #333;    
-    }
-    
-    .pagination-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .pagination-arrow {
-      display: inline-block;
-      padding: 5px 10px;
-      color: #7b0000;
-      text-decoration: none;
-      font-weight: bold;
-      border-radius: 4px;
-    }
-    
-    .pagination-arrow:hover {
-      background-color: #d0d0d0;
-    }
-    
-    .pagination-arrow.disabled {
-      color: #aaa;
-      pointer-events: none;
-    }
-    
-    .pagination-info {
-      margin: 0 10px;
-      font-weight: bold;
-      color: #333;
-    }
     
     .items-per-page {
       display: flex;
@@ -680,57 +619,37 @@
 
         <!-- User List Section -->
         <div class="user-list-wrapper">
-          <div class="user-list">
-            <?php 
-              if ($result && $result->num_rows > 0) {
-                // Loop through users and display each
-                while ($row = $result->fetch_assoc()) {
-                  $displayName = htmlspecialchars($row['username']);
-                  $role = htmlspecialchars($row['userType']);
-            ?>
-            <!-- User Card -->
-            <div class="user-card" data-role="<?php echo $role; ?>">
-              <div class="user-info">
-                <i class="fas fa-user-circle"></i>
-                <div>
-                  <div><strong><?php echo $displayName; ?></strong></div>
-                  <div><?php echo $role; ?></div>
+          <div class="scrollable-user-list">
+            <div class="user-list">
+              <?php 
+                if ($result && $result->num_rows > 0) {
+                  // Loop through users and display each
+                  while ($row = $result->fetch_assoc()) {
+                    $displayName = htmlspecialchars($row['username']);
+                    $role = htmlspecialchars($row['userType']);
+              ?>
+              <!-- User Card -->
+              <div class="user-card" data-role="<?php echo $role; ?>">
+                <div class="user-info">
+                  <i class="fas fa-user-circle"></i>
+                  <div>
+                    <div><strong><?php echo $displayName; ?></strong></div>
+                    <div><?php echo $role; ?></div>
+                  </div>
                 </div>
+                <a href="user-details.html" class="search-icon-link user-search">
+                  <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
+                </a>
               </div>
-              <a href="user-details.html" class="search-icon-link user-search">
-                <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
-              </a>
-            </div>
-            <?php 
+              <?php 
+                  }
+                } else {
+                  echo "<div style='text-align:center;padding:20px;'>No users found</div>";
                 }
-              } else {
-                echo "<div style='text-align:center;padding:20px;'>No users found</div>";
-              }
 
-              // Debugging Info
-              echo "<script>console.log('Number of users loaded: " . ($result ? $result->num_rows : 0) . "');</script>";
-            ?>
-          </div>
-
-          <!-- Pagination Controls -->
-          <div class="pagination-container">
-            <div class="pagination-controls">
-              <!-- First Page -->
-              <a href="?page=1" class="pagination-arrow <?php if($current_page == 1) echo 'disabled'; ?>">⟪</a>
-
-              <!-- Previous Page -->
-              <a href="?page=<?php echo max(1, $current_page - 1); ?>" class="pagination-arrow <?php if($current_page == 1) echo 'disabled'; ?>">⟨</a>
-
-              <!-- Page Info -->
-              <span class="pagination-info">
-                Page <?php echo $current_page; ?> of <?php echo $total_pages; ?>
-              </span>
-
-              <!-- Next Page -->
-              <a href="?page=<?php echo min($total_pages, $current_page + 1); ?>" class="pagination-arrow <?php if($current_page == $total_pages) echo 'disabled'; ?>">⟩</a>
-
-              <!-- Last Page -->
-              <a href="?page=<?php echo $total_pages; ?>" class="pagination-arrow <?php if($current_page == $total_pages) echo 'disabled'; ?>">⟫</a>
+                // Debugging Info
+                echo "<script>console.log('Number of users loaded: " . ($result ? $result->num_rows : 0) . "');</script>";
+              ?>
             </div>
           </div>
         </div>
@@ -1094,14 +1013,7 @@ function closeInput(input) {
   }
 
 
-  /* Pagination Script */
-    function changeTab(role) {
-    setUserTab(role);
-    const urlParams = new URLSearchParams(window.location.search);
-    urlParams.set('page', '1'); // Reset to first page
-    window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
   
-  }
 
   
 
