@@ -19,6 +19,14 @@
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
   }
+  // Fetch all users
+  $sql = "SELECT * FROM users";
+  $result = $conn->query($sql);
+  // Setup
+  $items_per_page = 10;
+  $current_page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+  $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+  $search_param = "%" . $conn->real_escape_string($search) . "%";
 
   // Filter clause
   $where_clause = "usertype IN ('Student', 'Instructor')";
@@ -30,8 +38,8 @@
   $sql = "SELECT * FROM users WHERE $where_clause";
   $result = $conn->query($sql);
 
-// Optional: Count total users (if you still need it)
-$total_users = $result ? $result->num_rows : 0;
+  // Optional: Count total users (if you still need it)
+  $total_users = $result ? $result->num_rows : 0;
 
 ?>
 <!DOCTYPE html>
@@ -243,6 +251,8 @@ $total_users = $result ? $result->num_rows : 0;
       gap: 10px;
       height: 100%;
       overflow-y: scroll;
+      scrollbar-width: thin; /* Firefox */
+      scrollbar-color: #a00 #f0f0f0; /* Firefox */
     }
 
     .user-overlay.show {
@@ -359,6 +369,83 @@ $total_users = $result ? $result->num_rows : 0;
     .search-image-icon:hover {
       transform: scale(1.1);
     }
+
+    /* User details overlay */
+
+    .user-details-content {
+      padding: 20px;
+      max-width: 600px;
+    }
+
+    .user-profile-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .user-profile-info {
+      flex: 1;
+    }
+
+    .user-detail-name {
+      font-size: 24px;
+      font-weight: bold;
+      color: #7b0000;
+    }
+
+    .user-detail-role {
+      font-size: 16px;
+      color: #666;
+    }
+
+    .user-details-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .detail-item label {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .user-actions {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .action-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      background-color: #e6e6e6;
+      color: #7b0000;
+    }
+
+    .action-btn:hover {
+      background-color: #fff;
+    }
+
+    .delete-btn {
+      background-color: #ffebeb;
+    }
+
+    .deactivate-btn {
+      background-color: #fff3e0;
+    }
+
+    /* Classroom Overlays */
 
     .classroom-item {
       background-color: #e0e0e0;
@@ -600,8 +687,8 @@ $total_users = $result ? $result->num_rows : 0;
           <div class="tabs">
             <!-- User Type Tabs -->
             <button class="tab" onclick="setUserTab('All')">All</button>
-            <button class="tab" onclick="setUserTab('Student')">Students</button>
-            <button class="tab" onclick="setUserTab('Instructor')">Instructors</button>
+            <button class="tab" onclick="setUserTab('Student')">Student</button>
+            <button class="tab" onclick="setUserTab('Instructor')">Instructor</button>
 
             <!-- Search Box -->
             <div class="right-buttons">
@@ -626,6 +713,27 @@ $total_users = $result ? $result->num_rows : 0;
                     $displayName = htmlspecialchars($row['username']);
                     $role = htmlspecialchars($row['userType']);
               ?>
+              <!-- User Card -->
+              <div class="user-card" 
+                 data-role="<?php echo $role; ?>"
+                 data-name="<?php echo $displayName; ?>"
+                 data-fname="<?php echo htmlspecialchars($row['firstName']); ?>"
+                 data-lname="<?php echo htmlspecialchars($row['lastName']); ?>"
+                 data-gender="<?php echo htmlspecialchars($row['sex']); ?>"
+                 data-email="<?php echo htmlspecialchars($row['email']); ?>"
+                 data-contact="<?php echo htmlspecialchars($row['contact']); ?>"
+                 data-dob="<?php echo htmlspecialchars($row['dateOfBirth']); ?>"
+                 data-uid="<?php echo htmlspecialchars($row['userID']); ?>">
+              <div class="user-info">
+                <div>
+                  <div><strong><?php echo $displayName; ?></strong></div>
+                  <div><?php echo $role; ?></div>
+                </div>
+              </div>
+              <div class="search-icon-link user-search" onclick="showUserDetails(this)">
+                <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
+              </div>
+            </div>
                     <div class="user-card" data-role="<?php echo $role; ?>">
                       <div class="user-info">
                         <i class="fas fa-user-circle"></i>
@@ -644,6 +752,61 @@ $total_users = $result ? $result->num_rows : 0;
                   echo "<div style='text-align:center;padding:20px;'>No users found</div>";
                 }
               ?>
+            </div>
+          </div>
+
+          <!-- User Details Overlay -->
+          <div id="userDetailsOverlay" class="create-overlay">
+            <button class="close-btn" onclick="hideCreateOverlay('userDetailsOverlay')">×</button>
+            <h2 style="color: #7b0000; margin-bottom: 20px;">User Details</h2>
+            
+            <div class="user-details-content">
+              <div class="user-profile-section">
+                <div class="user-profile-header">
+                  <i class="fas fa-user-circle" style="font-size: 48px;"></i>
+                  <div class="user-profile-info">
+                    <div id="userDetailName" class="user-detail-name"></div>
+                    <div id="userDetailRole" class="user-detail-role"></div>
+                  </div>
+                </div>
+                
+                <div class="user-details-grid">
+                  <div class="detail-item">
+                    <label>First Name:</label>
+                    <div id="userDetailFirstName">Joshua</div>
+                  </div>
+                  <div class="detail-item">
+                    <label>Last Name:</label>
+                    <div id="userDetailLastName">Gatmin</div>
+                  </div>
+                  <div class="detail-item">
+                    <label>Gender:</label>
+                    <div id="userDetailGender">Male</div>
+                  </div>
+                  <div class="detail-item">
+                    <label>Email:</label>
+                    <div id="userDetailEmail">jg17@gmail.com</div>
+                  </div>
+                  <div class="detail-item">
+                    <label>Contact:</label>
+                    <div id="userDetailContact">09827653342</div>
+                  </div>
+                  <div class="detail-item">
+                    <label>Date of Birth:</label>
+                    <div id="userDetailDOB">07/17/2003</div>
+                  </div>
+                  <div class="detail-item">
+                    <label>User ID:</label>
+                    <div id="userDetailUID">Thr5Tr4pY3s</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="user-actions">
+                <button class="action-btn" onclick="checkUserLogs()">Check Logs</button>
+                <button class="action-btn delete-btn" onclick="deleteUser()">Delete</button>
+                <button class="action-btn deactivate-btn" onclick="deactivateUser()">Deactivate</button>
+              </div>
             </div>
           </div>
         </div>
@@ -874,7 +1037,7 @@ $total_users = $result ? $result->num_rows : 0;
   } else {
     openInput(input);
 
-    // Outside click handler
+    // Handle outside click
     document.addEventListener('click', function handleOutsideClick(e) {
       if (!container.contains(e.target)) {
         closeInput(input);
@@ -882,37 +1045,41 @@ $total_users = $result ? $result->num_rows : 0;
       }
     });
 
-    // Listen for Enter key
-    input.addEventListener('keydown', function handleKey(e) {
+    // Enter key handler
+    const handleKey = function(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
         searchUsers(input.value);
-        // Don't close the input after search so user can modify
-        input.removeEventListener('keydown', handleKey); 
+        input.removeEventListener('keydown', handleKey);
       }
-    });
-    
-    // Also add input event for real-time search
-    input.addEventListener('input', function() {
+    };
+    input.addEventListener('keydown', handleKey);
+
+    // Real-time filtering
+    input.addEventListener('input', function () {
       searchUsers(input.value);
     });
   }
 }
 
 function searchUsers(query) {
-  const activeTab = document.querySelector('#userOverlay .tab.active')?.textContent.trim() || 'All';
+  const activeTabElement = document.querySelector('#userOverlay .tab.active');
   const cards = document.querySelectorAll('.user-card');
-  
+  const searchValue = query.toLowerCase();
+
+  // Normalize tab name (e.g. "Students" -> "student")
+  let activeTab = activeTabElement ? activeTabElement.textContent.trim().toLowerCase() : 'all';
+  if (activeTab.endsWith('s') && activeTab !== 'all') {
+    activeTab = activeTab.slice(0, -1); // remove trailing 's' for matching
+  }
+
   cards.forEach(card => {
-    // Get the username and role from the card
     const username = card.querySelector('.user-info strong').textContent.toLowerCase();
-    const role = card.getAttribute('data-role');
-    
-    // Check if the card matches both the search query and the active tab filter
-    const matchesSearch = username.includes(query.toLowerCase());
-    const matchesTab = (activeTab === 'All') || (role === activeTab);
-    
-    // Show the card only if it matches both conditions
+    const role = card.getAttribute('data-role').toLowerCase(); // e.g., "student" or "instructor"
+
+    const matchesSearch = username.includes(searchValue);
+    const matchesTab = (activeTab === 'all') || (role === activeTab);
+
     card.style.display = (matchesSearch && matchesTab) ? 'flex' : 'none';
   });
 }
@@ -1025,6 +1192,36 @@ function closeInput(input) {
     target.classList.remove('show');
   }
 
+  /* userdetail overlay */
+
+  function showUserDetails(element) {
+  const userCard = element.closest('.user-card');
+
+  // Get data attributes directly
+  const name = userCard.dataset.name;
+  const role = userCard.dataset.role;
+  const fname = userCard.dataset.fname;
+  const lname = userCard.dataset.lname;
+  const gender = userCard.dataset.gender;
+  const email = userCard.dataset.email;
+  const contact = userCard.dataset.contact;
+  const dob = userCard.dataset.dob;
+  const uid = userCard.dataset.uid;
+
+  // Update overlay fields
+  document.getElementById('userDetailName').textContent = name;
+  document.getElementById('userDetailRole').textContent = role;
+  document.getElementById('userDetailFirstName').textContent = fname;
+  document.getElementById('userDetailLastName').textContent = lname;
+  document.getElementById('userDetailGender').textContent = gender;
+  document.getElementById('userDetailEmail').textContent = email;
+  document.getElementById('userDetailContact').textContent = contact;
+  document.getElementById('userDetailDOB').textContent = dob;
+  document.getElementById('userDetailUID').textContent = uid;
+
+  // Show the overlay
+  document.getElementById('userDetailsOverlay').classList.add('show');
+}
 
   
 
