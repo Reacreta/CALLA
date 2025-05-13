@@ -707,6 +707,12 @@ $total_users = $result ? $result->num_rows : 0;
             <button class="tab active" onclick="loadModules('All', this)">All</button>
             <button class="tab" onclick="loadModules('Partner', this)">Partner</button>
             <button class="tab" onclick="loadModules('Classroom', this)">Classroom</button>
+            <div class="right-buttons">
+              <div class="search-container">
+                <input type="text" placeholder="Search..." class="search-input">
+                <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
+              </div>
+            </div>
           </div>
 
               <!--Dynamic Module List-->
