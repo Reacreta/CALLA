@@ -348,11 +348,6 @@
       z-index: 1;
     }
 
-    .view-card{
-      border: none;
-      background: none;
-    }
-
     .search-input {
       transition: width 0.3s ease, padding 0.3s ease, border 0.3s ease;
     }
@@ -372,77 +367,157 @@
 
     /* User details overlay */
 
-    .user-details-content {
+     .user-details-content {
       padding: 20px;
-      max-width: 600px;
+      width: 100%;
+      background: white;
+      border-radius: 8px;
+    }
+
+
+    .user-header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 3px;        
+      }
+
+    .user-profile-info {
+      flex: 1;
+      margin-top: 10px;
+    }
+
+    .user-detail-name {
+      font-size: 20px;
+      font-weight: bold;
+      color: #000;
+      margin-bottom: 5px;
+    }
+
+    .user-detail-role {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 5px;
     }
 
     .user-profile-header {
       display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 30px;
+      align-items: flex-start;
+      gap: 15px;
+      margin-bottom: 20px;
+      padding: 15px;
+      flex-wrap: wrap;
     }
 
-    .user-profile-info {
-      flex: 1;
+    .uid-display {
+      font-size: 13px;
+      color: #333;
+      font-style: italic;
+      margin-right: 80px;
     }
 
-    .user-detail-name {
-      font-size: 24px;
-      font-weight: bold;
-      color: #7b0000;
-    }
 
-    .user-detail-role {
-      font-size: 16px;
-      color: #666;
+    .user-profile-img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid #ccc;
     }
 
     .user-details-grid {
+      background: #f0f0f0;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-      margin-bottom: 30px;
+      gap: 15px;
     }
 
     .detail-item {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
     }
 
     .detail-item label {
-      font-weight: bold;
+      font-weight: 600;
+      color: #000;
+      min-width: 120px;
+    }
+
+    .detail-item div {
       color: #333;
     }
 
     .user-actions {
       display: flex;
-      justify-content: center;
-      gap: 15px;
+      justify-content: flex-start;
+      gap: 10px;
+      padding: 0 20px;
     }
 
     .action-btn {
-      padding: 10px 20px;
+      padding: 8px 16px;
       border: none;
-      border-radius: 5px;
+      border-radius: 4px;
       cursor: pointer;
-      font-weight: bold;
-      background-color: #e6e6e6;
-      color: #7b0000;
+      font-weight: normal;
+      font-size: 14px;
+      background-color: #e0e0e0;
+      color: #000;
     }
 
     .action-btn:hover {
-      background-color: #fff;
+      opacity: 0.9;
     }
 
     .delete-btn {
-      background-color: #ffebeb;
+      background-color: #7b0000;
+      color: white;
     }
 
     .deactivate-btn {
-      background-color: #fff3e0;
+      background-color: #7b0000;
+      color: white;
+    }
+
+    #userDetailsOverlay {
+      background: rgba(255, 255, 255, 0.95);
+      max-width: 800px;
+      width: 90%;
+      margin: auto;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .close-btn {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    /* Add Edit Profile link */
+    .edit-profile-link {
+      color: #7b0000;
+      text-decoration: none;
+      font-size: 14px;
+      position: absolute;
+      right: 20px;
+      bottom: 20px;
     }
 
     /* Classroom Overlays */
@@ -672,7 +747,7 @@
     <div class="main-content">
       <!-- Background Main Content -->
       <div id="backgroundContent" class="background-content">
-          Welcome, <?php echo $_SESSION['username']?> !
+          Welcome, <?php echo $_SESSION['username']?>!
       </div>
 
         <!-- Users Overlay -->
@@ -703,10 +778,6 @@
           <div class="list-wrapper">
             <div class="dynamic-list">
               <?php 
-
-                $sql = "SELECT * FROM users";
-                $result = $conn->query($sql);
-
                 if ($result && $result->num_rows > 0) {
                   // Loop through users and display each
                   while ($row = $result->fetch_assoc()) {
@@ -734,23 +805,14 @@
                 <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
               </div>
             </div>
-                    <div class="user-card" data-role="<?php echo $role; ?>">
-                      <div class="user-info">
-                        <i class="fas fa-user-circle"></i>
-                        <div>
-                          <div><strong><?php echo $displayName; ?></strong></div>
-                          <div><?php echo $role; ?></div>
-                        </div>
-                      </div>
-                      <button class="view-card">
-                        <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
-                      </button>
-                    </div>
               <?php 
                   }
                 } else {
                   echo "<div style='text-align:center;padding:20px;'>No users found</div>";
                 }
+
+                // Debugging Info
+                echo "<script>console.log('Number of users loaded: " . ($result ? $result->num_rows : 0) . "');</script>";
               ?>
             </div>
           </div>
@@ -763,10 +825,15 @@
             <div class="user-details-content">
               <div class="user-profile-section">
                 <div class="user-profile-header">
-                  <i class="fas fa-user-circle" style="font-size: 48px;"></i>
+                    <img src="images/user-profile.jpg" alt="User Photo" class="user-profile-img" />
                   <div class="user-profile-info">
-                    <div id="userDetailName" class="user-detail-name"></div>
-                    <div id="userDetailRole" class="user-detail-role"></div>
+                    <div class="user-header-flex">
+                      <div>
+                        <div id="userDetailName" class="user-detail-name">Joshua Gatmin</div>
+                        <div id="userDetailRole" class="user-detail-role">Instructor</div>
+                      </div>
+                      <div class="uid-display" id="userDetailUID">UID: Thr5Tr4pY3s</div>
+                    </div>
                   </div>
                 </div>
                 
@@ -794,10 +861,6 @@
                   <div class="detail-item">
                     <label>Date of Birth:</label>
                     <div id="userDetailDOB">07/17/2003</div>
-                  </div>
-                  <div class="detail-item">
-                    <label>User ID:</label>
-                    <div id="userDetailUID">Thr5Tr4pY3s</div>
                   </div>
                 </div>
               </div>
@@ -830,7 +893,7 @@
 
               <!-- Dynamic Classroom  Table -->
               <?php
-                $sql = "SELECT *
+                $sql = "SELECT classroom.className, users.username 
                         FROM classroom 
                         JOIN instructor ON classroom.instID = instructor.instID 
                         JOIN users ON instructor.userID = users.userID;";
