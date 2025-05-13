@@ -240,7 +240,7 @@ $total_users = $result ? $result->num_rows : 0;
       overflow:hidden;
     }
 
-    .user-list-wrapper {
+    .list-wrapper {
       flex: 1;
       height: 720px;
     }
@@ -585,270 +585,217 @@ $total_users = $result ? $result->num_rows : 0;
       </div>
     </div>
 
-  <div class="main-content">
-    <!-- Background Main Content -->
-    <div id="backgroundContent" class="background-content">
-        Welcome, <?php echo $_SESSION['username']?>!
-    </div>
-
-      <!-- Users Overlay -->
-      <div id="userOverlay" class="user-overlay">
-        <!-- Close Button -->
-        <button class="close-btn" onclick="hideOverlay('userOverlay')">×</button>
-
-        <!-- Title -->
-        <h2 style="color: #7b0000; margin-bottom: 20px;">Users</h2>
-
-        <!-- Tabs and Search -->
-        <div class="tabs">
-          <!-- User Type Tabs -->
-          <button class="tab" onclick="setUserTab('All')">All</button>
-          <button class="tab" onclick="setUserTab('Student')">Students</button>
-          <button class="tab" onclick="setUserTab('Instructor')">Instructors</button>
-
-          <!-- Search Box -->
-          <div class="right-buttons">
-            <div class="search-container">
-              <input type="text" placeholder="Search..." class="search-input">
-              <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
-            </div>
-          </div>
-        </div>
-
-        <!-- User List Section -->
-        <div class="user-list-wrapper">
-          <div class="dynamic-list">
-            <?php 
-              if ($result && $result->num_rows > 0) {
-                // Loop through users and display each
-                while ($row = $result->fetch_assoc()) {
-                  $displayName = htmlspecialchars($row['username']);
-                  $role = htmlspecialchars($row['userType']);
-            ?>
-            <!-- User Card -->
-            <div class="user-card" data-role="<?php echo $role; ?>">
-              <div class="user-info">
-                <i class="fas fa-user-circle"></i>
-                <div>
-                  <div><strong><?php echo $displayName; ?></strong></div>
-                  <div><?php echo $role; ?></div>
-                </div>
-              </div>
-              <a href="user-details.html" class="search-icon-link user-search">
-                <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
-              </a>
-            </div>
-            <?php 
-                }
-              } else {
-                echo "<div style='text-align:center;padding:20px;'>No users found</div>";
-              }
-
-              // Debugging Info
-              echo "<script>console.log('Number of users loaded: " . ($result ? $result->num_rows : 0) . "');</script>";
-            ?>
-          </div>
-        </div>
-      </div>
-                  
-
-      <!-- Classroom Overlay -->
-      <div id="classroomOverlay" class="user-overlay">
-        <button class="close-btn" onclick="hideOverlay('classroomOverlay')">×</button>
-        <h2 style="color: #7b0000; margin-bottom: 20px;">Classrooms</h2>
-
-        <div class="tabs">
-          <div class="right-buttons">
-            <div class="search-container">
-              <input type="text" placeholder="Search..." class="search-input">
-              <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
-            </div>
-          </div>
-        </div>
-        
-        <div class="dynamic-list">
-
-          <!-- Dynamic Classroom  Table -->
-          <?php
-            $sql = "SELECT classroom.className, users.username 
-                    FROM classroom 
-                    JOIN instructor ON classroom.instID = instructor.instID 
-                    JOIN users ON instructor.userID = users.userID;";
-            $result = $conn->query($sql);
-
-            while ($row = $result->fetch_assoc()) {
-              $className = htmlspecialchars($row['className']);
-              $creatorName = htmlspecialchars($row['username']);
-              debug_console($className);
-              debug_console($creatorName);
-          ?>
-            <div class="classroom-item">
-              <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
-              <div class="classroom-info">
-                <div class="classroom-title"><?php echo $className; ?></div>
-                <div class="classroom-creator"><?php echo $creatorName; ?></div>
-              </div>
-              <a href="classroom-details.html?classId=math4" class="search-icon-link">
-                <img src="images/Search_Icon.jpg" alt="View Classroom" class="search-image-icon">
-              </a>
-            </div>
-          <?php } ?>
-
-        </div>
+    <div class="main-content">
+      <!-- Background Main Content -->
+      <div id="backgroundContent" class="background-content">
+          Welcome, <?php echo $_SESSION['username']?>!
       </div>
 
-      
-      <!-- Modules Overlay -->
-      <div id="moduleOverlay" class="user-overlay">
-        <button class="close-btn" onclick="hideOverlay('moduleOverlay')">×</button>
-        <h2 style="color: #7b0000; margin-bottom: 20px;">Modules</h2>
+        <!-- Users Overlay -->
+        <div id="userOverlay" class="user-overlay">
+          <!-- Close Button -->
+          <button class="close-btn" onclick="hideOverlay('userOverlay')">×</button>
 
-        <div class="tabs">
-          <button class="tab active" onclick="loadModules('All', this)">All</button>
-          <button class="tab" onclick="loadModules('Partner', this)">Partner</button>
-          <button class="tab" onclick="loadModules('Classroom', this)">Classroom</button>
-        </div>
+          <!-- Title -->
+          <h2 style="color: #7b0000; margin-bottom: 20px;">Users</h2>
 
-            <!--Dynamic Module List-->
-        <div class="dynamic-list" id="moduleContainer">
+          <!-- Tabs and Search -->
+          <div class="tabs">
+            <!-- User Type Tabs -->
+            <button class="tab" onclick="setUserTab('All')">All</button>
+            <button class="tab" onclick="setUserTab('Student')">Students</button>
+            <button class="tab" onclick="setUserTab('Instructor')">Instructors</button>
 
-          <?php
-            $type = $_POST['type'] ?? 'All';
-            $sql='';
+            <!-- Search Box -->
+            <div class="right-buttons">
+              <div class="search-container">
+                <input type="text" placeholder="Search..." class="search-input">
+                <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
+              </div>
+            </div>
+          </div>
 
-            if ($type === 'Partner') {
-                $sql = "SELECT * FROM partnermodule pm 
-                        JOIN partner p ON p.partnerID = pm.partnerID 
-                        JOIN languagemodule l on l.langID = pm.langID;";
-
-            } elseif ($type === 'Classroom') {
-                $sql = "SELECT * FROM classmodule cm 
-                        join instructor i ON cm.classInstID = i.instID
-                        join users u ON i.userID = u.userID
-                        JOIN languagemodule lm ON lm.langID = cm.langID;";
-            } else {
-                $sql = "
-                  SELECT 
-                        l.langID, 
-                        l.moduleName, 
-                        p.partnerName, 
-                        'Partner'
-                    FROM partnermodule pm 
-                    JOIN partner p ON p.partnerID = pm.partnerID 
-                    JOIN languagemodule l ON l.langID = pm.langID
-
-                    UNION
-
-                    SELECT 
-                        lm.langID, 
-                        lm.moduleName, 
-                        u.username, 
-                        'Classroom'
-                    FROM classmodule cm 
-                    JOIN classinstructor ci ON cm.classInstID = ci.classInstID
-                    JOIN instructor i ON i.instID = ci.instID
-                    JOIN users u ON u.userID = i.userID
-                    JOIN languagemodule lm ON lm.langID = cm.langID;
-                    ";
-            }
-
-            $result = $conn->query($sql);
-
-            while ($row = $result->fetch_assoc()) {
-            ?>
-              <div class="module-card">
-                <img src="images/Module_Icon.jpg" alt="Module Icon" class="module-icon">
-                <div class="module-info">
-                  <div class="module-title"><?= htmlspecialchars($row['title']) ?></div>
-                  <div class="module-creator">By <?= htmlspecialchars($row['username']) ?></div>
+          <!-- User List Section -->
+          <div class="list-wrapper">
+            <div class="dynamic-list">
+              <?php 
+                if ($result && $result->num_rows > 0) {
+                  // Loop through users and display each
+                  while ($row = $result->fetch_assoc()) {
+                    $displayName = htmlspecialchars($row['username']);
+                    $role = htmlspecialchars($row['userType']);
+              ?>
+              <!-- User Card -->
+              <div class="user-card" data-role="<?php echo $role; ?>">
+                <div class="user-info">
+                  <i class="fas fa-user-circle"></i>
+                  <div>
+                    <div><strong><?php echo $displayName; ?></strong></div>
+                    <div><?php echo $role; ?></div>
+                  </div>
                 </div>
-                <a href="module-details.php?moduleId=<?= $row['moduleID'] ?>" class="search-icon-link">
-                  <img src="images/Search_Icon.jpg" alt="View Module" class="search-image-icon">
+                <a href="user-details.html" class="search-icon-link user-search">
+                  <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
                 </a>
               </div>
+              <?php 
+                  }
+                } else {
+                  echo "<div style='text-align:center;padding:20px;'>No users found</div>";
+                }
+
+                // Debugging Info
+                echo "<script>console.log('Number of users loaded: " . ($result ? $result->num_rows : 0) . "');</script>";
+              ?>
+            </div>
+          </div>
+        </div>
+                    
+
+        <!-- Classroom Overlay -->
+        <div id="classroomOverlay" class="user-overlay">
+          <button class="close-btn" onclick="hideOverlay('classroomOverlay')">×</button>
+          <h2 style="color: #7b0000; margin-bottom: 20px;">Classrooms</h2>
+
+          <div class="tabs">
+            <div class="right-buttons">
+              <div class="search-container">
+                <input type="text" placeholder="Search..." class="search-input">
+                <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
+              </div>
+            </div>
+          </div>
+          <div class="list-wrapper">
+            <div class="dynamic-list">
+
+              <!-- Dynamic Classroom  Table -->
+              <?php
+                $sql = "SELECT classroom.className, users.username 
+                        FROM classroom 
+                        JOIN instructor ON classroom.instID = instructor.instID 
+                        JOIN users ON instructor.userID = users.userID;";
+                $result = $conn->query($sql);
+
+                while ($row = $result->fetch_assoc()) {
+                  $className = htmlspecialchars($row['className']);
+                  $creatorName = htmlspecialchars($row['username']);
+                  debug_console($className);
+                  debug_console($creatorName);
+              ?>
+                <div class="classroom-item">
+                  <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
+                  <div class="classroom-info">
+                    <div class="classroom-title"><?php echo $className; ?></div>
+                    <div class="classroom-creator"><?php echo $creatorName; ?></div>
+                  </div>
+                  <a href="classroom-details.html?classId=math4" class="search-icon-link">
+                    <img src="images/Search_Icon.jpg" alt="View Classroom" class="search-image-icon">
+                  </a>
+                </div>
+              <?php } ?>
+            </div>
+          </div>
+        </div>
+
+        
+        <!-- Modules Overlay -->
+        <div id="moduleOverlay" class="user-overlay">
+          <button class="close-btn" onclick="hideOverlay('moduleOverlay')">×</button>
+          <h2 style="color: #7b0000; margin-bottom: 20px;">Modules</h2>
+
+          <div class="tabs">
+            <button class="tab active" onclick="loadModules('All', this)">All</button>
+            <button class="tab" onclick="loadModules('Partner', this)">Partner</button>
+            <button class="tab" onclick="loadModules('Classroom', this)">Classroom</button>
+          </div>
+
+              <!--Dynamic Module List-->
+          <div class="list-wrapper">
+            <div class="dynamic-list" id="moduleContainer">
+                <!-- Loading Modules -->
+            </div>
+          </div>
+        </div>
+        
+
+        <!-- Partners Overlay -->
+        <div id="partnersOverlay" class="user-overlay">
+          <button class="close-btn" onclick="hideOverlay('partnersOverlay')">x</button>
+          <h2 style="color: #7b0000; margin-bottom: 20px;">Partners</h2>
+          
+          <div class="tabs">
+            <button class="tab active">Partners</button>
+            <button class="tab" onclick="toggleCreatePartnersOverlay()">New</button>
+            <div class="right-buttons">
+              <div class="search-container">
+                <input type="text" placeholder="Search..." class="search-input">
+                <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Partner Dynamic Table-->
+          <div class="list-wrapper">
+            <div class="dynamic-list">
             <?php
-            }
-            ?>
+                $sql = "SELECT * FROM partner";
+                $result = $conn->query($sql);
 
-        </div>
-      </div>
-      
-
-      <!-- Partners Overlay -->
-      <div id="partnersOverlay" class="user-overlay">
-        <button class="close-btn" onclick="hideOverlay('partnersOverlay')">x</button>
-        <h2 style="color: #7b0000; margin-bottom: 20px;">Partners</h2>
-        
-        <div class="tabs">
-          <button class="tab active">Partners</button>
-          <button class="tab" onclick="toggleCreatePartnersOverlay()">New</button>
-          <div class="right-buttons">
-            <div class="search-container">
-              <input type="text" placeholder="Search..." class="search-input">
-              <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Partner Dynamic Table-->
-        <div class="partners-list">
-        <?php
-            $sql = "SELECT * FROM partner";
-            $result = $conn->query($sql);
-
-            while ($row = $result->fetch_assoc()) {
-              $partnerName = htmlspecialchars($row['partnerName']);
-              $partnerEmail = htmlspecialchars($row['email']);
-          ?>
-            <div class="partners-card">
-            <img src="images/Partners_Icon.jpg" alt="Partners Icon" class="partners-icon">
-            <div class="partners-info">
-              <div class="partners-title"><?php echo $partnerName?></div>
-              <div class="partners-role"><?php echo $partnerEmail?></div>
-            </div>
-            <a href="partners-details.html?partnersId=DepEd" class="search-icon-link">
-              <img src="images/Search_Icon.jpg" alt="View Partners" class="search-image-icon">
-            </a>
-          </div>
-          <?php } ?>
-        </div>
-        
-            <!-- Partner Creation-->
-        <div id="createPartnersOverlay" class="create-overlay">
-          <button class="close-btn" onclick="hideCreateOverlay('createPartnersOverlay')">×</button>
-          <h2 style="color: #7b0000; margin-bottom: 20px;">Create a Partner</h2>
-
-          <div class="create-list">
-            <form action="" method="post">
-              <div class="create-item1">
-                <div class="create-info">
-                  <label for="partnerName">Partner Name:</label>
-                  <input type="text" id="partnerName" name="partnerName" placeholder="Partner Name" required>
+                while ($row = $result->fetch_assoc()) {
+                  $partnerName = htmlspecialchars($row['partnerName']);
+                  $partnerEmail = htmlspecialchars($row['email']);
+              ?>
+                <div class="partners-card">
+                <img src="images/Partners_Icon.jpg" alt="Partners Icon" class="partners-icon">
+                <div class="partners-info">
+                  <div class="partners-title"><?php echo $partnerName?></div>
+                  <div class="partners-role"><?php echo $partnerEmail?></div>
                 </div>
+                <a href="partners-details.html?partnersId=DepEd" class="search-icon-link">
+                  <img src="images/Search_Icon.jpg" alt="View Partners" class="search-image-icon">
+                </a>
               </div>
+              <?php } ?>
+            </div>
+          </div>
+
+          <!-- Partner Creation-->
+          <div id="createPartnersOverlay" class="create-overlay">
+            <button class="close-btn" onclick="hideCreateOverlay('createPartnersOverlay')">×</button>
+            <h2 style="color: #7b0000; margin-bottom: 20px;">Create a Partner</h2>
+
+            <div class="create-list">
+              <form action="" method="post">
                 <div class="create-item1">
-                <div class="create-info">
-                  <label for="partnerContact">Contact Number:</label>
-                  <input type="tel" id="partnerContact" name="partnerContact" placeholder="Contact Number" required>
+                  <div class="create-info">
+                    <label for="partnerName">Partner Name:</label>
+                    <input type="text" id="partnerName" name="partnerName" placeholder="Partner Name" required>
+                  </div>
                 </div>
-              </div>
-              <div class="create-item1">
-                <div class="create-info">
-                  <label for="partnerEmail">Email:</label>
-                  <input type="email" id="partnerEmail" name="partnerEmail" placeholder="Partner Email" required>
+                  <div class="create-item1">
+                  <div class="create-info">
+                    <label for="partnerContact">Contact Number:</label>
+                    <input type="tel" id="partnerContact" name="partnerContact" placeholder="Contact Number" required>
+                  </div>
                 </div>
-              </div>
-              <div class="create-item2">
-                <div class="create-info">
-                  <label for="partnerDesc">Partner Description:</label>
-                  <textarea id="partnerDesc" name="partnerDesc" placeholder="Partner Description" required></textarea>
+                <div class="create-item1">
+                  <div class="create-info">
+                    <label for="partnerEmail">Email:</label>
+                    <input type="email" id="partnerEmail" name="partnerEmail" placeholder="Partner Email" required>
+                  </div>
                 </div>
-              </div>
-              <div class="create-SC">
-                <button class="creates" type="submit" name="createPartner">Create</button>
-                <button class="creates" onclick="hideCreateOverlay('createPartnersOverlay')">Cancel</button>
-              </div>
-            </form>
+                <div class="create-item2">
+                  <div class="create-info">
+                    <label for="partnerDesc">Partner Description:</label>
+                    <textarea id="partnerDesc" name="partnerDesc" placeholder="Partner Description" required></textarea>
+                  </div>
+                </div>
+                <div class="create-SC">
+                  <button class="creates" type="submit" name="createPartner">Create</button>
+                  <button class="creates" onclick="hideCreateOverlay('createPartnersOverlay')">Cancel</button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>
