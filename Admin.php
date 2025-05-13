@@ -619,34 +619,6 @@ $total_users = $result ? $result->num_rows : 0;
 
         <!-- User List Section -->
         <div class="user-list-wrapper">
-          <div class="scrollable-user-list">
-            <div class="user-list">
-              <?php 
-                if ($result && $result->num_rows > 0) {
-                  // Loop through users and display each
-                  while ($row = $result->fetch_assoc()) {
-                    $displayName = htmlspecialchars($row['username']);
-                    $role = htmlspecialchars($row['userType']);
-              ?>
-              <!-- User Card -->
-              <div class="user-card" data-role="<?php echo $role; ?>">
-                <div class="user-info">
-                  <i class="fas fa-user-circle"></i>
-                  <div>
-                    <div><strong><?php echo $displayName; ?></strong></div>
-                    <div><?php echo $role; ?></div>
-                  </div>
-                </div>
-                <a href="user-details.html" class="search-icon-link user-search">
-                  <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
-                </a>
-              </div>
-              <?php 
-                  }
-                } else {
-                  echo "<div style='text-align:center;padding:20px;'>No users found</div>";
-                }
-                ?>
           <div class="dynamic-list">
             <?php 
               if ($result && $result->num_rows > 0) {
@@ -674,11 +646,6 @@ $total_users = $result ? $result->num_rows : 0;
                 echo "<div style='text-align:center;padding:20px;'>No users found</div>";
               }
 
-                // Debugging Info
-                echo "<script>console.log('Number of users loaded: " . ($result ? $result->num_rows : 0) . "');</script>";
-              ?>
-            </div>
-          </div>
               // Debugging Info
               echo "<script>console.log('Number of users loaded: " . ($result ? $result->num_rows : 0) . "');</script>";
             ?>
