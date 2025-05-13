@@ -237,7 +237,21 @@ $total_users = $result ? $result->num_rows : 0;
       background: #f1f1f1;
       z-index: 10;
       padding: 20px;
-      overflow-y: auto;
+      overflow:hidden;
+    }
+
+    .user-list-wrapper {
+      flex: 1;
+      height: 100%;
+      padding-bottom: 15px;
+    }
+
+    .dynamic-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100%;
+      overflow-y: scroll;
     }
 
     .user-overlay.show {
@@ -287,14 +301,6 @@ $total_users = $result ? $result->num_rows : 0;
       border-bottom: 2px solid #7b0000;
     }
 
-    .dynamic-list{
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      overflow-y: scroll;
-    }
-
     .user-card {
       background: #e0e0e0;
       padding: 10px 15px;
@@ -312,13 +318,6 @@ $total_users = $result ? $result->num_rows : 0;
 
     .user-info i {
       font-size: 24px;
-    }
-
-    .scrollable-user-list {
-      max-height: 750px; /* or whatever height you want */
-      overflow-y: auto;
-      
-      padding-right: 10px; /* add padding to avoid scrollbar overlap */
     }
 
 
