@@ -242,8 +242,7 @@ $total_users = $result ? $result->num_rows : 0;
 
     .user-list-wrapper {
       flex: 1;
-      height: 100%;
-      padding-bottom: 15px;
+      height: 720px;
     }
 
     .dynamic-list {
@@ -659,8 +658,6 @@ $total_users = $result ? $result->num_rows : 0;
         <h2 style="color: #7b0000; margin-bottom: 20px;">Classrooms</h2>
 
         <div class="tabs">
-          <button class="tab active">All</button>
-          <button class="tab">Partner</button>
           <div class="right-buttons">
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
