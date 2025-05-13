@@ -235,14 +235,21 @@
     /* Tabs */
     .tabs { 
       display: flex;
+      flex-direction: row;
       gap: 20px;
       margin-bottom: 10px;
+      width: 100%;
     }
 
     .right-buttons {
     display: flex;
+    flex-direction: row;
     gap: 10px;
     margin-left: auto; 
+    }
+
+    .left-buttons{
+      
     }
 
     .create-SC .creates{
@@ -257,7 +264,7 @@
       font-size: 20px;
     }
 
-    .tabs .tab {
+    .tab {
       background: none;
       border: none;
       color: #7b0000;
@@ -480,15 +487,21 @@
         <h2 style="color: #7b0000; margin-bottom: 20px;">Classrooms</h2>
 
         <div class="tabs">
-        <button class="tab" onclick="setUserTab('All')">All</button>
-        <button class="tab" onclick="setUserTab('Student')">Students</button>
-          <button class="tab" onclick="toggleCreateOverlay()">Create</button>
+
+          <div class="left-buttons">
+            <button class="tab" onclick="setUserTab('All')">All</button>
+            <button class="tab" onclick="setUserTab('Joinable')">Joinable</button>
+            <button class="tab" onclick="setUserTab('Owned')">Owned</button>
+          </div>
+
           <div class="right-buttons">
+            <button class="tab" onclick="toggleCreateOverlay()">Create Classroom</button>
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
               <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
             </div>
           </div>
+
         </div>
         
         <div class="classroom-list">
