@@ -43,9 +43,12 @@
             debug_console('wrong credentials');
             $_SESSION['loginError'] = true;
         }
+        
         else{
             // else save account details to session
             $_SESSION['userID'] = $userID =  $account['userID'];
+            $_SESSION['username'] = $account['username'];
+            $_SESSION['email'] = $account['email'];
             $accountRole = $account['userType'];
             debug_console('Check role');
 

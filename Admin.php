@@ -22,6 +22,21 @@
   // Fetch all users
 $sql = "SELECT * FROM users";
 $result = $conn->query($sql);
+  // Setup
+  $items_per_page = 10;
+  $current_page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+  $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+  $search_param = "%" . $conn->real_escape_string($search) . "%";
+
+  // Filter clause
+  $where_clause = "usertype IN ('Student', 'Instructor')";
+  if (!empty($search)) {
+      $where_clause .= " AND username LIKE '$search_param'";
+  }
+
+  // Fetch matching users
+  $sql = "SELECT * FROM users WHERE $where_clause";
+  $result = $conn->query($sql);
 
 // Optional: Count total users (if you still need it)
 $total_users = $result ? $result->num_rows : 0;
@@ -192,19 +207,22 @@ $total_users = $result ? $result->num_rows : 0;
 
     .background-content {
       background-image: url('images/USeP_eagle.jpg');
-      opacity: 70%;
+      background-color: rgb(255, 255, 255, 0.25);
+      background-blend-mode: lighten;
+
       background-size: cover;
       background-position: center;
+
       height: 100%;
       width: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
-      color: white;
-      font-size: 24px;
+      color:rgb(255, 255, 255);
+      font-size: 35px;
       font-family: 'Goudy Bookletter 1911', serif;
       font-style: italic;
-      font-weight: bold;
+      font-weight: bolder;
       
     }
 
@@ -269,11 +287,12 @@ $total_users = $result ? $result->num_rows : 0;
       border-bottom: 2px solid #7b0000;
     }
 
-    .user-list {
+    .dynamic-list{
       flex-grow: 1;
       display: flex;
       flex-direction: column;
       gap: 10px;
+      overflow-y: scroll;
     }
 
     .user-card {
@@ -333,7 +352,6 @@ $total_users = $result ? $result->num_rows : 0;
       transition: width 0.3s ease, padding 0.3s ease, border 0.3s ease;
     }
 
-
     .search-image-icon {
       width: 35px;
       height: 35px;
@@ -345,12 +363,6 @@ $total_users = $result ? $result->num_rows : 0;
 
     .search-image-icon:hover {
       transform: scale(1.1);
-    }
-
-    .classroom-list {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
     }
 
     .classroom-item {
@@ -391,12 +403,6 @@ $total_users = $result ? $result->num_rows : 0;
       cursor: pointer;
     }
 
-    .module-list {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
     .module-card {
       background-color: #e0e0e0;
       padding: 15px 20px;
@@ -427,12 +433,6 @@ $total_users = $result ? $result->num_rows : 0;
     .module-creator {
       font-size: 14px;
       color: #444;
-    }
-
-    .partners-list {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
     }
 
     .partners-card {
@@ -590,7 +590,7 @@ $total_users = $result ? $result->num_rows : 0;
   <div class="main-content">
     <!-- Background Main Content -->
     <div id="backgroundContent" class="background-content">
-        Welcome to the Admin Dashboard
+        Welcome, <?php echo $_SESSION['username']?>!
     </div>
 
       <!-- Users Overlay -->
@@ -646,11 +646,41 @@ $total_users = $result ? $result->num_rows : 0;
                 } else {
                   echo "<div style='text-align:center;padding:20px;'>No users found</div>";
                 }
+          <div class="dynamic-list">
+            <?php 
+              if ($result && $result->num_rows > 0) {
+                // Loop through users and display each
+                while ($row = $result->fetch_assoc()) {
+                  $displayName = htmlspecialchars($row['username']);
+                  $role = htmlspecialchars($row['userType']);
+            ?>
+            <!-- User Card -->
+            <div class="user-card" data-role="<?php echo $role; ?>">
+              <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <div>
+                  <div><strong><?php echo $displayName; ?></strong></div>
+                  <div><?php echo $role; ?></div>
+                </div>
+              </div>
+              <a href="user-details.html" class="search-icon-link user-search">
+                <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
+              </a>
+            </div>
+            <?php 
+                }
+              } else {
+                echo "<div style='text-align:center;padding:20px;'>No users found</div>";
+              }
 
                 // Debugging Info
                 echo "<script>console.log('Number of users loaded: " . ($result ? $result->num_rows : 0) . "');</script>";
               ?>
             </div>
+          </div>
+              // Debugging Info
+              echo "<script>console.log('Number of users loaded: " . ($result ? $result->num_rows : 0) . "');</script>";
+            ?>
           </div>
         </div>
       </div>
@@ -672,7 +702,7 @@ $total_users = $result ? $result->num_rows : 0;
           </div>
         </div>
         
-        <div class="classroom-list">
+        <div class="dynamic-list">
 
           <!-- Dynamic Classroom  Table -->
           <?php
@@ -699,6 +729,7 @@ $total_users = $result ? $result->num_rows : 0;
               </a>
             </div>
           <?php } ?>
+
         </div>
       </div>
 
@@ -714,10 +745,68 @@ $total_users = $result ? $result->num_rows : 0;
           <button class="tab" onclick="loadModules('Classroom', this)">Classroom</button>
         </div>
 
-        <div class="module-list" id="moduleContainer">
-          <!-- Modules will load here -->
+            <!--Dynamic Module List-->
+        <div class="dynamic-list" id="moduleContainer">
+
+          <?php
+            $type = $_POST['type'] ?? 'All';
+            $sql='';
+
+            if ($type === 'Partner') {
+                $sql = "SELECT * FROM partnermodule pm 
+                        JOIN partner p ON p.partnerID = pm.partnerID 
+                        JOIN languagemodule l on l.langID = pm.langID;";
+
+            } elseif ($type === 'Classroom') {
+                $sql = "SELECT * FROM classmodule cm 
+                        join instructor i ON cm.classInstID = i.instID
+                        join users u ON i.userID = u.userID
+                        JOIN languagemodule lm ON lm.langID = cm.langID;";
+            } else {
+                $sql = "
+                  SELECT 
+                        l.langID, 
+                        l.moduleName, 
+                        p.partnerName, 
+                        'Partner'
+                    FROM partnermodule pm 
+                    JOIN partner p ON p.partnerID = pm.partnerID 
+                    JOIN languagemodule l ON l.langID = pm.langID
+
+                    UNION
+
+                    SELECT 
+                        lm.langID, 
+                        lm.moduleName, 
+                        u.username, 
+                        'Classroom'
+                    FROM classmodule cm 
+                    JOIN classinstructor ci ON cm.classInstID = ci.classInstID
+                    JOIN instructor i ON i.instID = ci.instID
+                    JOIN users u ON u.userID = i.userID
+                    JOIN languagemodule lm ON lm.langID = cm.langID;
+                    ";
+            }
+
+            $result = $conn->query($sql);
+
+            while ($row = $result->fetch_assoc()) {
+            ?>
+              <div class="module-card">
+                <img src="images/Module_Icon.jpg" alt="Module Icon" class="module-icon">
+                <div class="module-info">
+                  <div class="module-title"><?= htmlspecialchars($row['title']) ?></div>
+                  <div class="module-creator">By <?= htmlspecialchars($row['username']) ?></div>
+                </div>
+                <a href="module-details.php?moduleId=<?= $row['moduleID'] ?>" class="search-icon-link">
+                  <img src="images/Search_Icon.jpg" alt="View Module" class="search-image-icon">
+                </a>
+              </div>
+            <?php
+            }
+            ?>
+
         </div>
-        
       </div>
       
 
@@ -737,6 +826,7 @@ $total_users = $result ? $result->num_rows : 0;
           </div>
         </div>
 
+        <!-- Partner Dynamic Table-->
         <div class="partners-list">
         <?php
             $sql = "SELECT * FROM partner";
@@ -758,7 +848,8 @@ $total_users = $result ? $result->num_rows : 0;
           </div>
           <?php } ?>
         </div>
-
+        
+            <!-- Partner Creation-->
         <div id="createPartnersOverlay" class="create-overlay">
           <button class="close-btn" onclick="hideCreateOverlay('createPartnersOverlay')">×</button>
           <h2 style="color: #7b0000; margin-bottom: 20px;">Create a Partner</h2>
@@ -801,6 +892,11 @@ $total_users = $result ? $result->num_rows : 0;
 
 
   <script>
+
+  const lastOpened = "";
+
+
+
   // On Webpage Load
   window.addEventListener('DOMContentLoaded', () => {
     setUserTab('All');
@@ -808,18 +904,21 @@ $total_users = $result ? $result->num_rows : 0;
   });
 
 
-  function toggleLogoutDropdown() {
+
+  // ------------------------- Logout Dropdown
+  function toggleLogoutDropdown() { 
     const dropdown = document.getElementById('logoutDropdown');
     dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
   }
 
-  document.addEventListener('click', function (e) {
+  document.addEventListener('click', function (e) { 
     const profileContainer = document.querySelector('.profile-container');
     const dropdown = document.getElementById('logoutDropdown');
     if (!profileContainer.contains(e.target)) {
       dropdown.style.display = 'none';
     }
   });
+
 
   function showOverlay(targetId) {
     const overlays = ['userOverlay', 'classroomOverlay',  'moduleOverlay', 'partnersOverlay'];
@@ -983,7 +1082,7 @@ function closeInput(input) {
       window.history.replaceState({}, '', url);
     }
   }
-
+  
   function loadModules(type, clickedBtn) {
     // Remove 'active' from all tabs
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
