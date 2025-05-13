@@ -19,14 +19,6 @@
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
   }
-  // Fetch all users
-$sql = "SELECT * FROM users";
-$result = $conn->query($sql);
-  // Setup
-  $items_per_page = 10;
-  $current_page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-  $search = isset($_GET['search']) ? trim($_GET['search']) : '';
-  $search_param = "%" . $conn->real_escape_string($search) . "%";
 
   // Filter clause
   $where_clause = "usertype IN ('Student', 'Instructor')";
@@ -346,6 +338,11 @@ $total_users = $result ? $result->num_rows : 0;
       z-index: 1;
     }
 
+    .view-card{
+      border: none;
+      background: none;
+    }
+
     .search-input {
       transition: width 0.3s ease, padding 0.3s ease, border 0.3s ease;
     }
@@ -619,33 +616,33 @@ $total_users = $result ? $result->num_rows : 0;
           <div class="list-wrapper">
             <div class="dynamic-list">
               <?php 
+
+                $sql = "SELECT * FROM users";
+                $result = $conn->query($sql);
+
                 if ($result && $result->num_rows > 0) {
                   // Loop through users and display each
                   while ($row = $result->fetch_assoc()) {
                     $displayName = htmlspecialchars($row['username']);
                     $role = htmlspecialchars($row['userType']);
               ?>
-              <!-- User Card -->
-              <div class="user-card" data-role="<?php echo $role; ?>">
-                <div class="user-info">
-                  <i class="fas fa-user-circle"></i>
-                  <div>
-                    <div><strong><?php echo $displayName; ?></strong></div>
-                    <div><?php echo $role; ?></div>
-                  </div>
-                </div>
-                <a href="user-details.html" class="search-icon-link user-search">
-                  <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
-                </a>
-              </div>
+                    <div class="user-card" data-role="<?php echo $role; ?>">
+                      <div class="user-info">
+                        <i class="fas fa-user-circle"></i>
+                        <div>
+                          <div><strong><?php echo $displayName; ?></strong></div>
+                          <div><?php echo $role; ?></div>
+                        </div>
+                      </div>
+                      <button class="view-card">
+                        <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
+                      </button>
+                    </div>
               <?php 
                   }
                 } else {
                   echo "<div style='text-align:center;padding:20px;'>No users found</div>";
                 }
-
-                // Debugging Info
-                echo "<script>console.log('Number of users loaded: " . ($result ? $result->num_rows : 0) . "');</script>";
               ?>
             </div>
           </div>
@@ -670,7 +667,7 @@ $total_users = $result ? $result->num_rows : 0;
 
               <!-- Dynamic Classroom  Table -->
               <?php
-                $sql = "SELECT classroom.className, users.username 
+                $sql = "SELECT *
                         FROM classroom 
                         JOIN instructor ON classroom.instID = instructor.instID 
                         JOIN users ON instructor.userID = users.userID;";
