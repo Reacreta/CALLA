@@ -646,6 +646,7 @@ $total_users = $result ? $result->num_rows : 0;
                 } else {
                   echo "<div style='text-align:center;padding:20px;'>No users found</div>";
                 }
+                ?>
           <div class="dynamic-list">
             <?php 
               if ($result && $result->num_rows > 0) {
