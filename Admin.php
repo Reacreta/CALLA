@@ -588,7 +588,7 @@ $total_users = $result ? $result->num_rows : 0;
     <div class="main-content">
       <!-- Background Main Content -->
       <div id="backgroundContent" class="background-content">
-          Welcome, <?php echo $_SESSION['username']?>!
+          Welcome, <?php echo $_SESSION['username']?> !
       </div>
 
         <!-- Users Overlay -->
