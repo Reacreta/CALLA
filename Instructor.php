@@ -98,10 +98,24 @@
       justify-content: space-between;
       align-items: center;
     }
+    .title{
+      display: flex;
+      flex-direction: row;
+    }
 
-    .header .title {
-      font-size: 28px;
+    .title #role{
+      display: flex;
+      align-items: end;
+    }
+
+    .title #role span{
+      font-size: 35px;
       font-family: 'Goudy Bookletter 1911', serif;
+    }
+
+    .title #logo{
+      height: 70px;
+      width: auto;
     }
 
     .header .title span {
@@ -229,7 +243,7 @@
 
 
     /* OVERLAYS */
-    .user-overlay { 
+    .module-overlay { 
       display: none;
       position: absolute;
       top: 0;
@@ -242,7 +256,7 @@
       overflow-y: auto;
     }
     
-    .user-overlay.show, .create-overlay.show {
+    .module-overlay.show, .create-overlay.show {
       display: block;
     }
 
@@ -501,7 +515,7 @@
 
 <body>
   <div class="header">
-    <div class="title">CALLA <span>instructor</span></div>
+    <div class="title"><img id="logo" src="images/logo.png"><div id="role"><span>INSTRUCTOR</span></div></div>
     <div class="profile-container" onclick="toggleLogoutDropdown()">
       <div class="profile-pic" style="background-image: url('images/profile.jpg');"></div>
       <div class="logout-dropdown" id="logoutDropdown">
@@ -525,7 +539,7 @@
       </div>
 
       <!-- Classroom Overlay -->
-      <div id="classroomOverlay" class="user-overlay">
+      <div id="classroomOverlay" class="module-overlay" overlay-type="classroom">
         <button class="close-btn" onclick="hideOverlay('classroomOverlay')">×</button>
         <h2 style="color: #7b0000; margin-bottom: 20px;">Classrooms</h2>
 
@@ -570,7 +584,7 @@
             // Not Joinable 
             if($res->num_rows == 1){ // if query 
         ?>
-              <div class="classroom-card" class-type = "Joinable">
+              <div class="classroom-card" class-type = "joinable">
                 <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
                 <div class="classroom-info">
                   <div class="classroom-title"><?php echo $className; ?></div>
@@ -582,7 +596,7 @@
             }
             else{
         ?>
-            <div class="classroom-card" class-type = "Owned">
+            <div class="classroom-card" class-type = "owned">
                 <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
                 <div class="classroom-info">
                   <div class="classroom-title"><?php echo $className; ?></div>
@@ -631,10 +645,8 @@
 
         </div> <!-- End Classroom Creation-->
 
-
-
       <!-- Modules Overlay -->
-      <div id="moduleOverlay" class="user-overlay">
+      <div id="moduleOverlay" class="module-overlay" overlay-type ="module">
         <button class="close-btn" onclick="hideOverlay('moduleOverlay')">×</button>
         <h2 style="color: #7b0000; margin-bottom: 20px;">Modules</h2>
 
@@ -717,16 +729,33 @@
   });
 
   function toggleSearch(label) {
+    // get container and input field
     const container = label.closest('.search-container');
     const input = container.querySelector('.search-input');
+    // get overlay-type
+    const overlay = label.closest('[overlay-type]');
+    const overlayType = overlay ? overlay.getAttribute('overlay-type') : null;
+    // check bool for expanded
     const isOpen = input.style.width === '200px';
 
+    // flex function inherit
+    const functionMap = {
+      "classroom": searchClassroom,
+      "module": searchModule
+    };
+
+    const flexSearch = functionMap[overlayType];
+
     if (isOpen) {
-      closeInput(input);
+      if (input.value.trim()) {
+        flexSearch(input.value);
+      } else {
+        closeInput(input);
+      }
     } else {
       openInput(input);
 
-      // Outside click handler
+      // Handle outside click
       document.addEventListener('click', function handleOutsideClick(e) {
         if (!container.contains(e.target)) {
           closeInput(input);
@@ -734,16 +763,68 @@
         }
       });
 
-      // Listen for Enter key
-      input.addEventListener('keydown', function handleKey(e) {
+      // Enter key handler
+      const handleKey = function(e) {
         if (e.key === 'Enter') {
           e.preventDefault();
-          console.log(input.value); 
-          closeInput(input);
-          input.removeEventListener('keydown', handleKey); 
+          flexSearch(input.value);
+          input.removeEventListener('keydown', handleKey);
         }
+      };
+      input.addEventListener('keydown', handleKey);
+
+      // Real-time filtering
+      input.addEventListener('input', function () {
+        flexSearch(input.value);
       });
     }
+  }
+
+  function searchClassroom(query) {
+    const activeTabElement = document.querySelector('#classroomOverlay .tab.active');
+    const cards = document.querySelectorAll('.classroom-card');
+    const searchValue = query.toLowerCase();
+
+    // Normalize tab name
+    let activeTab = activeTabElement ? activeTabElement.textContent.trim().toLowerCase() : 'all';
+    if (activeTab.endsWith('s') && activeTab !== 'all') {
+      activeTab = activeTab.slice(0, -1); // remove trailing 's' for matching
+    }
+
+    cards.forEach(card => {
+      const className = card.querySelector('.classroom-title').textContent.toLowerCase();
+      const type = card.getAttribute('class-type').toLowerCase();
+
+      const matchesSearch = className.includes(searchValue);
+      const matchesTab = (activeTab === 'all') || (role === activeTab);
+
+      card.style.display = (matchesSearch && matchesTab) ? 'flex' : 'none';
+    });
+  }
+
+  function searchModule(query){
+    const cards = document.querySelectorAll('.module-card');
+    const searchValue = query.toLowerCase();
+
+    cards.forEach(card => {
+      const moduleName = card.querySelector('.module-title').textContent.toLowerCase();
+      const matchesSearch = moduleName.includes(searchValue);
+      card.style.display = (matchesSearch) ? 'flex' : 'none';
+    });
+  }
+  function openInput(input) {
+    input.style.width = '200px';
+    input.style.padding = '10px';
+    input.style.border = '1px solid #ccc';
+    input.style.borderRadius = '20px';
+    input.focus();
+  }
+
+  function closeInput(input) {
+    input.style.width = '0';
+    input.style.padding = '0';
+    input.style.border = 'none';
+    input.value = '';
   }
 
   
@@ -781,20 +862,6 @@
     }
   }
 
-  function openInput(input) {
-    input.style.width = '200px';
-    input.style.padding = '10px';
-    input.style.border = '1px solid #ccc';
-    input.style.borderRadius = '20px';
-    input.focus();
-  }
-
-  function closeInput(input) {
-    input.style.width = '0';
-    input.style.padding = '0';
-    input.style.border = 'none';
-    input.value = '';
-  }
 
   function showOverlay(targetId, backgroundId = null) {
     const overlays = ['classroomOverlay', 'moduleOverlay', 'createOverlay'];
@@ -843,19 +910,6 @@
   showOverlay('createOverlay', 'classroomOverlay');
   }
 
-  function setUserTab(role) {
-    const cards = document.querySelectorAll('.user-card');
-    const tabs = document.querySelectorAll('.tab');
-
-    cards.forEach(card => {
-      const cardRole = card.getAttribute('data-role');
-      card.style.display = (role === 'All' || cardRole === role) ? 'flex' : 'none';
-    });
-
-    tabs.forEach(tab => tab.classList.remove('active'));
-    const activeTab = Array.from(tabs).find(t => t.textContent === role);
-    if (activeTab) activeTab.classList.add('active');
-  }
 
   // Automatically select "All" when the page loads
   window.addEventListener('DOMContentLoaded', () => {
