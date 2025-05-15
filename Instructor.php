@@ -317,7 +317,7 @@
       gap: 15px;
     }
 
-    .classroom-item {
+    .classroom-card {
       background-color: #e0e0e0;
       padding: 15px 20px;
       border-radius: 12px;
@@ -530,11 +530,10 @@
         <h2 style="color: #7b0000; margin-bottom: 20px;">Classrooms</h2>
 
         <div class="tabs">
-
           <div class="left-buttons">
-            <button class="tab" onclick="setUserTab('All')">All</button>
-            <button class="tab" onclick="setUserTab('Joinable')">Joinable</button>
-            <button class="tab" onclick="setUserTab('Owned')">Owned</button>
+            <button class="tab active" onclick="setClassFilter('All')">All</button>
+            <button class="tab" onclick="setClassFilter('Joinable')">Joinable</button>
+            <button class="tab" onclick="setClassFilter('Owned')">Owned</button>
           </div>
 
           <div class="right-buttons">
@@ -549,29 +548,54 @@
         
         <div class="classroom-list">
         <?php
-            $sql = "SELECT classroom.className, users.username 
-                    FROM classroom 
-                    JOIN instructor ON classroom.instID = instructor.instID 
-                    JOIN users ON instructor.userID = users.userID;";
-            $result = $conn->query($sql);
+          $sql = "SELECT classroom.className, users.username, instructor.instID 
+                  FROM classroom 
+                  JOIN classinstructor ON classinstructor.classroomID = classroom.classroomID
+                  JOIN instructor ON classinstructor.instID = instructor.instID 
+                  JOIN users ON instructor.userID = users.userID;";
+          $result = $conn->query($sql);
 
-            while ($row = $result->fetch_assoc()) {
-              $className = htmlspecialchars($row['className']);
-              $creatorName = htmlspecialchars($row['username']);
-              debug_console($className);
-              debug_console($creatorName);
-          ?>
-            <div class="classroom-item">
-              <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
-              <div class="classroom-info">
-                <div class="classroom-title"><?php echo $className; ?></div>
-                <div class="classroom-creator"><?php echo $creatorName; ?></div>
+          while ($row = $result->fetch_assoc()) {
+            $className = htmlspecialchars($row['className']);
+            $creatorName = htmlspecialchars($row['username']);
+            $instID = htmlspecialchars($row['instID']);
+            
+            // Check if joinable
+            $sql = "SELECT * FROM classinstructor ci WHERE ci.instID = ?;";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('s',$instID);
+            $stmt->execute();
+            $res = $stmt->get_result();
+
+            // Not Joinable 
+            if($res->num_rows == 1){ // if query 
+        ?>
+              <div class="classroom-card" class-type = "Joinable">
+                <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
+                <div class="classroom-info">
+                  <div class="classroom-title"><?php echo $className; ?></div>
+                  <div class="classroom-creator"><?php echo $creatorName; ?></div>
+                </div>
+                <Button>Join</Button>
               </div>
-              <a href="classroom-details.html?classId=math4" class="search-icon-link">
-                <img src="images/Search_Icon.jpg" alt="View Classroom" class="search-image-icon">
-              </a>
-            </div>
-          <?php } ?>
+        <?php 
+            }
+            else{
+        ?>
+            <div class="classroom-card" class-type = "Owned">
+                <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
+                <div class="classroom-info">
+                  <div class="classroom-title"><?php echo $className; ?></div>
+                  <div class="classroom-creator"><?php echo $creatorName; ?></div>
+                </div>
+                <div class="search-icon-link user-search" onclick="showClassDetails(this)">
+                  <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
+                </div>
+              </div>
+        <?php
+            }
+        }
+        ?>
         </div>
 
       </div> <!-- End Classroom Overlay -->
@@ -722,6 +746,41 @@
     }
   }
 
+  
+  function setClassFilter(typeFilter) {
+    const cards = document.querySelectorAll('.classroom-card');
+    const tabs = document.querySelectorAll('#classroomOverlay .tab');
+    const searchInput = document.querySelector('#classroomOverlay .search-input');
+
+    // Update tab styling
+    tabs.forEach(tab => {
+      if (tab.textContent.trim() === typeFilter) {
+        tab.classList.add('active');
+        tab.focus(); // This will apply the focus styling
+      } else {
+        tab.classList.remove('active');
+      }
+    });
+
+    // Clear any active search
+    if (searchInput) {
+      searchInput.value = '';
+      if (typeof closeInput === 'function') {
+        closeInput(searchInput);
+      }
+    }
+
+    // Filter cards based on typeFilter
+    if (typeFilter === 'All') {
+      cards.forEach(card => card.style.display = 'flex');
+    } else {
+      cards.forEach(card => {
+        const cardType = card.getAttribute('class-type');
+        card.style.display = (cardType === typeFilter) ? 'flex' : 'none';
+      });
+    }
+  }
+
   function openInput(input) {
     input.style.width = '200px';
     input.style.padding = '10px';
@@ -737,7 +796,7 @@
     input.value = '';
   }
 
-    function showOverlay(targetId, backgroundId = null) {
+  function showOverlay(targetId, backgroundId = null) {
     const overlays = ['classroomOverlay', 'moduleOverlay', 'createOverlay'];
     const bg = document.getElementById('backgroundContent');
     overlays.forEach(id => {
@@ -749,24 +808,6 @@
       overlay.classList.toggle('show', shouldShow);
     });
     bg.style.display = 'none';
-  }
-
-  function loadModules(type, clickedBtn) {
-    // Remove 'active' from all tabs
-    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    // Add 'active' to the clicked one
-    clickedBtn.classList.add('active');
-
-    // Send AJAX request
-    fetch('adminFunctions.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'type=' + encodeURIComponent(type)
-    })
-    .then(res => res.text())
-    .then(html => {
-      document.getElementById('moduleContainer').innerHTML = html;
-    });
   }
 
   function hideOverlay(targetId) {

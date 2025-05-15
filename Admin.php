@@ -1218,13 +1218,6 @@ function closeInput(input) {
         card.style.display = (cardRole === role) ? 'flex' : 'none';
       });
     }
-    
-    // Reset to first page when changing tabs
-    if (window.location.search.includes('page=')) {
-      const url = new URL(window.location);
-      url.searchParams.set('page', '1');
-      window.history.replaceState({}, '', url);
-    }
   }
   
   function loadModules(type, clickedBtn) {
