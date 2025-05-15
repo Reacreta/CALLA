@@ -1,23 +1,23 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+  ini_set('display_errors', 1);
+  ini_set('display_startup_errors', 1);
+  error_reporting(E_ALL);
   ob_start();
   session_start();
   require_once 'database.php';
   require_once 'authFunctions.php';
 
+  $creatorID = $_SESSION['userID'];
+  $sql = "SELECT instID FROM instructor WHERE userID = ?";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param('s',$creatorID);
+  $stmt->execute();
+  $res = $stmt->get_result();
+  $row = $res->fetch_assoc();
+  
+  $_SESSION['instID'] = $row['instID'];
+
   if(isset($_POST['createClassroom'])){
-
-    // Retrieve instructorID from userID
-    $creatorID = $_SESSION['userID'];
-    $sql = "SELECT instID FROM instructor WHERE userID = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('s',$creatorID);
-    $stmt->execute();
-    $res = $stmt->get_result();
-    $row = $res->fetch_assoc();
-
     $creatorID= array_values($row)[0];
 
     // Insert into Classroom
@@ -628,21 +628,26 @@ error_reporting(E_ALL);
         <div id="module-list" class="list-wrapper">
           <div class="dynamic-list" id="moduleContainer">
               <?php
+              
                 $sql = "
-                SELECT * 
-                FROM languagemodule l
-                JOIN classmodule cm
-                ON l.langID = cm.langID
-                JOIN classinstructor ci
-                ON cm.classInstID = ci.classInstID
-                JOIN instructor i 
-                ON ci.instID = i.instID 
+                SELECT 
+                    lm.langID, 
+                    lm.moduleName, 
+                    u.username, 
+                    'Classroom'
+                FROM classmodule cm 
+                JOIN classinstructor ci ON cm.classInstID = ci.classInstID
+                JOIN instructor i ON i.instID = ci.instID
+                JOIN users u ON u.userID = i.userID
+                JOIN languagemodule lm ON lm.langID = cm.langID
                 WHERE i.instID = ?;
                 ";
 
                 $stmt = $conn->prepare($sql); 
-                $stmt->bind_param('s', $creatorID);
+                $stmt->bind_param('s', $_SESSION['instID']);
                 $stmt->execute();
+                 
+                debug_console("InstructorID: ".$_SESSION['instID']);
 
                 $result = $stmt->get_result();
                 while($row = $result->fetch_assoc()){
@@ -650,12 +655,12 @@ error_reporting(E_ALL);
                   <div class="module-card">
                     <img src="images/Module_Icon.jpg" alt="Module Icon" class="module-icon">
                     <div class="module-info">
-                    <div class="module-title"><?= htmlspecialchars($row['title']) ?></div>
+                    <div class="module-title"><?= htmlspecialchars($row['moduleName']) ?></div>
                     <div class="module-creator">By <?= htmlspecialchars($row['username']) ?></div>
                     </div>
-                    <a href="module-details.php?moduleId=<?= $row['moduleID'] ?>" class="search-icon-link">
-                    <img src="images/Search_Icon.jpg" alt="View Module" class="search-image-icon">
-                    </a>
+                    <button>
+                      <img src="images/Search_Icon.jpg" alt="View Module" class="search-image-icon">
+                    </button>
                 </div>    
               <?php
                 }
