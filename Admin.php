@@ -747,7 +747,7 @@
     <div class="main-content">
       <!-- Background Main Content -->
       <div id="backgroundContent" class="background-content">
-          Welcome, <?php echo $_SESSION['username']?>!
+          Welcome Admin, <?php echo $_SESSION['username']?>!
       </div>
 
         <!-- Users Overlay -->
