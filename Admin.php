@@ -510,7 +510,6 @@
       color: #666;
     }
 
-    /* Add Edit Profile link */
     .edit-profile-link {
       color: #7b0000;
       text-decoration: none;
@@ -518,6 +517,114 @@
       position: absolute;
       right: 20px;
       bottom: 20px;
+    }
+
+
+
+    /* Checklogs Overlay Base */
+    #userChecklogsOverlay {
+      background: rgba(255, 255, 255, 0.95);
+      max-width: 1000px;
+      width: 90%;
+      height: 700px;
+      margin: auto;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    /* Overlay inner container */
+    #userChecklogsOverlay .overlay-content {
+      position: relative; /* This is CRUCIAL */
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+
+    /* Logs container */
+    .check {
+      max-height: 100%;
+      overflow-y: auto;
+      padding: 0 10px;
+    }
+
+    /* Logs header (column titles) */
+    .logs-header {
+      display: grid;
+      grid-template-columns: 1.5fr 3fr 1.5fr;
+      padding: 12px 20px;
+      background-color: #dcdcdc;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 16px;
+      color: #7b0000;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    /* Individual log entry */
+    .log-entry {
+      display: grid;
+      grid-template-columns: 1.5fr 3fr 1.5fr;
+      padding: 15px 20px;
+      background-color: #f1f1f1;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      font-size: 15px;
+      align-items: center;
+      transition: background-color 0.3s ease;
+    }
+
+    /* Alternate row background */
+    .log-entry:nth-child(even) {
+      background-color: #e0e0e0;
+    }
+
+    /* Columns styling */
+    .user-col, .action-col, .date-col {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    /* Date column specifics */
+    .date-col {
+      color: #7b0000;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    /* Close button */
+    #userChecklogsOverlay .close-btn {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background-color: #7b0000;
+      color: white;
+      padding: 6px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      height: auto;
+      width: auto;
+      display: inline-block;
+      line-height: 1;
+    }
+
+
+    #userChecklogsOverlay .close-btn:hover {
+      background-color: #5a0000;
     }
 
     /* Classroom Overlays */
@@ -747,7 +854,7 @@
     <div class="main-content">
       <!-- Background Main Content -->
       <div id="backgroundContent" class="background-content">
-          Welcome, <?php echo $_SESSION['username']?>!
+          Welcome Admin, <?php echo $_SESSION['username']?>!
       </div>
 
         <!-- Users Overlay -->
@@ -872,7 +979,27 @@
               </div>
             </div>
           </div>
+
+         <div id="userChecklogsOverlay" style="display: none;">
+          <div class="overlay-content">
+            <div class="logs-header">
+              <div>User</div>
+              <div>Action</div>
+              <div>Date</div>
+            </div>
+            <div class="check">
+              <div class="log-entry">
+                <div class="user-col">Joshua Gatmin - Thr5Tr4pY3s</div>
+                <div class="action-col">Created Instructor Joshua Gatmin</div>
+                <div class="date-col">2/04/2025–8:09 AM</div>
+              </div>
+            </div>
+
+            <!-- ✅ This must be placed here, within .overlay-content -->
+            <button class="close-btn" onclick="closeUserLogs()">Close</button>
+          </div>
         </div>
+      </div>
                     
 
         <!-- Classroom Overlay -->
@@ -884,7 +1011,7 @@
             <div class="right-buttons">
               <div class="search-container">
                 <input type="text" placeholder="Search..." class="search-input">
-                <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
+                image.png                <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
               </div>
             </div>
           </div>
@@ -1285,6 +1412,20 @@ function closeInput(input) {
   // Show the overlay
   document.getElementById('userDetailsOverlay').classList.add('show');
 }
+
+// checkuserlogs
+function checkUserLogs() {
+  const overlay = document.getElementById('userChecklogsOverlay');
+  overlay.style.display = 'block';
+}
+
+function closeUserLogs() {
+  const overlay = document.getElementById('userChecklogsOverlay');
+  overlay.style.display = 'none';
+}
+
+
+
 
   
 
