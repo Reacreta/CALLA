@@ -19,9 +19,11 @@
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
   }
+  
   // Fetch all users
   $sql = "SELECT * FROM users";
   $result = $conn->query($sql);
+
   // Setup
   $items_per_page = 10;
   $current_page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
@@ -92,15 +94,24 @@
       align-items: center;
     }
 
-    .header .title {
-      font-size: 28px;
+    .title{
+      display: flex;
+      flex-direction: row;
+    }
+
+    .title #role{
+      display: flex;
+      align-items: end;
+    }
+
+    .title #role span{
+      font-size: 35px;
       font-family: 'Goudy Bookletter 1911', serif;
     }
 
-    .header .title span {
-      font-size: 14px;
-      margin-left: 10px;
-      font-style: italic;
+    .title #logo{
+      height: 70px;
+      width: auto;
     }
 
     .header .profile {
@@ -832,7 +843,7 @@
 <body>
 
   <div class="header">
-    <div class="title">CALLA <span>admin</span></div>
+    <div class="title"><img id="logo" src="images/logo.png"><div id="role"><span>ADMIN</span></div></div>
     <div class="profile-container" onclick="toggleLogoutDropdown()">
       <div class="profile-pic" style="background-image: url('images/profile.jpg');"></div>
       <div class="logout-dropdown" id="logoutDropdown">
@@ -1344,13 +1355,6 @@ function closeInput(input) {
         const cardRole = card.getAttribute('data-role');
         card.style.display = (cardRole === role) ? 'flex' : 'none';
       });
-    }
-    
-    // Reset to first page when changing tabs
-    if (window.location.search.includes('page=')) {
-      const url = new URL(window.location);
-      url.searchParams.set('page', '1');
-      window.history.replaceState({}, '', url);
     }
   }
   

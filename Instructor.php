@@ -1,11 +1,52 @@
 <?php
+  ini_set('display_errors', 1);
+  ini_set('display_startup_errors', 1);
+  error_reporting(E_ALL);
   ob_start();
   session_start();
   require_once 'database.php';
   require_once 'authFunctions.php';
 
-  // Read Tables
-  $sql = "SELECT * FROM tbl_users";
+  $creatorID = $_SESSION['userID'];
+  $sql = "SELECT instID FROM instructor WHERE userID = ?";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param('s',$creatorID);
+  $stmt->execute();
+  $res = $stmt->get_result();
+  $row = $res->fetch_assoc();
+  
+  $_SESSION['instID'] = $row['instID'];
+
+  if(isset($_POST['createClassroom'])){
+    $creatorID= array_values($row)[0];
+
+    // Insert into Classroom
+    $className = $_POST['className'];
+    $classDesc = $_POST['classDesc'];
+    $classCode = generateID("CC",5);
+    $classID = generateID("C", 9);
+    $dateCreated = date("Y/m/d");
+    $sql = "INSERT INTO classroom (classroomID,instID,className,classDesc,classCode,dateCreated) VALUES(?,?,?,?,?,?)";
+    
+    $stmt = $conn->prepare($sql); 
+    $stmt->bind_param('ssssss', $classID, $creatorID,$className,$classDesc,$classCode,$dateCreated);
+    $stmt->execute();
+
+
+    // Insert into Classinst
+    $classinstID = generateID("CI", 8);
+    $sql = "INSERT INTO classinstructor (classinstID, instID, classroomID) VALUES(?,?,?)";
+    $stmt = $conn->prepare($sql); 
+    $stmt->bind_param("sss",$classinstID,$creatorID, $classID);
+    $stmt->execute();
+
+
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+  }
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -57,10 +98,24 @@
       justify-content: space-between;
       align-items: center;
     }
+    .title{
+      display: flex;
+      flex-direction: row;
+    }
 
-    .header .title {
-      font-size: 28px;
+    .title #role{
+      display: flex;
+      align-items: end;
+    }
+
+    .title #role span{
+      font-size: 35px;
       font-family: 'Goudy Bookletter 1911', serif;
+    }
+
+    .title #logo{
+      height: 70px;
+      width: auto;
     }
 
     .header .title span {
@@ -188,7 +243,7 @@
 
 
     /* OVERLAYS */
-    .user-overlay { 
+    .module-overlay { 
       display: none;
       position: absolute;
       top: 0;
@@ -200,25 +255,8 @@
       padding: 20px;
       overflow-y: auto;
     }
-
-    .create-overlay { 
-      display: none;
-      position: absolute;
-      border: 2px solid white;
-      border-radius: 6px 6px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      top: 10%;
-      left: 30%;
-      height: fit-content;
-      width: fit-content;
-      background: rgba(241, 241, 241, 0.85);
-      backdrop-filter: blur(5px);
-      z-index: 20;
-      padding: 20px;
-      overflow-y: auto;
-    }
     
-    .user-overlay.show, .create-overlay.show {
+    .module-overlay.show, .create-overlay.show {
       display: block;
     }
 
@@ -248,22 +286,6 @@
     margin-left: auto; 
     }
 
-    .left-buttons{
-      
-    }
-
-    .create-SC .creates{
-      background: #e6e6e6;
-      border: none;
-      color: #7b0000;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 50px;
-      padding: 10px 50px;
-      border-radius: 6px 6px;
-      font-size: 20px;
-    }
-
     .tab {
       background: none;
       border: none;
@@ -278,10 +300,6 @@
     
     .tabs .tab.add:hover, .SearchButton:hover{
       transform: scale(1.1); 
-    }
-
-    .create-SC .creates:hover{
-      background-color: #fff;
     }
     
     .tabs .tab:not(.search, .add):hover {
@@ -313,7 +331,7 @@
       gap: 15px;
     }
 
-    .classroom-item {
+    .classroom-card {
       background-color: #e0e0e0;
       padding: 15px 20px;
       border-radius: 12px;
@@ -356,6 +374,45 @@
       display: flex;
       flex-direction: column;
       gap: 30px;
+    }
+
+    .create-SC{
+      display: flex;
+      justify-content: right;
+      gap: 15px;
+    }
+
+    .create-SC .creates{
+      background: #e6e6e6;
+      border: none;
+      color: #7b0000;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 50px;
+      padding: 10px 50px;
+      border-radius: 6px 6px;
+      font-size: 20px;
+    }
+
+    .create-overlay { 
+      display: none;
+      position: absolute;
+      border: 2px solid white;
+      border-radius: 6px 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      top: 10%;
+      left: 30%;
+      height: fit-content;
+      width: fit-content;
+      background: rgba(241, 241, 241, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 20;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .create-SC .creates:hover{
+      background-color: #fff;
     }
 
     #className {
@@ -458,7 +515,7 @@
 
 <body>
   <div class="header">
-    <div class="title">CALLA <span>instructor</span></div>
+    <div class="title"><img id="logo" src="images/logo.png"><div id="role"><span>INSTRUCTOR</span></div></div>
     <div class="profile-container" onclick="toggleLogoutDropdown()">
       <div class="profile-pic" style="background-image: url('images/profile.jpg');"></div>
       <div class="logout-dropdown" id="logoutDropdown">
@@ -478,20 +535,19 @@
     <div class="main-content">
       <!-- Background Main Content -->
       <div id="backgroundContent" class="background-content">
-        Welcome to the Instructor Dashboard
+        Welcome Instructor, <?php echo $_SESSION['username']?> !
       </div>
 
       <!-- Classroom Overlay -->
-      <div id="classroomOverlay" class="user-overlay">
+      <div id="classroomOverlay" class="module-overlay" overlay-type="classroom">
         <button class="close-btn" onclick="hideOverlay('classroomOverlay')">×</button>
         <h2 style="color: #7b0000; margin-bottom: 20px;">Classrooms</h2>
 
         <div class="tabs">
-
           <div class="left-buttons">
-            <button class="tab" onclick="setUserTab('All')">All</button>
-            <button class="tab" onclick="setUserTab('Joinable')">Joinable</button>
-            <button class="tab" onclick="setUserTab('Owned')">Owned</button>
+            <button class="tab active" onclick="setClassFilter('All')">All</button>
+            <button class="tab" onclick="setClassFilter('Joinable')">Joinable</button>
+            <button class="tab" onclick="setClassFilter('Owned')">Owned</button>
           </div>
 
           <div class="right-buttons">
@@ -506,68 +562,98 @@
         
         <div class="classroom-list">
         <?php
-            $sql = "SELECT classroom.className, users.username 
-                    FROM classroom 
-                    JOIN instructor ON classroom.instID = instructor.instID 
-                    JOIN users ON instructor.userID = users.userID;";
-            $result = $conn->query($sql);
+          $sql = "SELECT classroom.className, users.username, instructor.instID 
+                  FROM classroom 
+                  JOIN classinstructor ON classinstructor.classroomID = classroom.classroomID
+                  JOIN instructor ON classinstructor.instID = instructor.instID 
+                  JOIN users ON instructor.userID = users.userID;";
+          $result = $conn->query($sql);
 
-            while ($row = $result->fetch_assoc()) {
-              $className = htmlspecialchars($row['className']);
-              $creatorName = htmlspecialchars($row['username']);
-              debug_console($className);
-              debug_console($creatorName);
-          ?>
-            <div class="classroom-item">
-              <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
-              <div class="classroom-info">
-                <div class="classroom-title"><?php echo $className; ?></div>
-                <div class="classroom-creator"><?php echo $creatorName; ?></div>
+          while ($row = $result->fetch_assoc()) {
+            $className = htmlspecialchars($row['className']);
+            $creatorName = htmlspecialchars($row['username']);
+            $instID = htmlspecialchars($row['instID']);
+            
+            // Check if joinable
+            $sql = "SELECT * FROM classinstructor ci WHERE ci.instID = ?;";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('s',$instID);
+            $stmt->execute();
+            $res = $stmt->get_result();
+
+            // Not Joinable 
+            if($res->num_rows == 1){ // if query 
+        ?>
+              <div class="classroom-card" class-type = "joinable">
+                <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
+                <div class="classroom-info">
+                  <div class="classroom-title"><?php echo $className; ?></div>
+                  <div class="classroom-creator"><?php echo $creatorName; ?></div>
+                </div>
+                <Button>Join</Button>
               </div>
-              <a href="classroom-details.html?classId=math4" class="search-icon-link">
-                <img src="images/Search_Icon.jpg" alt="View Classroom" class="search-image-icon">
-              </a>
-            </div>
-          <?php } ?>
+        <?php 
+            }
+            else{
+        ?>
+            <div class="classroom-card" class-type = "owned">
+                <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
+                <div class="classroom-info">
+                  <div class="classroom-title"><?php echo $className; ?></div>
+                  <div class="classroom-creator"><?php echo $creatorName; ?></div>
+                </div>
+                <div class="search-icon-link user-search" onclick="showClassDetails(this)">
+                  <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
+                </div>
+              </div>
+        <?php
+            }
+        }
+        ?>
         </div>
 
-      </div>
+      </div> <!-- End Classroom Overlay -->
 
         <div id="createOverlay" class="create-overlay">
           <button class="close-btn" onclick="hideCreateOverlay('createOverlay')">×</button>
           <h2 style="color: #7b0000; margin-bottom: 20px;">Create a Class</h2>
 
           <div class = create-list>
+
+            <form action="" method="post">
+
             <div class = create-item1>
               <div class = create-info>
                 <label for="className">Class Name:</label>
                 <input type="text" id="className" name="className"placeholder="Class Name" required>
               </div>
             </div>
+
             <div class = create-item2>
               <div class = create-info>
                 <textarea rows="20" cols="100" id="classDesc" name="classDesc" placeholder="Class Description" required></textarea>
               </div>
             </div>
+
             <div class = create-SC>
-              <button class = creates type="submit">Create</button>
+              <button class = creates type="submit" name="createClassroom">Create</button>
               <button class = creates onclick="hideCreateOverlay('createOverlay')">Cancel</button>
             </div>
+            </form>
           </div>
 
 
-        </div>
+        </div> <!-- End Classroom Creation-->
 
       <!-- Modules Overlay -->
-      <div id="moduleOverlay" class="user-overlay">
+      <div id="moduleOverlay" class="module-overlay" overlay-type ="module">
         <button class="close-btn" onclick="hideOverlay('moduleOverlay')">×</button>
         <h2 style="color: #7b0000; margin-bottom: 20px;">Modules</h2>
 
         <div class="tabs">
-          <button class="tab active">All</button>
-          <button class="tab">Partner</button>
-          <button class="tab">Classroom</button>
+          <div id="tabHeader">Owned</div>
           <div class="right-buttons">
+            <button onclick="toggleModuleCreation()">New Module</button>
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
               <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
@@ -575,37 +661,60 @@
           </div>
         </div>
 
-        <div class="module-list">
+        <div id="module-list" class="list-wrapper">
+          <div class="dynamic-list" id="moduleContainer">
+              <?php
+              
+                $sql = "
+                SELECT 
+                    lm.langID, 
+                    lm.moduleName, 
+                    u.username, 
+                    'Classroom'
+                FROM classmodule cm 
+                JOIN classinstructor ci ON cm.classInstID = ci.classInstID
+                JOIN instructor i ON i.instID = ci.instID
+                JOIN users u ON u.userID = i.userID
+                JOIN languagemodule lm ON lm.langID = cm.langID
+                WHERE i.instID = ?;
+                ";
 
-          <?php
-            $sql = "SELECT username, userType FROM users WHERE usertype <> 'Administrator'";
-            $result = $conn->query($sql);
+                $stmt = $conn->prepare($sql); 
+                $stmt->bind_param('s', $_SESSION['instID']);
+                $stmt->execute();
+                 
+                debug_console("InstructorID: ".$_SESSION['instID']);
 
-            while ($row = $result->fetch_assoc()) {
-              $displayName = htmlspecialchars($row['username']);
-              $role = htmlspecialchars($row['userType']);
-          ?>
-            <div class="user-card" data-role="<?php echo $role; ?>">
-              <div class="user-info">
-                <i class="fas fa-user-circle"></i>
-                <div>
-                  <div><strong><?php echo $displayName; ?></strong></div>
-                  <div><?php echo $role; ?></div>
-                </div>
-              </div>
-              <a href="user-details.html" class="search-icon-link user-search">
-                <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon"> 
-              </a>
-            </div>
-          <?php } ?>
+                $result = $stmt->get_result();
+                while($row = $result->fetch_assoc()){
+              ?>
+                  <div class="module-card">
+                    <img src="images/Module_Icon.jpg" alt="Module Icon" class="module-icon">
+                    <div class="module-info">
+                    <div class="module-title"><?= htmlspecialchars($row['moduleName']) ?></div>
+                    <div class="module-creator">By <?= htmlspecialchars($row['username']) ?></div>
+                    </div>
+                    <button>
+                      <img src="images/Search_Icon.jpg" alt="View Module" class="search-image-icon">
+                    </button>
+                </div>    
+              <?php
+                }
+              ?>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
+
+      </div><!-- End Module Overlay-->
+
+      <!-- Module Creation -->
+
+
+    </div><!-- End Main Content-->
+  </div><!-- End dashboard-container-->
 
 
 
-  <script>
+<script>
   function toggleLogoutDropdown() {
     const dropdown = document.getElementById('logoutDropdown');
     dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
@@ -620,63 +729,153 @@
   });
 
   function toggleSearch(label) {
-  const container = label.closest('.search-container');
-  const input = container.querySelector('.search-input');
-  const isOpen = input.style.width === '200px';
+    // get container and input field
+    const container = label.closest('.search-container');
+    const input = container.querySelector('.search-input');
+    // get overlay-type
+    const overlay = label.closest('[overlay-type]');
+    const overlayType = overlay ? overlay.getAttribute('overlay-type') : null;
+    // check bool for expanded
+    const isOpen = input.style.width === '200px';
 
-  if (isOpen) {
-    closeInput(input);
-  } else {
-    openInput(input);
+    // flex function inherit
+    const functionMap = {
+      "classroom": searchClassroom,
+      "module": searchModule
+    };
 
-    // Outside click handler
-    document.addEventListener('click', function handleOutsideClick(e) {
-      if (!container.contains(e.target)) {
+    const flexSearch = functionMap[overlayType];
+
+    if (isOpen) {
+      if (input.value.trim()) {
+        flexSearch(input.value);
+      } else {
         closeInput(input);
-        document.removeEventListener('click', handleOutsideClick);
       }
-    });
+    } else {
+      openInput(input);
 
-    // Listen for Enter key
-    input.addEventListener('keydown', function handleKey(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        console.log(input.value); 
-        closeInput(input);
-        input.removeEventListener('keydown', handleKey); 
-      }
+      // Handle outside click
+      document.addEventListener('click', function handleOutsideClick(e) {
+        if (!container.contains(e.target)) {
+          closeInput(input);
+          document.removeEventListener('click', handleOutsideClick);
+        }
+      });
+
+      // Enter key handler
+      const handleKey = function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          flexSearch(input.value);
+          input.removeEventListener('keydown', handleKey);
+        }
+      };
+      input.addEventListener('keydown', handleKey);
+
+      // Real-time filtering
+      input.addEventListener('input', function () {
+        flexSearch(input.value);
+      });
+    }
+  }
+
+  function searchClassroom(query) {
+    const activeTabElement = document.querySelector('#classroomOverlay .tab.active');
+    const cards = document.querySelectorAll('.classroom-card');
+    const searchValue = query.toLowerCase();
+
+    // Normalize tab name
+    let activeTab = activeTabElement ? activeTabElement.textContent.trim().toLowerCase() : 'all';
+    if (activeTab.endsWith('s') && activeTab !== 'all') {
+      activeTab = activeTab.slice(0, -1); // remove trailing 's' for matching
+    }
+
+    cards.forEach(card => {
+      const className = card.querySelector('.classroom-title').textContent.toLowerCase();
+      const type = card.getAttribute('class-type').toLowerCase();
+
+      const matchesSearch = className.includes(searchValue);
+      const matchesTab = (activeTab === 'all') || (role === activeTab);
+
+      card.style.display = (matchesSearch && matchesTab) ? 'flex' : 'none';
     });
   }
-}
 
-function openInput(input) {
-  input.style.width = '200px';
-  input.style.padding = '10px';
-  input.style.border = '1px solid #ccc';
-  input.style.borderRadius = '20px';
-  input.focus();
-}
+  function searchModule(query){
+    const cards = document.querySelectorAll('.module-card');
+    const searchValue = query.toLowerCase();
 
-function closeInput(input) {
-  input.style.width = '0';
-  input.style.padding = '0';
-  input.style.border = 'none';
-  input.value = '';
-}
+    cards.forEach(card => {
+      const moduleName = card.querySelector('.module-title').textContent.toLowerCase();
+      const matchesSearch = moduleName.includes(searchValue);
+      card.style.display = (matchesSearch) ? 'flex' : 'none';
+    });
+  }
+  function openInput(input) {
+    input.style.width = '200px';
+    input.style.padding = '10px';
+    input.style.border = '1px solid #ccc';
+    input.style.borderRadius = '20px';
+    input.focus();
+  }
+
+  function closeInput(input) {
+    input.style.width = '0';
+    input.style.padding = '0';
+    input.style.border = 'none';
+    input.value = '';
+  }
+
+  
+  function setClassFilter(typeFilter) {
+    const cards = document.querySelectorAll('.classroom-card');
+    const tabs = document.querySelectorAll('#classroomOverlay .tab');
+    const searchInput = document.querySelector('#classroomOverlay .search-input');
+
+    // Update tab styling
+    tabs.forEach(tab => {
+      if (tab.textContent.trim() === typeFilter) {
+        tab.classList.add('active');
+        tab.focus(); // This will apply the focus styling
+      } else {
+        tab.classList.remove('active');
+      }
+    });
+
+    // Clear any active search
+    if (searchInput) {
+      searchInput.value = '';
+      if (typeof closeInput === 'function') {
+        closeInput(searchInput);
+      }
+    }
+
+    // Filter cards based on typeFilter
+    if (typeFilter === 'All') {
+      cards.forEach(card => card.style.display = 'flex');
+    } else {
+      cards.forEach(card => {
+        const cardType = card.getAttribute('class-type');
+        card.style.display = (cardType === typeFilter) ? 'flex' : 'none';
+      });
+    }
+  }
+
 
   function showOverlay(targetId, backgroundId = null) {
-  const overlays = ['classroomOverlay', 'moduleOverlay', 'createOverlay'];
-  const bg = document.getElementById('backgroundContent');
-  overlays.forEach(id => {
-    const overlay = document.getElementById(id);
-    const shouldShow = (
-      id === targetId || 
-      (backgroundId && id === backgroundId)
-    );
-    overlay.classList.toggle('show', shouldShow);
-  });
-  bg.style.display = 'none';
-}
+    const overlays = ['classroomOverlay', 'moduleOverlay', 'createOverlay'];
+    const bg = document.getElementById('backgroundContent');
+    overlays.forEach(id => {
+      const overlay = document.getElementById(id);
+      const shouldShow = (
+        id === targetId || 
+        (backgroundId && id === backgroundId)
+      );
+      overlay.classList.toggle('show', shouldShow);
+    });
+    bg.style.display = 'none';
+  }
 
   function hideOverlay(targetId) {
     const target = document.getElementById(targetId);
@@ -711,19 +910,6 @@ function closeInput(input) {
   showOverlay('createOverlay', 'classroomOverlay');
   }
 
-  function setUserTab(role) {
-    const cards = document.querySelectorAll('.user-card');
-    const tabs = document.querySelectorAll('.tab');
-
-    cards.forEach(card => {
-      const cardRole = card.getAttribute('data-role');
-      card.style.display = (role === 'All' || cardRole === role) ? 'flex' : 'none';
-    });
-
-    tabs.forEach(tab => tab.classList.remove('active'));
-    const activeTab = Array.from(tabs).find(t => t.textContent === role);
-    if (activeTab) activeTab.classList.add('active');
-  }
 
   // Automatically select "All" when the page loads
   window.addEventListener('DOMContentLoaded', () => {

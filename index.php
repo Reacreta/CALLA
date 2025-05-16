@@ -42,6 +42,7 @@
         if (!password_verify($password, $account['password'])){
             debug_console('wrong credentials');
             $_SESSION['loginError'] = true;
+            header("Refresh:0");
         }
         
         else{
@@ -305,6 +306,8 @@
   const password = document.getElementsByName('password')[0];
   const errorIcon = document.getElementById('errorIcon');
   const errorSummary = document.getElementById('errorSummary');
+
+
 
   form.addEventListener('submit', function (e) {
     let valid = true;
