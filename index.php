@@ -6,8 +6,7 @@
   require_once 'authFunctions.php';
 
   if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
-    session_unset();  
-    session_destroy(); 
+    destroySession();
     session_start(); 
     debug_console("Session state: " . json_encode($_SESSION)); // check if same session
   }

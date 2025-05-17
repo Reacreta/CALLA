@@ -1,11 +1,14 @@
 <?php
+  require_once 'database.php';
+  require_once 'authFunctions.php';
+
   ini_set('display_errors', 1);
   ini_set('display_startup_errors', 1);
   error_reporting(E_ALL);
+
   ob_start();
   session_start();
-  require_once 'database.php';
-  require_once 'authFunctions.php';
+  sessionCheck();
 
   $creatorID = $_SESSION['userID'];
   $sql = "SELECT instID FROM instructor WHERE userID = ?";
@@ -44,8 +47,6 @@
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
   }
-
-
 
 ?>
 
@@ -255,7 +256,7 @@
       overflow-y: auto;
     }
     
-    .module-overlay.show, .create-overlay.show {
+    .module-overlay.show, .create-overlay.show, .join-overlay.show {
       display: block;
     }
 
@@ -267,6 +268,20 @@
       color: #7b0000;
       font-weight: bold;
       cursor: pointer;
+    }
+
+    .list-wrapper{
+      flex: 1;
+      height: 87%;
+    }
+    .dynamic-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100%;
+      overflow-y: scroll;
+      scrollbar-width: thin; /* Firefox */
+      scrollbar-color: #a00 #f0f0f0; /* Firefox */
     }
 
     /* Tabs */
@@ -324,12 +339,6 @@
       transform: scale(1.1);
     }
 
-    .classroom-list {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
     .classroom-card {
       background-color: #e0e0e0;
       padding: 15px 20px;
@@ -369,10 +378,28 @@
     }
 
     /* CREATE CLASS */
-    .create-list {
+
+    .create-overlay { 
+      display: none;
+      position: absolute;
+      border: 2px solid white;
+      border-radius: 6px 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      top: 10%;
+      left: 30%;
+      height: fit-content;
+      width: fit-content;
+      background: rgba(241, 241, 241, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 20;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .create-con form {
       display: flex;
       flex-direction: column;
-      gap: 30px;
+      gap: 15px;
     }
 
     .create-SC{
@@ -393,23 +420,6 @@
       font-size: 20px;
     }
 
-    .create-overlay { 
-      display: none;
-      position: absolute;
-      border: 2px solid white;
-      border-radius: 6px 6px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      top: 10%;
-      left: 30%;
-      height: fit-content;
-      width: fit-content;
-      background: rgba(241, 241, 241, 0.85);
-      backdrop-filter: blur(5px);
-      z-index: 20;
-      padding: 20px;
-      overflow-y: auto;
-    }
-
     .create-SC .creates:hover{
       background-color: #fff;
     }
@@ -421,7 +431,56 @@
       border-radius: 4px;
     }
 
-     /* SEARCH INPUTS */
+    /* JOIN CLASS */
+
+    .join-overlay{
+      display: none;
+      position: absolute;
+      border: 2px solid white;
+      border-radius: 6px 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      top: 10%;
+      left: 30%;
+      height: 45%;
+      width: 35%;
+      background: rgba(241, 241, 241, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 20;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    #joinHeader{
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    #joinTitle{
+      display: flex;
+      gap: 10px;
+      align-items: end;
+    }
+
+    #joinClassIcon img{
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+    }
+
+    #joinClassInfo{
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .join-con{
+      width: auto;
+      height: 100%;
+    }
+
+    /* SEARCH INPUTS */
     .search-container {
       position: relative;
       display: flex;
@@ -452,7 +511,6 @@
       transition: width 0.3s ease, padding 0.3s ease, border 0.3s ease;
     }
 
-
     textarea {
       width: 625px;
       height: 200px;
@@ -460,13 +518,6 @@
       resize: none;
       border: 1px solid #ccc;
       border-radius: 4px;
-    }
-
-
-    .module-list {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
     }
 
     .module-card {
@@ -526,8 +577,8 @@
   <div class="dashboard-container">
     <div class="sidebar">
       <div class="nav-group">
-      <button class="nav-btn" onclick="toggleClassroomOverlay()"><img src="images/Class_Icon.jpg" class="User-icon" alt="Classroom Icon"> Classrooms</button>
-      <button class="nav-btn" onclick="toggleModuleOverlay()"><img src="images/Module_Icon.jpg" class="User-icon" alt="Module Icon"> Modules</button>
+      <button class="nav-btn" onclick="showOverlay('classroomOverlay')"><img src="images/Class_Icon.jpg" class="User-icon" alt="Classroom Icon"> Classrooms</button>
+      <button class="nav-btn" onclick="showOverlay('moduleOverlay')"><img src="images/Module_Icon.jpg" class="User-icon" alt="Module Icon"> Modules</button>
       </div>
     </div>
   
@@ -563,90 +614,134 @@
 
         </div>
         
-        <div class="classroom-list">
-        <?php
-          $sql = "SELECT classroom.className, users.username, instructor.instID 
-                  FROM classroom 
-                  JOIN classinstructor ON classinstructor.classroomID = classroom.classroomID
-                  JOIN instructor ON classinstructor.instID = instructor.instID 
-                  JOIN users ON instructor.userID = users.userID;";
-          $result = $conn->query($sql);
+        <div class="list-wrapper">
+          <div class="dynamic-list">
+            <?php
+              // get table of all classrooms and their creator
+              $sql = "SELECT * 
+                      FROM classroom 
+                      JOIN classinstructor ON classinstructor.classroomID = classroom.classroomID
+                      JOIN instructor ON classinstructor.instID = instructor.instID 
+                      JOIN users ON instructor.userID = users.userID;";
+              $result = $conn->query($sql);
 
-          while ($row = $result->fetch_assoc()) {
-            $className = htmlspecialchars($row['className']);
-            $creatorName = htmlspecialchars($row['username']);
-            $instID = htmlspecialchars($row['instID']);
-            
-            // Check if joinable
-            $sql = "SELECT * FROM classinstructor ci WHERE ci.instID = ?;";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param('s',$instID);
-            $stmt->execute();
-            $res = $stmt->get_result();
+              while ($row = $result->fetch_assoc()) {
+                $instID = $_SESSION['roleID'];
+                $classroomID = htmlspecialchars($row['classroomID']);
+                $className = htmlspecialchars($row['className']);
+                $classDesc = htmlspecialchars($row['classDesc']);
+                $classCode = htmlspecialchars($row['classCode']);
+                $creatorName = htmlspecialchars($row['username']);
+                
+                // Check if joinable
+                $sql = "SELECT * FROM classinstructor ci WHERE ci.instID = ? AND ci.classroomID = ?;";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param('ss',$instID,$classroomID);
+                $stmt->execute();
+                $res = $stmt->get_result();
 
-            // Not Joinable 
-            if($res->num_rows == 1){ // if query 
-        ?>
-              <div class="classroom-card" class-type = "joinable">
-                <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
-                <div class="classroom-info">
-                  <div class="classroom-title"><?php echo $className; ?></div>
-                  <div class="classroom-creator"><?php echo $creatorName; ?></div>
-                </div>
-                <Button>Join</Button>
-              </div>
-        <?php 
+                // Not Joinable 
+                if($res->num_rows <> 1){ // if query 
+            ?>
+                  <div class="classroom-card" class-type = "joinable"
+                    classroom-id = <?php echo $classroomID?>
+                    classroom-name = <?php echo $className?>
+                    classroom-desc = <?php echo $classDesc?>
+                    classroom-code = <?php echo $classCode?>
+                    classroom-creator = <?php echo $creatorName?>
+                    >
+
+                    <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
+                    <div class="classroom-info">
+                      <div class="classroom-title"><?php echo $className; ?></div>
+                      <div class="classroom-creator"><?php echo $creatorName; ?></div>
+                    </div>
+                    <Button id="joinClass" onclick="showJoinOverlay(this)">Join</Button>
+                  </div>
+            <?php 
+                }
+                else{
+            ?>
+                  <div class="classroom-card" class-type = "owned">
+                      <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
+                      <div class="classroom-info">
+                        <div class="classroom-title"><?php echo $className; ?></div>
+                        <div class="classroom-creator"><?php echo $creatorName; ?></div>
+                      </div>
+                      <div class="search-icon-link user-search" onclick="showClassDetails(this)">
+                        <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
+                      </div>
+                    </div>
+            <?php
+                }
             }
-            else{
-        ?>
-            <div class="classroom-card" class-type = "owned">
-                <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
-                <div class="classroom-info">
-                  <div class="classroom-title"><?php echo $className; ?></div>
-                  <div class="classroom-creator"><?php echo $creatorName; ?></div>
-                </div>
-                <div class="search-icon-link user-search" onclick="showClassDetails(this)">
-                  <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
-                </div>
-              </div>
-        <?php
-            }
-        }
-        ?>
+            ?>
+          </div>
         </div>
 
       </div> <!-- End Classroom Overlay -->
 
-        <div id="createOverlay" class="create-overlay">
-          <button class="close-btn" onclick="hideCreateOverlay('createOverlay')">×</button>
-          <h2 style="color: #7b0000; margin-bottom: 20px;">Create a Class</h2>
+      <div id="createOverlay" class="create-overlay">
+        <button class="close-btn" onclick="hideClassSubOverlay('createOverlay')">×</button>
+        <h2 style="color: #7b0000; margin-bottom: 20px;">Create a Class</h2>
 
-          <div class = create-list>
+        <div class = create-con>
 
-            <form action="" method="post">
+          <form action="" method= post>
 
-            <div class = create-item1>
-              <div class = create-info>
-                <label for="className">Class Name:</label>
-                <input type="text" id="className" name="className"placeholder="Class Name" required>
-              </div>
+          <div class = create-item1>
+            <div class = create-info>
+              <input type="text" id="className" name="className"placeholder="Class Name" required>
             </div>
-
-            <div class = create-item2>
-              <div class = create-info>
-                <textarea rows="20" cols="100" id="classDesc" name="classDesc" placeholder="Class Description" required></textarea>
-              </div>
-            </div>
-
-            <div class = create-SC>
-              <button class = creates type="submit" name="createClassroom">Create</button>
-              <button class = creates onclick="hideCreateOverlay('createOverlay')">Cancel</button>
-            </div>
-            </form>
           </div>
 
+          <div class = create-item2>
+            <div class = create-info>
+              <textarea rows="20" cols="100" id="classDesc" name="classDesc" placeholder="Class Description" required></textarea>
+            </div>
+          </div>
 
-        </div> <!-- End Classroom Creation-->
+          <div class = create-SC>
+            <button class = "creates" type="submit" name="createClassroom">Create</button>
+            <button class = "creates" onclick="hideClassSubOverlay('createOverlay')">Cancel</button>
+          </div>
+          </form>
+
+        </div>
+
+      </div> <!-- End Classroom Creation-->
+
+      <!-- Join Classroom -->
+      <div id="joinOverlay" class="join-overlay">
+      <button class="close-btn" onclick="hideClassSubOverlay('joinOverlay')">×</button>
+        <div class = join-con>
+
+          <div id="joinHeader">
+            <div id="joinClassIcon">
+              <img src="images/Class_Icon.jpg" alt="">
+            </div>
+            <div id="joinClassInfo">
+              <div id="joinTitle">
+                <div style="color: black; font-size: 20px; font-weight: bold;" id="joinName">null</div>
+                <div style="color: black; font-size: 13px; font-style: italic;" id="joinCreator">null</div>
+              </div>
+              <div>
+                <p id="joinDesc" style="color: black; margin-bottom: 20px;">null</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="joinCode">
+            <input type="text" id="classCode" name="classCode"placeholder="Code" required>
+          </div>
+
+          <div class = create-SC>
+            <button class = creates type="button" onclick= "joinClassroom();">Join</button>
+            <button class = creates type="submit" onclick="hideClassSubOverlay('joinOverlay')">Cancel</button>
+          </div>
+
+        </div>
+      </div>
 
       <!-- Modules Overlay -->
       <div id="moduleOverlay" class="module-overlay" overlay-type ="module">
@@ -664,8 +759,8 @@
           </div>
         </div>
 
-        <div id="module-list" class="list-wrapper">
-          <div class="dynamic-list" id="moduleContainer">
+        <div class="list-wrapper">
+          <div class="dynamic-list">
               <?php
               
                 $sql = "
@@ -710,8 +805,7 @@
       </div><!-- End Module Overlay-->
 
       <!-- Module Creation -->
-
-
+      
     </div><!-- End Main Content-->
   </div><!-- End dashboard-container-->
 
@@ -731,6 +825,7 @@
     }
   });
 
+  // Search Funcs
   function toggleSearch(label) {
     // get container and input field
     const container = label.closest('.search-container');
@@ -783,6 +878,7 @@
     }
   }
 
+    // Funcs
   function searchClassroom(query) {
     const activeTabElement = document.querySelector('#classroomOverlay .tab.active');
     const cards = document.querySelectorAll('.classroom-card');
@@ -816,6 +912,7 @@
     });
   }
   
+  // input funcs
   function openInput(input) {
     input.style.width = '200px';
     input.style.padding = '10px';
@@ -866,57 +963,136 @@
   }
 
   function showOverlay(targetId, backgroundId = null) {
-    const overlays = ['classroomOverlay', 'moduleOverlay', 'createOverlay'];
+    const overlays = ['classroomOverlay', 'moduleOverlay', 'createOverlay', 'joinOverlay'];
     const bg = document.getElementById('backgroundContent');
+
     overlays.forEach(id => {
-      const overlay = document.getElementById(id);
-      const shouldShow = (
-        id === targetId || 
-        (backgroundId && id === backgroundId)
-      );
+      const overlay = document.getElementById(id); // gets element with corresponding name from overlay array
+
+      const shouldShow = (id === targetId || (backgroundId && id === backgroundId));// BOOLEAN MAN DIAY NI PUTANGINA MO
+
       overlay.classList.toggle('show', shouldShow);
     });
+
     bg.style.display = 'none';
   }
 
   function hideOverlay(targetId) {
-    const target = document.getElementById(targetId);
+    const target = document.getElementById(targetId); // gets element with corresponding name 
+    
     target.classList.remove('show');
+
     // If no overlays are visible, show the background
-    const anyOpen = document.querySelectorAll('.user-overlay.show').length > 0;
+    const anyOpen = document.querySelectorAll('.show').length > 0;
+
     if (!anyOpen) {
       document.getElementById('backgroundContent').style.display = 'flex';
     }
+
   }
 
-  function hideCreateOverlay(targetId) {
+  function hideClassSubOverlay(targetId) {
+
     const target = document.getElementById(targetId);
+
     target.classList.remove('show');
-    // If no overlays are visible, show the background
-    const anyOpen = document.querySelectorAll('.user-overlay.show').length > 0;
+
+    const anyOpen = document.querySelectorAll('.show').length > 0;
+
     if (!anyOpen) {
       document.getElementById('classroomOverlay').classList.add('show');
     }
+
   }
 
+    var name = "";
+    var desc = "";
+    var code = "";
+    var creator = "";
+    var classid = "";
+  
+  function showJoinOverlay(element) {
+    console.log("Join Overlay");
 
-  // Aliases for buttons
-  function toggleClassroomOverlay() {
-    showOverlay('classroomOverlay');
+    // Find the parent classroom-card element
+    const classCard = element.closest('.classroom-card');
+    if (!classCard) {
+      console.error("Error: Classroom card not found.");
+      return;
+    }
+
+    console.log("Join Overlay2");
+
+    // Get data attributes directly
+    name = classCard.getAttribute('classroom-name');
+    desc = classCard.getAttribute('classroom-desc');
+    code = classCard.getAttribute('classroom-code');
+    creator = classCard.getAttribute('classroom-creator');
+    classid = classCard.getAttribute('classroom-id');
+
+    console.log(name + " " + desc + " " + code + " " + creator + " " + classid);
+
+    // Update overlay fields
+    document.getElementById('joinName').textContent = name;
+    document.getElementById('joinDesc').textContent = desc;
+    document.getElementById('joinCreator').textContent = creator;
+
+    // Show the overlay
+    showOverlay('joinOverlay', 'classroomOverlay');
   }
 
-  function toggleModuleOverlay() {
-  showOverlay('moduleOverlay');
-  }
-  function toggleCreateOverlay() {
-  showOverlay('createOverlay', 'classroomOverlay');
-  }
+  function joinClassroom() {
+    console.log("Join Classroom");
+
+    // Get the value of the input field #classCode
+    const inputCode = document.getElementById('classCode').value;
+    console.log(inputCode +" = "+code);
 
 
-  // Automatically select "All" when the page loads
-  window.addEventListener('DOMContentLoaded', () => {
-    setUserTab('All');
-  });
+    console.log(inputCode === code);
+    // Compare the input value with the variable `code`
+    if (inputCode !== code) {
+      alert('The class code you entered is incorrect.');
+      return; // Stop execution if the codes don't match
+    }
+
+    const data = {
+      name: name,
+      desc: desc,
+      code: code,
+      creator: creator,
+      classid: classid
+    };
+
+    console.log(data);
+
+    fetch('instructorFunctions.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'joinClassroom',
+        data: data
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json(); // Parse JSON response
+      })
+      .then(result => {
+        if (result.success) {
+          alert('Classroom joined successfully!');
+          location.reload(); // Optionally refresh the page
+        } else {
+          alert('Failed to join classroom: ' + result.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred: ' + error.message);
+      });
+  }
 
 </script>
 
