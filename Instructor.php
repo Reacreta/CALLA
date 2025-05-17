@@ -241,7 +241,6 @@
       font-weight: bold; 
     }
 
-
     /* OVERLAYS */
     .module-overlay { 
       display: none;
@@ -545,9 +544,9 @@
 
         <div class="tabs">
           <div class="left-buttons">
-            <button class="tab active" onclick="setClassFilter('All')">All</button>
-            <button class="tab" onclick="setClassFilter('Joinable')">Joinable</button>
-            <button class="tab" onclick="setClassFilter('Owned')">Owned</button>
+            <button class="tab active" onclick="setClassFilter('all')">All</button>
+            <button class="tab" onclick="setClassFilter('joinable')">Joinable</button>
+            <button class="tab" onclick="setClassFilter('owned')">Owned</button>
           </div>
 
           <div class="right-buttons">
@@ -812,6 +811,7 @@
       card.style.display = (matchesSearch) ? 'flex' : 'none';
     });
   }
+  
   function openInput(input) {
     input.style.width = '200px';
     input.style.padding = '10px';
@@ -827,7 +827,6 @@
     input.value = '';
   }
 
-  
   function setClassFilter(typeFilter) {
     const cards = document.querySelectorAll('.classroom-card');
     const tabs = document.querySelectorAll('#classroomOverlay .tab');
@@ -852,7 +851,7 @@
     }
 
     // Filter cards based on typeFilter
-    if (typeFilter === 'All') {
+    if (typeFilter === 'all') {
       cards.forEach(card => card.style.display = 'flex');
     } else {
       cards.forEach(card => {
@@ -861,7 +860,6 @@
       });
     }
   }
-
 
   function showOverlay(targetId, backgroundId = null) {
     const overlays = ['classroomOverlay', 'moduleOverlay', 'createOverlay'];
