@@ -497,6 +497,8 @@
       color: white;
     }
 
+    /* User checklogs overlay */
+
     #userDetailsOverlay {
       background: rgba(255, 255, 255, 0.95);
       max-width: 800px;
@@ -532,7 +534,6 @@
 
 
 
-    /* Checklogs Overlay Base */
     #userChecklogsOverlay {
       background: rgba(255, 255, 255, 0.95);
       max-width: 1000px;
@@ -548,26 +549,32 @@
       z-index: 1000;
     }
 
-    /* Overlay inner container */
+    .overlay-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
     #userChecklogsOverlay .overlay-content {
-      position: relative; /* This is CRUCIAL */
-      background: white;
+      background: #fff;
       border-radius: 8px;
       padding: 20px;
-      width: 100%;
-      max-height: 80vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 70px;
       overflow-y: auto;
     }
 
-
-    /* Logs container */
     .check {
       max-height: 100%;
       overflow-y: auto;
       padding: 0 10px;
     }
 
-    /* Logs header (column titles) */
     .logs-header {
       display: grid;
       grid-template-columns: 1.5fr 3fr 1.5fr;
@@ -581,7 +588,6 @@
       text-align: center;
     }
 
-    /* Individual log entry */
     .log-entry {
       display: grid;
       grid-template-columns: 1.5fr 3fr 1.5fr;
@@ -594,47 +600,44 @@
       transition: background-color 0.3s ease;
     }
 
-    /* Alternate row background */
     .log-entry:nth-child(even) {
       background-color: #e0e0e0;
     }
 
-    /* Columns styling */
-    .user-col, .action-col, .date-col {
+    .user-col,
+    .action-col,
+    .date-col {
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
     }
 
-    /* Date column specifics */
     .date-col {
       color: #7b0000;
       font-weight: bold;
       font-size: 14px;
     }
 
-    /* Close button */
-    #userChecklogsOverlay .close-btn {
+    #userChecklogsOverlay .logs-close-btn {
       position: absolute;
       bottom: 20px;
       right: 20px;
       background-color: #7b0000;
-      color: white;
-      padding: 6px 14px;
+      color: #fff;
+      padding: 10px 20px;
       border: none;
-      border-radius: 6px;
-      font-size: 14px;
+      border-radius: 8px;
+      font-size: 16px;
       cursor: pointer;
       transition: background-color 0.3s ease;
-      height: auto;
-      width: auto;
       display: inline-block;
-      line-height: 1;
+      width: auto;
+      height: auto;
+      line-height: 1.2;
     }
 
-
-    #userChecklogsOverlay .close-btn:hover {
+    #userChecklogsOverlay .logs-close-btn:hover {
       background-color: #5a0000;
     }
 
@@ -992,22 +995,24 @@
           </div>
 
          <div id="userChecklogsOverlay" style="display: none;">
-          <div class="overlay-content">
-            <div class="logs-header">
-              <div>User</div>
-              <div>Action</div>
-              <div>Date</div>
-            </div>
-            <div class="check">
-              <div class="log-entry">
-                <div class="user-col">Joshua Gatmin - Thr5Tr4pY3s</div>
-                <div class="action-col">Created Instructor Joshua Gatmin</div>
-                <div class="date-col">2/04/2025–8:09 AM</div>
+          <div class="overlay-wrapper">
+            <div class="overlay-content">
+              <div class="logs-header">
+                <div>User</div>
+                <div>Action</div>
+                <div>Date</div>
+              </div>
+              <div class="check">
+                <div class="log-entry">
+                  <div class="user-col">Joshua Gatmin - Thr5Tr4pY3s</div>
+                  <div class="action-col">Created Instructor Joshua Gatmin</div>
+                  <div class="date-col">2/04/2025–8:09 AM</div>
+                </div>
               </div>
             </div>
 
-            <!-- ✅ This must be placed here, within .overlay-content -->
-            <button class="close-btn" onclick="closeUserLogs()">Close</button>
+            <!-- ✅ Fixed Close Button -->
+            <button class="logs-close-btn" onclick="closeUserLogs()">Close</button>
           </div>
         </div>
       </div>
@@ -1022,7 +1027,7 @@
             <div class="right-buttons">
               <div class="search-container">
                 <input type="text" placeholder="Search..." class="search-input">
-                image.png                <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
+                <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
               </div>
             </div>
           </div>
