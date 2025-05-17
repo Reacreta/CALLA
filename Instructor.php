@@ -272,6 +272,20 @@
       cursor: pointer;
     }
 
+    .list-wrapper{
+      flex: 1;
+      height: 87%;
+    }
+    .dynamic-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100%;
+      overflow-y: scroll;
+      scrollbar-width: thin; /* Firefox */
+      scrollbar-color: #a00 #f0f0f0; /* Firefox */
+    }
+
     /* Tabs */
     .tabs { 
       display: flex;
@@ -327,12 +341,6 @@
       transform: scale(1.1);
     }
 
-    .classroom-list {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
     .classroom-card {
       background-color: #e0e0e0;
       padding: 15px 20px;
@@ -372,10 +380,10 @@
     }
 
     /* CREATE CLASS */
-    .create-list {
+    .create-list form {
       display: flex;
       flex-direction: column;
-      gap: 30px;
+      gap: 15px;
     }
 
     .create-SC{
@@ -455,7 +463,6 @@
       transition: width 0.3s ease, padding 0.3s ease, border 0.3s ease;
     }
 
-
     textarea {
       width: 625px;
       height: 200px;
@@ -463,13 +470,6 @@
       resize: none;
       border: 1px solid #ccc;
       border-radius: 4px;
-    }
-
-
-    .module-list {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
     }
 
     .module-card {
@@ -538,7 +538,7 @@
       <!-- Background Main Content -->
       <div id="backgroundContent" class="background-content">
         Welcome Instructor, <?php echo $_SESSION['username']?> !
-      </div>
+    </div>
 
       <!-- Classroom Overlay -->
       <div id="classroomOverlay" class="module-overlay" overlay-type="classroom">
@@ -562,95 +562,97 @@
 
         </div>
         
-        <div class="classroom-list">
-        <?php
-          $sql = "SELECT classroom.className, users.username, instructor.instID 
-                  FROM classroom 
-                  JOIN classinstructor ON classinstructor.classroomID = classroom.classroomID
-                  JOIN instructor ON classinstructor.instID = instructor.instID 
-                  JOIN users ON instructor.userID = users.userID;";
-          $result = $conn->query($sql);
+        <div class="list-wrapper">
+          <div class="dynamic-list">
+            <?php
+              // get table of all classrooms and their creator
+              $sql = "SELECT classroom.className,classroom.classroomID, users.username, instructor.instID 
+                      FROM classroom 
+                      JOIN classinstructor ON classinstructor.classroomID = classroom.classroomID
+                      JOIN instructor ON classinstructor.instID = instructor.instID 
+                      JOIN users ON instructor.userID = users.userID;";
+              $result = $conn->query($sql);
 
-          while ($row = $result->fetch_assoc()) {
-            $className = htmlspecialchars($row['className']);
-            $creatorName = htmlspecialchars($row['username']);
-            $instID = htmlspecialchars($row['instID']);
-            
-            // Check if joinable
-            $sql = "SELECT * FROM classinstructor ci WHERE ci.instID = ?;";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param('s',$instID);
-            $stmt->execute();
-            $res = $stmt->get_result();
+              while ($row = $result->fetch_assoc()) {
+                $className = htmlspecialchars($row['className']);
+                $creatorName = htmlspecialchars($row['username']);
+                $instID = $_SESSION['roleID'];
+                $classroomID = htmlspecialchars($row['classroomID']);
+                
+                // Check if joinable
+                $sql = "SELECT * FROM classinstructor ci WHERE ci.instID = ? AND ci.classroomID = ?;";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param('ss',$instID,$classroomID);
+                $stmt->execute();
+                $res = $stmt->get_result();
 
-            // Not Joinable 
-            if($res->num_rows == 1){ // if query 
-        ?>
-              <div class="classroom-card" class-type = "joinable">
-                <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
-                <div class="classroom-info">
-                  <div class="classroom-title"><?php echo $className; ?></div>
-                  <div class="classroom-creator"><?php echo $creatorName; ?></div>
-                </div>
-                <Button>Join</Button>
-              </div>
-        <?php 
+                // Not Joinable 
+                if($res->num_rows <> 1){ // if query 
+            ?>
+                  <div class="classroom-card" class-type = "joinable">
+                    <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
+                    <div class="classroom-info">
+                      <div class="classroom-title"><?php echo $className; ?></div>
+                      <div class="classroom-creator"><?php echo $creatorName; ?></div>
+                    </div>
+                    <Button>Join</Button>
+                  </div>
+            <?php 
+                }
+                else{
+            ?>
+                <div class="classroom-card" class-type = "owned">
+                    <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
+                    <div class="classroom-info">
+                      <div class="classroom-title"><?php echo $className; ?></div>
+                      <div class="classroom-creator"><?php echo $creatorName; ?></div>
+                    </div>
+                    <div class="search-icon-link user-search" onclick="showClassDetails(this)">
+                      <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
+                    </div>
+                  </div>
+            <?php
+                }
             }
-            else{
-        ?>
-            <div class="classroom-card" class-type = "owned">
-                <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
-                <div class="classroom-info">
-                  <div class="classroom-title"><?php echo $className; ?></div>
-                  <div class="classroom-creator"><?php echo $creatorName; ?></div>
-                </div>
-                <div class="search-icon-link user-search" onclick="showClassDetails(this)">
-                  <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
-                </div>
-              </div>
-        <?php
-            }
-        }
-        ?>
+            ?>
+          </div>
         </div>
 
       </div> <!-- End Classroom Overlay -->
 
-        <div id="createOverlay" class="create-overlay">
-          <button class="close-btn" onclick="hideCreateOverlay('createOverlay')">×</button>
-          <h2 style="color: #7b0000; margin-bottom: 20px;">Create a Class</h2>
+      <div id="createOverlay" class="create-overlay">
+        <button class="close-btn" onclick="hideCreateOverlay('createOverlay')">×</button>
+        <h2 style="color: #7b0000; margin-bottom: 20px;">Create a Class</h2>
 
-          <div class = create-list>
+        <div class = create-list>
 
-            <form action="" method="post">
+          <form action="" method="post">
 
-            <div class = create-item1>
-              <div class = create-info>
-                <label for="className">Class Name:</label>
-                <input type="text" id="className" name="className"placeholder="Class Name" required>
-              </div>
+          <div class = create-item1>
+            <div class = create-info>
+              <input type="text" id="className" name="className"placeholder="Class Name" required>
             </div>
-
-            <div class = create-item2>
-              <div class = create-info>
-                <textarea rows="20" cols="100" id="classDesc" name="classDesc" placeholder="Class Description" required></textarea>
-              </div>
-            </div>
-
-            <div class = create-SC>
-              <button class = creates type="submit" name="createClassroom">Create</button>
-              <button class = creates onclick="hideCreateOverlay('createOverlay')">Cancel</button>
-            </div>
-            </form>
-
           </div>
 
+          <div class = create-item2>
+            <div class = create-info>
+              <textarea rows="20" cols="100" id="classDesc" name="classDesc" placeholder="Class Description" required></textarea>
+            </div>
+          </div>
 
-        </div> <!-- End Classroom Creation-->
+          <div class = create-SC>
+            <button class = creates type="submit" name="createClassroom">Create</button>
+            <button class = creates onclick="hideCreateOverlay('createOverlay')">Cancel</button>
+          </div>
+          </form>
+
+        </div>
+
+      </div> <!-- End Classroom Creation-->
       <!-- Join Classroom -->
-       <div class="">
-
-       </div>
+      <div class="module-overlay">
+          
+      </div>
 
       <!-- Modules Overlay -->
       <div id="moduleOverlay" class="module-overlay" overlay-type ="module">
@@ -668,8 +670,8 @@
           </div>
         </div>
 
-        <div id="module-list" class="list-wrapper">
-          <div class="dynamic-list" id="moduleContainer">
+        <div class="list-wrapper">
+          <div class="dynamic-list">
               <?php
               
                 $sql = "
@@ -714,7 +716,7 @@
       </div><!-- End Module Overlay-->
 
       <!-- Module Creation -->
-
+      
     </div><!-- End Main Content-->
   </div><!-- End dashboard-container-->
 
