@@ -808,12 +808,12 @@
                  data-contact="<?php echo htmlspecialchars($row['contact']); ?>"
                  data-dob="<?php echo htmlspecialchars($row['dateOfBirth']); ?>"
                  data-uid="<?php echo htmlspecialchars($row['userID']); ?>">
-              <div class="user-info">
-                <div>
-                  <div><strong><?php echo $displayName; ?></strong></div>
-                  <div><?php echo $role; ?></div>
+                <div class="user-info">
+                  <div>
+                    <div><strong><?php echo $displayName; ?></strong></div>
+                    <div><?php echo $role; ?></div>
+                  </div>
                 </div>
-              </div>
               <div class="search-icon-link user-search" onclick="showUserDetails(this)">
                 <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
               </div>
@@ -1264,32 +1264,32 @@ function closeInput(input) {
   /* userdetail overlay */
 
   function showUserDetails(element) {
-  const userCard = element.closest('.user-card');
+    const userCard = element.closest('.user-card');
 
-  // Get data attributes directly
-  const name = userCard.dataset.name;
-  const role = userCard.dataset.role;
-  const fname = userCard.dataset.fname;
-  const lname = userCard.dataset.lname;
-  const gender = userCard.dataset.gender;
-  const email = userCard.dataset.email;
-  const contact = userCard.dataset.contact;
-  const dob = userCard.dataset.dob;
-  const uid = userCard.dataset.uid;
+    // Get data attributes directly
+    const name = userCard.dataset.name;
+    const role = userCard.dataset.role;
+    const fname = userCard.dataset.fname;
+    const lname = userCard.dataset.lname;
+    const gender = userCard.dataset.gender;
+    const email = userCard.dataset.email;
+    const contact = userCard.dataset.contact;
+    const dob = userCard.dataset.dob;
+    const uid = userCard.dataset.uid;
 
-  // Update overlay fields
-  document.getElementById('userDetailName').textContent = name;
-  document.getElementById('userDetailRole').textContent = role;
-  document.getElementById('userDetailFirstName').textContent = fname;
-  document.getElementById('userDetailLastName').textContent = lname;
-  document.getElementById('userDetailGender').textContent = gender;
-  document.getElementById('userDetailEmail').textContent = email;
-  document.getElementById('userDetailContact').textContent = contact;
-  document.getElementById('userDetailDOB').textContent = dob;
-  document.getElementById('userDetailUID').textContent = uid;
+    // Update overlay fields
+    document.getElementById('userDetailName').textContent = name;
+    document.getElementById('userDetailRole').textContent = role;
+    document.getElementById('userDetailFirstName').textContent = fname;
+    document.getElementById('userDetailLastName').textContent = lname;
+    document.getElementById('userDetailGender').textContent = gender;
+    document.getElementById('userDetailEmail').textContent = email;
+    document.getElementById('userDetailContact').textContent = contact;
+    document.getElementById('userDetailDOB').textContent = dob;
+    document.getElementById('userDetailUID').textContent = uid;
 
-  // Show the overlay
-  document.getElementById('userDetailsOverlay').classList.add('show');
+    // Show the overlay
+    document.getElementById('userDetailsOverlay').classList.add('show');
 }
 
   
