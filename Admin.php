@@ -255,7 +255,7 @@
 
     .list-wrapper {
       flex: 1;
-      height: 720px;
+      height: 87%;
     }
 
     .dynamic-list {
