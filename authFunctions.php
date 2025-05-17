@@ -1,6 +1,11 @@
 <?php
     include 'database.php';
-    
+
+    function destroySession(){
+        session_unset(); 
+        session_destroy();
+    }
+
     function generateID($prefix = 'NU', $length = 8){
         return $prefix . generateRandomString($length);
     }
@@ -89,7 +94,13 @@
         echo "<script type='text/javascript'>
             setTimeout(function() {
                 window.location.href = '$url';
-            }, 2000);
+            }, 5000);
         </script>";
+    }
+
+    function sessionCheck(){
+        if(!isset($_SESSION['userID'])){
+            redirect("index.php");
+        }
     }
 ?>

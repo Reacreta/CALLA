@@ -1,11 +1,14 @@
 <?php
+  require_once 'database.php';
+  require_once 'authFunctions.php';
+
   ini_set('display_errors', 1);
   ini_set('display_startup_errors', 1);
   error_reporting(E_ALL);
+
   ob_start();
   session_start();
-  require_once 'database.php';
-  require_once 'authFunctions.php';
+  sessionCheck();
 
   $creatorID = $_SESSION['userID'];
   $sql = "SELECT instID FROM instructor WHERE userID = ?";
@@ -639,10 +642,15 @@
               <button class = creates onclick="hideCreateOverlay('createOverlay')">Cancel</button>
             </div>
             </form>
+
           </div>
 
 
         </div> <!-- End Classroom Creation-->
+      <!-- Join Classroom -->
+       <div class="">
+
+       </div>
 
       <!-- Modules Overlay -->
       <div id="moduleOverlay" class="module-overlay" overlay-type ="module">
@@ -706,7 +714,6 @@
       </div><!-- End Module Overlay-->
 
       <!-- Module Creation -->
-
 
     </div><!-- End Main Content-->
   </div><!-- End dashboard-container-->
