@@ -297,7 +297,7 @@
       font-size: 20px;
     }
     
-    .tabs .tab.add:hover, .SearchButton:hover{
+    .tabs .tab.add:hover, .SearchButton:hover {
       transform: scale(1.1); 
     }
     
@@ -550,7 +550,7 @@
           </div>
 
           <div class="right-buttons">
-            <button class="tab" onclick="toggleCreateOverlay()">Create Classroom</button>
+            <button class="tab" onclick="toggleCreateOverlay()">Create Class</button>
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
               <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
