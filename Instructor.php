@@ -601,7 +601,11 @@
           </div>
 
           <div class="right-buttons">
+<<<<<<< HEAD
             <button class="tab" onclick="toggleCreateOverlay()">Create Class</button>
+=======
+            <button class="tab" onclick="showOverlay('createOverlay','classroomOverlay')">Create Classroom</button>
+>>>>>>> d3789ad5723608ee2de8e1ca3a06241d919cd5ba
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
               <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
