@@ -616,8 +616,7 @@
               // get table of all classrooms and their creator
               $sql = "SELECT * 
                       FROM classroom 
-                      JOIN classinstructor ON classinstructor.classroomID = classroom.classroomID
-                      JOIN instructor ON classinstructor.instID = instructor.instID 
+                      JOIN instructor ON classroom.instID = instructor.instID 
                       JOIN users ON instructor.userID = users.userID;";
               $result = $conn->query($sql);
 
@@ -626,7 +625,6 @@
                 $classroomID = htmlspecialchars($row['classroomID']);
                 $className = htmlspecialchars($row['className']);
                 $classDesc = htmlspecialchars($row['classDesc']);
-                debug_console($classDesc);
                 $classCode = htmlspecialchars($row['classCode']);
                 $creatorName = htmlspecialchars($row['username']);
                 
