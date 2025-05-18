@@ -347,6 +347,8 @@
         height: 85%;
         scrollbar-width: thin;
         scroll-behavior: smooth;
+        background-color: lightgrey;
+        border-radius: 20px;
     }
 
     .dynamic-list {
@@ -404,6 +406,7 @@
 
     #moduleList,#studentList{
         height: 100%;
+        
     }
     
   </style>
