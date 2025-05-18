@@ -601,7 +601,7 @@
           </div>
 
           <div class="right-buttons">
-            <button class="tab" onclick="toggleCreateOverlay()">Create Classroom</button>
+            <button class="tab" onclick="showOverlay('createOverlay','classroomOverlay')">Create Classroom</button>
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
               <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
@@ -626,6 +626,7 @@
                 $classroomID = htmlspecialchars($row['classroomID']);
                 $className = htmlspecialchars($row['className']);
                 $classDesc = htmlspecialchars($row['classDesc']);
+                debug_console($classDesc);
                 $classCode = htmlspecialchars($row['classCode']);
                 $creatorName = htmlspecialchars($row['username']);
                 
@@ -640,11 +641,11 @@
                 if($res->num_rows <> 1){ // if query 
             ?>
                   <div class="classroom-card" class-type = "joinable"
-                    classroom-id = <?php echo $classroomID?>
-                    classroom-name = <?php echo $className?>
-                    classroom-desc = <?php echo $classDesc?>
-                    classroom-code = <?php echo $classCode?>
-                    classroom-creator = <?php echo $creatorName?>
+                    classroom-id = "<?php echo $classroomID?>"
+                    classroom-name = "<?php echo $className?>"
+                    classroom-desc = "<?php echo $classDesc?>"
+                    classroom-code = "<?php echo $classCode?>"
+                    classroom-creator = "<?php echo $creatorName?>"
                     >
 
                     <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
