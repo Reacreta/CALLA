@@ -42,7 +42,7 @@
     $stmt->bind_param("sss",$classinstID,$creatorID, $classID);
     $stmt->execute();
 
-    logAction($conn, $_SESSION['userID'], "Created Classroom: ".$className);
+    logAction($conn, $_SESSION['userID'], "Created Classroom: ".$classID);
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
   }
@@ -309,9 +309,11 @@
       border-radius: 6px 6px 0 0;
       border-bottom: 2px solid transparent;
       font-size: 20px;
+      transition: transform 0.2s;
     }
     
-    .tabs .tab.add:hover, .SearchButton:hover{
+    .SearchButton:hover{
+      transition: transform 0.2s;
       transform: scale(1.1); 
     }
     
@@ -336,6 +338,15 @@
 
     .search-image-icon:hover {
       transform: scale(1.1);
+    }
+
+    .search-icon-link{
+      display: flex;
+
+      width: 78px;
+      height: auto;
+
+      justify-content: center;
     }
 
     .classroom-card {
@@ -440,7 +451,8 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       top: 10%;
       left: 30%;
-      height: 45%;
+      height: fit-content;
+      max-height: 55%;
       width: 35%;
       background: rgba(241, 241, 241, 0.85);
       backdrop-filter: blur(5px);
@@ -451,7 +463,7 @@
 
     #joinHeader{
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       gap: 20px;
       margin-bottom: 20px;
     }
@@ -459,7 +471,30 @@
     #joinTitle{
       display: flex;
       gap: 10px;
-      align-items: end;
+      align-items: center;
+    }
+
+    #joinDesc{
+      background-color: gainsboro;
+      border-radius: 15px;
+      padding: 15px;
+    }
+
+    #joinClass{
+      background:rgb(255, 255, 255);
+      border: none;
+      color: #7b0000;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 10px 20px;
+      border-radius: 15px;
+      font-size: 15px;
+      transition: transform 0.2s;
+    }
+
+    #joinClass:hover{
+      background-color: #fff;
+      transform: scale(1.1);
     }
 
     #joinClassIcon img{
@@ -474,9 +509,39 @@
       gap: 10px;
     }
 
-    .join-con{
+    .join-con, #joinCode{
       width: auto;
-      height: 100%;
+      height: fit-content%;
+    }
+
+    #joinCode input[type="text"]{
+      height: auto;
+      width: 100%;
+
+      padding: 10px;
+      margin-bottom: 20px;
+
+      border: none;
+      border-radius: 10px;
+    }
+
+    .join-SC{
+      display: flex;
+      gap: 15px;
+      height: fit-content;
+      width: 100%;
+      justify-content: right;
+    }
+  
+    .join-SC button{
+      background: #e6e6e6;
+      border: none;
+      color: #7b0000;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 10px 30px;
+      border-radius: 6px 6px;
+      font-size: 20px;
     }
 
     /* SEARCH INPUTS */
@@ -600,7 +665,7 @@
           </div>
 
           <div class="right-buttons">
-            <button class="tab" onclick="showOverlay('createOverlay','classroomOverlay')">Create Classroom</button>
+            <button class="SearchButton" onclick="showOverlay('createOverlay','classroomOverlay')">Create Classroom</button>
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
               <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
@@ -711,27 +776,27 @@
         <div class = join-con>
 
           <div id="joinHeader">
-            <div id="joinClassIcon">
-              <img src="images/Class_Icon.jpg" alt="">
-            </div>
             <div id="joinClassInfo">
               <div id="joinTitle">
-                <div style="color: black; font-size: 20px; font-weight: bold;" id="joinName">null</div>
-                <div style="color: black; font-size: 13px; font-style: italic;" id="joinCreator">null</div>
-              </div>
-              <div>
-                <p id="joinDesc" style="color: black; margin-bottom: 20px;">null</p>
+                <div id="joinClassIcon">
+                  <img src="images/Class_Icon.jpg" alt="">
+                </div>
+                <div>
+                  <div style="color: black; font-size: 20px; font-weight: bold;" id="joinName">null</div>
+                  <div style="color: black; font-size: 13px; font-style: italic;" id="joinCreator">null</div>
+                </div>
               </div>
             </div>
+            <div id="joinDesc">Null</div>
           </div>
 
           <div id="joinCode">
             <input type="text" id="classCode" name="classCode"placeholder="Code" required>
           </div>
 
-          <div class = create-SC>
-            <button class = creates type="button" onclick= "joinClassroom();">Join</button>
-            <button class = creates type="submit" onclick="hideClassSubOverlay('joinOverlay')">Cancel</button>
+          <div class = join-SC>
+            <button type="button" onclick= "joinClassroom();">Join</button>
+            <button type="submit" onclick="hideClassSubOverlay('joinOverlay')">Cancel</button>
           </div>
 
         </div>

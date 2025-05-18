@@ -71,12 +71,12 @@
             $res = $stmt->get_result();
             $row = $res->fetch_assoc();
             $_SESSION['roleID'] = array_values($row)[0];
-            debug_console($_SESSION['roleID']);
+            logAction($conn, $userID, 'Logged in as '.$accountRole);
             
             // redirect according to role
             switch($accountRole){
                 case 'Administrator':
-                    debug_console('Redirect to Administrator');
+                    
                     redirect("Admin.php");
                     break;
                 case 'Instructor':

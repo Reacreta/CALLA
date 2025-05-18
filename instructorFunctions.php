@@ -35,6 +35,7 @@
               $stmt->bind_param('sss', $classInstID, $roleID, $id);
     
               if ($stmt->execute()) {
+                    logAction($conn, $_SESSION['userID'], 'Joined classroom with ID: ' . $id);
                   echo json_encode(['success' => true]);
               } else {
                   echo json_encode(['success' => false, 'message' => 'SQL execution error: ' . $stmt->error]);
