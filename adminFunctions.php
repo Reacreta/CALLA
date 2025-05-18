@@ -1,6 +1,4 @@
 <?php
-  ob_start();
-  session_start();
   require_once 'database.php';
   require_once 'authFunctions.php';
 
@@ -61,14 +59,5 @@
       </a>
     </div>
   <?php
-  }
-
-  function logAction($conn, $userID, $action) {
-    $logID = generateID('L',9);
-
-    $sql = "INSERT INTO activity (logID,userID,action,dateTimeCreated) VALUES (?,?,?,CURRENT_TIMESTAMP)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('sss', $logID, $userID, $action);
-    $stmt->execute();
   }
 ?>

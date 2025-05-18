@@ -10,6 +10,7 @@
   session_start();
   sessionCheck();
 
+  // fetch instructor Id on load
   $creatorID = $_SESSION['userID'];
   $sql = "SELECT instID FROM instructor WHERE userID = ?";
   $stmt = $conn->prepare($sql);
@@ -17,13 +18,12 @@
   $stmt->execute();
   $res = $stmt->get_result();
   $row = $res->fetch_assoc();
-  
   $_SESSION['instID'] = $row['instID'];
 
+  // Insert into Classroom
   if(isset($_POST['createClassroom'])){
     $creatorID= array_values($row)[0];
 
-    // Insert into Classroom
     $className = $_POST['className'];
     $classDesc = $_POST['classDesc'];
     $classCode = generateID("CC",5);
@@ -35,7 +35,6 @@
     $stmt->bind_param('ssssss', $classID, $creatorID,$className,$classDesc,$classCode,$dateCreated);
     $stmt->execute();
 
-
     // Insert into Classinst
     $classinstID = generateID("CI", 8);
     $sql = "INSERT INTO classinstructor (classinstID, instID, classroomID) VALUES(?,?,?)";
@@ -43,7 +42,7 @@
     $stmt->bind_param("sss",$classinstID,$creatorID, $classID);
     $stmt->execute();
 
-
+    logAction($conn, $_SESSION['userID'], "Created Classroom: ".$className);
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
   }

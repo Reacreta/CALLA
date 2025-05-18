@@ -103,4 +103,13 @@
             redirect("index.php");
         }
     }
+
+    function logAction($conn, $userID, $action) {
+        $logID = generateID('L',9);
+    
+        $sql = "INSERT INTO activity (logID,userID,action,dateTimeCreated) VALUES (?,?,?,CURRENT_TIMESTAMP)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('sss', $logID, $userID, $action);
+        $stmt->execute();
+      }
 ?>
