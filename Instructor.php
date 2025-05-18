@@ -551,6 +551,7 @@
       position: relative;
       display: flex;
       align-items: center;
+      gap: 5px;
     }
 
     .search-input {
@@ -643,8 +644,8 @@
   <div class="dashboard-container">
     <div class="sidebar">
       <div class="nav-group">
-      <button class="nav-btn" onclick="showOverlay('classroomOverlay')"><img src="images/Class_Icon.jpg" class="User-icon" alt="Classroom Icon"> Classrooms</button>
-      <button class="nav-btn" onclick="showOverlay('moduleOverlay')"><img src="images/Module_Icon.jpg" class="User-icon" alt="Module Icon"> Modules</button>
+        <button class="nav-btn" onclick="showOverlay('classroomOverlay')"><img src="images/Class_Icon.jpg" class="User-icon" alt="Classroom Icon"> Classrooms</button>
+        <button class="nav-btn" onclick="showOverlay('moduleOverlay')"><img src="images/Module_Icon.jpg" class="User-icon" alt="Module Icon"> Modules</button>
       </div>
     </div>
   
@@ -723,7 +724,8 @@
                 }
                 else{
             ?>
-                  <div class="classroom-card" class-type = "owned">
+                  <div class="classroom-card" class-type = "owned"
+                  classroom-id = "<?php echo $classroomID?>">
                       <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
                       <div class="classroom-info">
                         <div class="classroom-title"><?php echo $className; ?></div>
@@ -771,6 +773,8 @@
         </div>
 
       </div> <!-- End Classroom Creation-->
+
+      <!-- Classroom Details -->
 
       <!-- Join Classroom -->
       <div id="joinOverlay" class="join-overlay">
@@ -1066,12 +1070,13 @@
 
   }
 
-    var name = "";
-    var desc = "";
-    var code = "";
-    var creator = "";
-    var classid = "";
+  var name = "";
+  var desc = "";
+  var code = "";
+  var creator = "";
+  var classid = "";
   
+  // Show Join Overlay
   function showJoinOverlay(element) {
     console.log("Join Overlay");
 
@@ -1155,6 +1160,26 @@
       });
   }
 
+  // Classroom Details ajax request 
+  function showClassDetails(element) {
+  // Fetch classroom card
+  const classCard = element.closest('.classroom-card');
+  if (!classCard) {
+    console.error("Error: Classroom card not found.");
+    return;
+  }
+
+  // Get the classroom ID from the card's attributes
+  const classid = classCard.getAttribute('classroom-id');
+
+  if (!classid) {
+    console.error("Error: Classroom ID not found.");
+    return;
+  }
+
+  // Redirect to classroomDetails.php with the classid as a query parameter
+  window.location.href = `classroomDetails.php?classid=${encodeURIComponent(classid)}`;
+}
 </script>
 
 </body>

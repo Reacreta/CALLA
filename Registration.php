@@ -131,6 +131,8 @@
                 break;
         }
 
+        logAction($conn, $userID, 'Registered as '.$usertype);
+
         // redirect to login
         debug_console("Redirecting to login");
         redirect('index.php');
