@@ -43,6 +43,7 @@
   // Optional: Count total users (if you still need it)
   $total_users = $result ? $result->num_rows : 0;
 
+  // Fetch logs from activity
   $allLogs = [];
   $logResult = $conn->query("SELECT userID, action, dateTimeCreated FROM activity ORDER BY dateTimeCreated DESC");
 
@@ -57,6 +58,7 @@
 <script>
   const allLogs = <?php echo json_encode($allLogs, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
 </script>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -399,6 +401,39 @@
       border-radius: 8px;
     }
 
+    #userDetailsOverlay {
+      background: rgba(255, 255, 255, 0.95);
+      max-width: 800px;
+      width: 90%;
+      margin: auto;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .close-btn {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .edit-profile-link { /* non functioning */ 
+      color: #7b0000;
+      text-decoration: none;
+      font-size: 14px;
+      position: absolute;
+      right: 20px;
+      bottom: 20px;
+    }
+
 
     .user-header-flex {
         display: flex;
@@ -511,43 +546,8 @@
       color: white;
     }
 
-    /* User checklogsdetails overlay */
 
-    #userDetailsOverlay {
-      background: rgba(255, 255, 255, 0.95);
-      max-width: 800px;
-      width: 90%;
-      margin: auto;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .close-btn {
-      position: absolute;
-      right: 10px;
-      top: 10px;
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      color: #666;
-    }
-
-    .edit-profile-link {
-      color: #7b0000;
-      text-decoration: none;
-      font-size: 14px;
-      position: absolute;
-      right: 20px;
-      bottom: 20px;
-    }
-
-
-
+    /* userchecklogs */ 
     #userChecklogsOverlay {
       background: rgba(255, 255, 255, 0.95);
       max-width: 1000px;
@@ -580,13 +580,29 @@
       left: 0;
       right: 0;
       bottom: 70px;
-      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* prevent double scrollbar */
     }
 
     .check {
-      max-height: 100%;
+      height: 600px; /* enough for ~10 entries */
       overflow-y: auto;
       padding: 0 10px;
+      margin-top: 10px;
+    }
+
+    .check::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .check::-webkit-scrollbar-thumb {
+      background: #aaa;
+      border-radius: 6px;
+    }
+
+    .check::-webkit-scrollbar-track {
+      background: #f1f1f1;
     }
 
     .logs-header {
@@ -603,9 +619,10 @@
     }
 
     .log-entry {
+      height: 55px;
       display: grid;
       grid-template-columns: 1.5fr 3fr 1.5fr;
-      padding: 15px 20px;
+      padding: 0 20px;
       background-color: #f1f1f1;
       border-radius: 12px;
       margin-bottom: 10px;
