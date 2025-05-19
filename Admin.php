@@ -43,7 +43,20 @@
   // Optional: Count total users (if you still need it)
   $total_users = $result ? $result->num_rows : 0;
 
+  $allLogs = [];
+  $logResult = $conn->query("SELECT userID, action, dateTimeCreated FROM activity ORDER BY dateTimeCreated DESC");
+
+  if ($logResult && $logResult->num_rows > 0) {
+      while ($row = $logResult->fetch_assoc()) {
+          $allLogs[] = $row;
+      }
+  }
+
 ?>
+
+<script>
+  const allLogs = <?php echo json_encode($allLogs, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+</script>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -951,10 +964,10 @@
                   <div class="user-profile-info">
                     <div class="user-header-flex">
                       <div>
-                        <div id="userDetailName" class="user-detail-name">Joshua Gatmin</div>
-                        <div id="userDetailRole" class="user-detail-role">Instructor</div>
+                        <div id="userDetailName" class="user-detail-name"></div>
+                        <div id="userDetailRole" class="user-detail-role"></div>
                       </div>
-                      <div class="uid-display" id="userDetailUID">UID: Thr5Tr4pY3s</div>
+                      <div class="uid-display" id="userDetailUID"></div>
                     </div>
                   </div>
                 </div>
@@ -962,27 +975,27 @@
                 <div class="user-details-grid">
                   <div class="detail-item">
                     <label>First Name:</label>
-                    <div id="userDetailFirstName">Joshua</div>
+                    <div id="userDetailFirstName"></div>
                   </div>
                   <div class="detail-item">
                     <label>Last Name:</label>
-                    <div id="userDetailLastName">Gatmin</div>
+                    <div id="userDetailLastName"></div>
                   </div>
                   <div class="detail-item">
                     <label>Gender:</label>
-                    <div id="userDetailGender">Male</div>
+                    <div id="userDetailGender"></div>
                   </div>
                   <div class="detail-item">
                     <label>Email:</label>
-                    <div id="userDetailEmail">jg17@gmail.com</div>
+                    <div id="userDetailEmail"></div>
                   </div>
                   <div class="detail-item">
                     <label>Contact:</label>
-                    <div id="userDetailContact">09827653342</div>
+                    <div id="userDetailContact"></div>
                   </div>
                   <div class="detail-item">
                     <label>Date of Birth:</label>
-                    <div id="userDetailDOB">07/17/2003</div>
+                    <div id="userDetailDOB"></div>
                   </div>
                 </div>
               </div>
@@ -1005,9 +1018,9 @@
               </div>
               <div class="check">
                 <div class="log-entry">
-                  <div class="user-col">Joshua Gatmin - Thr5Tr4pY3s</div>
-                  <div class="action-col">Created Instructor Joshua Gatmin</div>
-                  <div class="date-col">2/04/2025–8:09 AM</div>
+                  <div class="user-col"></div>
+                  <div class="action-col"></div>
+                  <div class="date-col"></div>
                 </div>
               </div>
             </div>
@@ -1425,8 +1438,36 @@ function closeInput(input) {
 
 // checkuserlogs
 function checkUserLogs() {
+  const userID = document.getElementById('userDetailUID')?.textContent?.trim();
+  const userName = document.getElementById('userDetailName')?.textContent?.trim();
+
   const overlay = document.getElementById('userChecklogsOverlay');
+  const checkContainer = overlay.querySelector('.check');
+  checkContainer.innerHTML = ''; // Clear logs
+
   overlay.style.display = 'block';
+
+  if (!userID) {
+    checkContainer.innerHTML = '<div style="padding:10px;color:red;">User ID missing.</div>';
+    return;
+  }
+
+  const logs = Array.isArray(allLogs) ? allLogs.filter(log => log.userID === userID) : [];
+
+  if (logs.length > 0) {
+    logs.forEach(log => {
+      const entry = document.createElement('div');
+      entry.classList.add('log-entry');
+      entry.innerHTML = `
+        <div class="user-col">${userName}</div>
+        <div class="action-col">${log.action}</div>
+        <div class="date-col">${log.dateTimeCreated}</div>
+      `;
+      checkContainer.appendChild(entry);
+    });
+  } else {
+    checkContainer.innerHTML = '<div style="padding:10px;">No logs found for this user.</div>';
+  }
 }
 
 function closeUserLogs() {
