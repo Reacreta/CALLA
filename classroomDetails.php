@@ -11,10 +11,30 @@
     sessionCheck();
 
     $classid = $_GET['classid'] ?? null;
+    $accountRole = $_SESSION['accountRole'];
 
     if (!$classid) {
         die('Class ID is missing.');
     }
+
+    // Set page based on accountRole
+
+    if ($accountRole === 'Administrator') { // if admin
+        $title = 'CALLA Admin Dashboard';
+        $logoHeader = 'ADMIN';
+    }
+    else if ($accountRole === 'Instructor') { // if instructor
+        $title = 'CALLA Instructor Dashboard';
+        $logoHeader = 'INSTRUCTOR';
+    }
+    else if ($accountRole === 'Student') { // if student
+        $title = 'CALLA Student Dashboard';
+        $logoHeader = 'STUDENT';
+    }
+    else {
+        die('Role does not comply.');
+    }
+
 
     // Fetch classroom details from the database
     $sql = "SELECT * FROM classroom c 
@@ -87,7 +107,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>CALLA Instructor Dashboard</title>
+  <title><?php echo $title ?></title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter&family=Goudy+Bookletter+1911&display=swap" rel="stylesheet">
   <style>
@@ -414,7 +434,7 @@
 
 <body>
     <div class="header">
-        <div class="logoTitle"><img id="logo" src="images/logo.png"><div id="role"><span>INSTRUCTOR</span></div></div>
+        <div class="logoTitle"><img id="logo" src="images/logo.png"><div id="role"><span><?php echo $logoHeader ?></span></div></div>
         <div class="profile-container" onclick="toggleLogoutDropdown()">
             <div class="profile-pic" style="background-image: url('images/Human_Icon.jpg');"></div>
             <div class="logout-dropdown" id="logoutDropdown">
@@ -427,7 +447,7 @@
 
         <div class="dash-head">
             <div class="nav-group">
-                <button class="nav-btn" id="back">Back</button>
+                <button class="nav-btn" id="back" onclick="backToDashboard()">Back</button>
                 <button class="nav-btn" id="editBtn" onclick="">Edit</button>
                 <button class="nav-btn" id="deleteBtn" onclick="">Delete</button>
                 <button class="nav-btn" id="leaveBtn" onclick="">Leave</button>
@@ -732,6 +752,23 @@
             document.getElementById('classroomOverlay').classList.add('show');
             }
 
+        }
+
+        // Classroom Functions
+        
+        function backToDashboard() {
+            // Pass PHP variable to JS as a string
+            const accountRole = "<?php echo htmlspecialchars($accountRole, ENT_QUOTES); ?>";
+
+            if (accountRole === 'Administrator') {
+                window.location.href = 'Admin.php';
+            } else if (accountRole === 'Instructor') {
+                window.location.href = 'Instructor.php';
+            } else if (accountRole === 'Student') {
+                window.location.href = 'Student.php';
+            } else {
+                alert('No account role detected. Please login again.');
+            }
         }
       
     </script>

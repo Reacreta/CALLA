@@ -50,6 +50,7 @@
             $_SESSION['username'] = $account['username'];
             $_SESSION['email'] = $account['email'];
             $accountRole = $account['userType'];
+            $_SESSION['accountRole'] = $accountRole;
             debug_console('Check role');
 
             // get user role ID
