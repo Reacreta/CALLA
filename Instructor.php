@@ -1055,17 +1055,34 @@
 Module Name, Module Description{
   {Lesson 1 Name, Lesson 1 Description{
     {Word 1, Meaning},
-    {Word 2, Meaning}
+    {Word 2, Meaning}, ...
   }},
   {Lesson 2 Name, Lesson 2 Description{
     {Word 1, Meaning},
-    {Word 2, Meaning}
-  }}	
+    {Word 2, Meaning}, ...
+  }}, ...	
 }</pre>
           </div>
           <form action="" method="post" enctype="multipart/form-data">
             <div class="create-module-con">
-              <input id="classroomIDField" type="text" placeholder="ClassroomID" name="classIDField">
+              <select name="classroomIDField" id="classroomIDField" placeholder="ClassroomID">
+                <option value="" disabled selected>Select a Classroom</option>
+                  <?php
+                    $sql = "SELECT ci.classroomID, c.className FROM classinstructor ci 
+                            JOIN classroom c ON ci.classroomID = c.classroomID 
+                            WHERE ci.instID = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param('s', $_SESSION['roleID']);
+                    $stmt->execute();
+                    $results = $stmt->get_result();
+                    while($rows = $results->fetch_assoc()){
+                      $classroomID = $rows['classroomID'];
+                      $classroomName = $rows['className'];
+                      echo "<option value='$classroomID'>$classroomName</option>";
+                    }
+                  ?>
+
+              </select>
               <input id="files" type="file" name="files[]" multiple>
             </div>
 
