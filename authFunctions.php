@@ -112,4 +112,27 @@
         $stmt->bind_param('sss', $logID, $userID, $action);
         $stmt->execute();
       }
+
+
+    function checkFiles($files) {
+        debug_console("Checking Files");
+        $permitted = array('txt', 'json'); 
+    
+        // Check if files are uploaded
+        if (!isset($files['name']) || $files['name'][0] === "") {
+            debug_console("No files uploaded.");
+            return false;
+        }
+    
+        // Validate each file
+        foreach ($files['name'] as $key => $fileName) {
+            $ext = pathinfo($fileName, PATHINFO_EXTENSION);
+            if (!in_array($ext, $permitted)) {
+                debug_console("Invalid file type: " . $fileName);
+                return false;
+            }
+        }
+        debug_console("All files are valid.");
+        return true;
+    }
 ?>

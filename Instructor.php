@@ -10,16 +10,6 @@
   session_start();
   sessionCheck();
 
-  // fetch instructor Id on load
-  $creatorID = $_SESSION['userID'];
-  $sql = "SELECT instID FROM instructor WHERE userID = ?";
-  $stmt = $conn->prepare($sql);
-  $stmt->bind_param('s',$creatorID);
-  $stmt->execute();
-  $res = $stmt->get_result();
-  $row = $res->fetch_assoc();
-  $_SESSION['instID'] = $row['instID'];
-
   // Insert into Classroom
   if(isset($_POST['createClassroom'])){
     $creatorID= array_values($row)[0];
@@ -47,7 +37,134 @@
     exit();
   }
 
+  // Module Upload Reading Parsing and Insert
+  if (isset($_FILES['files']) && isset($_POST['upload'])) {
+    $response = "";
+    $classroomID = $_POST['classIDField'];
+    $instID = $_SESSION['roleID'];
+    $fileArray = $_FILES['files'];
+
+    // Check if instructor is part of classroom
+    $sql = "SELECT * FROM classinstructor WHERE classroomID = ? AND instID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('ss', $classroomID, $instID);
+    $stmt->execute();
+    $results = $stmt->get_result();
+    $rows = $results->fetch_assoc();
+
+    $classInstID = $rows['classInstID'];
+
+    if ($results->num_rows !== 0) {
+      // check if Files are uploaded and valid then loop through each file
+      if (checkFiles($fileArray)) {
+        for($i = 0; $i < count($fileArray['name']); $i++) {
+          $file = [
+              'name' => $fileArray['name'][$i],
+              'tmp_name' => $fileArray['tmp_name'][$i],
+              'type' => $fileArray['type'][$i],
+              'error' => $fileArray['error'][$i],
+              'size' => $fileArray['size'][$i],
+          ];
+
+          $fileContent = file_get_contents($file['tmp_name']);
+
+          // Loop, parse and insert modules
+          $modulePattern = '/^(.*?),\s*(.*?)\s*{(.*)}$/s';
+          if (preg_match($modulePattern, $fileContent, $moduleMatches)) {
+            $moduleName = trim($moduleMatches[1]);
+            $moduleDesc = trim($moduleMatches[2]);
+            $moduleContent = trim($moduleMatches[3]);
+
+            debug_console("Module Name: " . $moduleName);
+            debug_console("Module Desc: " . $moduleDesc);
+
+            $moduleID = generateID("M", 9);
+            $cmID = generateID("CM", 8);
+
+            // Insert into Language Modules
+            $sql = "INSERT INTO languagemodule (langID, moduleName, moduleDesc, dateCreated)
+                    VALUES (?, ?, ?, CURRENT_DATE)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('sss', $moduleID, $moduleName, $moduleDesc);
+            $stmt->execute();
+
+            // Insert ClassModule
+
+            $sql = "INSERT INTO classmodule (cmID, classInstID, langID) VALUES (?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('sss', $cmID, $classInstID, $moduleID);
+            $stmt->execute();
+
+            // loop, parse and insert lessons
+            preg_match_all('/{(.*?),\s*(.*?)\s*{(.*?)}}/s', $moduleContent, $lessonMatches, PREG_SET_ORDER);
+            error_log("Lesson Matches: " . print_r($lessonMatches, true)); // Debugging line
+            foreach ($lessonMatches as $lesson) {
+              $lessonName = trim($lesson[1]);
+              $lessonDesc = trim($lesson[2]);
+              $lessonContent = trim($lesson[3]);
+              $lessonID = generateID("L", 9);
+
+              debug_console("Lesson Name: " . $lessonName);
+              debug_console("Lesson Desc: " . $lessonDesc);
+
+              $sql = "INSERT INTO lesson (lessID, langID, lessonName, lessonDesc, dateCreated)
+                      VALUES (?, ?, ?, ?, CURRENT_DATE)";
+              $stmt = $conn->prepare($sql);
+              $stmt->bind_param('ssss', $lessonID, $moduleID, $lessonName, $lessonDesc);
+              $stmt->execute();
+              // loop, parse and insert word-meaning pairs
+              preg_match_all('/{\s*(.*?),\s*(.*?)}/s', $lessonContent, $wordMeaningPairs, PREG_SET_ORDER);
+              foreach ($wordMeaningPairs as $pair) {
+                  $word = trim($pair[1]);
+                  $meaning = trim($pair[2]);
+                  debug_console("Word: " . $word);
+                  debug_console("Meaning: " . $meaning);
+                  $wordID = generateID("W", 9);
+
+                  $sql = "INSERT INTO vocabulary (wordID, lessID, word, meaning) VALUES (?, ?, ?, ?)";
+                  $stmt = $conn->prepare($sql);
+                  $stmt->bind_param('ssss', $wordID, $lessonID, $word, $meaning);
+                  $stmt->execute();
+                }
+              }
+            }
+          }
+        }
+      }
+      else {
+        $response = "You are not part of the Classroom";
+      }
+      header("Location: " . $_SERVER['PHP_SELF']);
+      exit();
+    }// Yawa ni abot og 10 ka nests jesus
+
+  /*
+            Expected Text Format:
+            Module name, Module description {
+              {Lesson1Name, lesson1Description{
+                {word, meaning},
+                {Word, meaning}
+              }
+              {Lesson2Name, lesson2Description{
+                {word, meaning},
+                {Word, meaning}
+              }
+            }
+
+
+            Regex Pattern: "/^(.*?),\s*(.*?)\s*{(.*)}$/s" same rani siya nga pattern for lesson ang 
+            medjo lahi lang is ang kadtong word-meaning pairs so goonerific 😋🤤
+
+            ^$ - start and end of string
+            (.*?), - Module Name - detects up to comma
+            \s* - whitespace
+            (.*?) - Module Description - detects up to {
+            {(.*)} - Module Content - detects everything inside the brackets type shit yawa
+            dugay ni sulaton pre atay
+
+    */
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -255,10 +372,6 @@
       z-index: 10;
       padding: 20px;
       overflow-y: auto;
-    }
-    
-    .module-overlay.show, .create-overlay.show, .join-overlay.show {
-      display: block;
     }
 
     .close-btn {
@@ -546,6 +659,28 @@
       font-size: 20px;
     }
 
+    /* Create Module Overlay */
+    .create-module-overlay{
+      display: none;
+      position: absolute;
+      border: 2px solid white;
+      border-radius: 6px 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      top: 10%;
+      left: 30%;
+      height: fit-content;
+      width: fit-content;
+      background: rgba(241, 241, 241, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 20;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .module-overlay.show, .create-overlay.show, .join-overlay.show, .create-module-overlay.show {
+      display: block;
+    }
+
     /* SEARCH INPUTS */
     .search-container {
       position: relative;
@@ -745,7 +880,7 @@
       </div> <!-- End Classroom Overlay -->
 
       <div id="createOverlay" class="create-overlay">
-        <button class="close-btn" onclick="hideClassSubOverlay('createOverlay')">×</button>
+        <button class="close-btn" onclick="hideSubOverlay('createOverlay')">×</button>
         <h2 style="color: #7b0000; margin-bottom: 20px;">Create a Class</h2>
 
         <div class = create-con>
@@ -766,7 +901,7 @@
 
           <div class = create-SC>
             <button class = "creates" type="submit" name="createClassroom">Create</button>
-            <button class = "creates" onclick="hideClassSubOverlay('createOverlay')">Cancel</button>
+            <button class = "creates" onclick="hideSubOverlay('createOverlay','classroomOverlay')">Cancel</button>
           </div>
           </form>
 
@@ -774,11 +909,9 @@
 
       </div> <!-- End Classroom Creation-->
 
-      <!-- Classroom Details -->
-
       <!-- Join Classroom -->
       <div id="joinOverlay" class="join-overlay">
-      <button class="close-btn" onclick="hideClassSubOverlay('joinOverlay')">×</button>
+      <button class="close-btn" onclick="hideSubOverlay('joinOverlay','classroomOverlay')">×</button>
         <div class = join-con>
 
           <div id="joinHeader">
@@ -802,7 +935,7 @@
 
           <div class = join-SC>
             <button type="button" onclick= "joinClassroom();">Join</button>
-            <button type="submit" onclick="hideClassSubOverlay('joinOverlay')">Cancel</button>
+            <button type="button" onclick="hideSubOverlay('joinOverlay','classroomOverlay')">Cancel</button>
           </div>
 
         </div>
@@ -816,7 +949,7 @@
         <div class="tabs">
           <div id="tabHeader">Owned</div>
           <div class="right-buttons">
-            <button onclick="toggleModuleCreation()">New Module</button>
+            <button onclick="showOverlay('createModuleOverlay','moduleOverlay')">New Module</button>
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
               <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
@@ -843,10 +976,10 @@
                 ";
 
                 $stmt = $conn->prepare($sql); 
-                $stmt->bind_param('s', $_SESSION['instID']);
+                $stmt->bind_param('s', $_SESSION['roleID']);
                 $stmt->execute();
                  
-                debug_console("InstructorID: ".$_SESSION['instID']);
+                debug_console("InstructorID: ".$_SESSION['roleID']);
 
                 $result = $stmt->get_result();
                 while($row = $result->fetch_assoc()){
@@ -857,7 +990,7 @@
                     <div class="module-title"><?= htmlspecialchars($row['moduleName']) ?></div>
                     <div class="module-creator">By <?= htmlspecialchars($row['username']) ?></div>
                     </div>
-                    <button>
+                    <button type="button" onclick="showSubOverlay('','moduleOverlay')">
                       <img src="images/Search_Icon.jpg" alt="View Module" class="search-image-icon">
                     </button>
                 </div>    
@@ -870,7 +1003,22 @@
       </div><!-- End Module Overlay-->
 
       <!-- Module Creation -->
-      
+      <div id="createModuleOverlay" class="create-module-overlay" overlay-type ="create-module">
+        <div id="createModuleMain">
+          <button class="close-btn" onclick="hideSubOverlay('createModuleOverlay','moduleOverlay')">×</button>
+          <h2 style="color: #7b0000; margin-bottom: 20px;">Upload a Module</h2>
+          <form action="" method="post" enctype="multipart/form-data">
+            <input type="text" placeholder="ClassroomID" name="classIDField">
+            <input type="file" name="files[]" multiple>
+
+            <div class = join-SC>
+              <button type="submit" name="upload">Upload</button>
+              <button type="button" onclick="hideSubOverlay('createModuleOverlay','moduleOverlay')">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div><!-- End Module Creation -->
+
     </div><!-- End Main Content-->
   </div><!-- End dashboard-container-->
 
@@ -1028,7 +1176,7 @@
   }
 
   function showOverlay(targetId, backgroundId = null) {
-    const overlays = ['classroomOverlay', 'moduleOverlay', 'createOverlay', 'joinOverlay'];
+    const overlays = ['classroomOverlay', 'moduleOverlay', 'createOverlay', 'joinOverlay', 'createModuleOverlay'];
     const bg = document.getElementById('backgroundContent');
 
     overlays.forEach(id => {
@@ -1056,7 +1204,7 @@
 
   }
 
-  function hideClassSubOverlay(targetId) {
+  function hideSubOverlay(targetId,parent) {
 
     const target = document.getElementById(targetId);
 
@@ -1065,7 +1213,7 @@
     const anyOpen = document.querySelectorAll('.show').length > 0;
 
     if (!anyOpen) {
-      document.getElementById('classroomOverlay').classList.add('show');
+      document.getElementById(parent).classList.add('show');
     }
 
   }
