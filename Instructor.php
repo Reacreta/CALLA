@@ -739,7 +739,46 @@
       transition: transform 0.2s;
     }
 
-    .module-overlay.show, .create-overlay.show, .join-overlay.show, .create-module-overlay.show {
+    /* View Module */
+    #viewModuleOverlay{
+      display: none;
+      position: absolute;
+      border: 2px solid white;
+      border-radius: 6px 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      top: 10%;
+      left: 30%;
+      height: fit-content;
+      width: fit-content;
+      background: rgba(241, 241, 241, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 20;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    #viewModuleInfo{
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    #viewModuleTitle{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    #viewModuleInfoText{
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    #viewModuleDesc{
+      background-color: gainsboro;
+      border-radius: 15px;
+      padding: 15px;
+    }
+
+    .show, #viewModuleOverlay.show{
       display: block;
     }
 
@@ -1046,13 +1085,14 @@
                 $result = $stmt->get_result();
                 while($row = $result->fetch_assoc()){
               ?>
-                  <div class="module-card">
+                  <div class="module-card" 
+                  module-id = "<?php echo htmlspecialchars($row['langID'])?>">
                     <img src="images/Module_Icon.jpg" alt="Module Icon" class="module-icon">
                     <div class="module-info">
                     <div class="module-title"><?= htmlspecialchars($row['moduleName']) ?></div>
                     <div class="module-creator">In <?= htmlspecialchars($row['className']) ?></div>
                     </div>
-                    <Button id="viewModule" onclick="showSubOverlay('','moduleOverlay')">
+                    <Button id="viewModule" onclick="showViewModule(this)">
                       <img src="images/Search_Icon.jpg" alt="View Module" class="search-image-icon">
                     </Button>
                 </div>    
@@ -1113,6 +1153,23 @@ Module Name, Module Description{
           </form>
         </div>
       </div><!-- End Module Creation -->
+
+
+      <!-- View Module Overlay -->
+      <div id="viewModuleOverlay" class="view-module-overlay" overlay-type = "view-module-overlay">
+        <div id="viewModuleCon">
+          <div id="viewModuleHeader">
+            <button class="close-btn" onclick="hideSubOverlay('viewModuleOverlay','moduleOverlay')">×</button>
+            <h2 style="color: #7b0000; margin-bottom: 20px;">View Module</h2>
+          </div>
+          <div id="viewModuleMain">
+                  <!-- I Edit ni siya sa adtong scipt sa java script i love jollibee -->
+          </div>
+          <div id="viewModuleSC">
+            <button type="button" class="create-mod-btn" onclick="deleteModule(this)">Delete</button>
+            <button type="button" class="create-mod-btn" onclick="hideSubOverlay('viewModuleOverlay','moduleOverlay')">Close</button>
+        </div>
+      </div><!-- End View Module Overlay -->
 
     </div><!-- End Main Content-->
   </div><!-- End dashboard-container-->
@@ -1271,14 +1328,15 @@ Module Name, Module Description{
   }
 
   function showOverlay(targetId, backgroundId = null) {
-    const overlays = ['classroomOverlay', 'moduleOverlay', 'createOverlay', 'joinOverlay', 'createModuleOverlay'];
+    const overlays = ['classroomOverlay', 'moduleOverlay', 'createOverlay', 'joinOverlay', 'createModuleOverlay','viewModuleOverlay'];
     const bg = document.getElementById('backgroundContent');
 
     overlays.forEach(id => {
       const overlay = document.getElementById(id); // gets element with corresponding name from overlay array
+      console.log("Overlay ID: " + id); // Debugging line
 
       const shouldShow = (id === targetId || (backgroundId && id === backgroundId));// BOOLEAN MAN DIAY NI PUTANGINA MO
-
+      console.log("Should Show: " + shouldShow); // Debugging line
       overlay.classList.toggle('show', shouldShow);
     });
 
@@ -1357,7 +1415,6 @@ Module Name, Module Description{
     const inputCode = document.getElementById('classCode').value;
     console.log(inputCode +" = "+code);
 
-
     console.log(inputCode === code);
     // Compare the input value with the variable `code`
     if (inputCode !== code) {
@@ -1403,26 +1460,87 @@ Module Name, Module Description{
       });
   }
 
-  // Classroom Details ajax request 
-  function showClassDetails(element) {
-  // Fetch classroom card
-  const classCard = element.closest('.classroom-card');
-  if (!classCard) {
-    console.error("Error: Classroom card not found.");
-    return;
+ // Show View Module
+  var selectedModuleID = "";
+
+  function showViewModule(element) {
+    console.log("View Module");
+    showOverlay('viewModuleOverlay', 'moduleOverlay');
+
+    const moduleCard = element.closest('.module-card');
+    const moduleID = moduleCard.getAttribute('module-id');
+
+    selectedModuleID = moduleID;
+    console.log("Module ID: " + moduleID);
+
+    if (!moduleID) {
+      console.error("Error: Module ID not found.");
+      return;
+    }
+
+    console.log('Sending Fetch Request to instructor.php');
+    fetch('instructorFunctions.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'getModuleDetails',
+        data: { moduleID: moduleID }
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.text();
+    })
+    .then(data => {
+      console.log(data);
+      document.getElementById('viewModuleMain').innerHTML = data;
+    })
+    .catch(error => {
+      console.error("Fetch error:", error);
+      document.getElementById('viewModuleMain').innerHTML = `<div class="error">Failed to load module details.</div>`;
+    });
   }
 
-  // Get the classroom ID from the card's attributes
-  const classid = classCard.getAttribute('classroom-id');
+  function deleteModule(element) {
+    console.log("Delete Module");
+    const moduleCard = element.closest('.module-card');
+    const moduleID = moduleCard.getAttribute('module-id');
 
-  if (!classid) {
-    console.error("Error: Classroom ID not found.");
-    return;
+    if (!moduleID) {
+      console.error("Error: Module ID not found.");
+      return;
+    }
+
+    fetch('instructorFunctions.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'deleteModule',
+        data: { moduleID: moduleID }
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(result => {
+      if (result.success) {
+        alert('Module deleted successfully!');
+        location.reload(); // Optionally refresh the page
+      } else {
+        alert('Failed to delete module: ' + result.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('An error occurred: ' + error.message);
+    });
   }
-
-  // Redirect to classroomDetails.php with the classid as a query parameter
-  window.location.href = `classroomDetails.php?classid=${encodeURIComponent(classid)}`;
-}
+  
 </script>
 
 </body>
