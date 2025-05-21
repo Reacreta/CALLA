@@ -414,6 +414,14 @@
     margin-left: auto; 
     }
 
+    #tabHeader{
+      display: flex;
+      font-size: 20px;
+      font-weight: bold;
+      color: #7b0000;
+      align-items: center;
+    }
+
     .tab {
       background: none;
       border: none;
@@ -719,6 +727,18 @@
       font-size: 15px;
     }
 
+    #viewModule{
+      background: #e6e6e6;
+      border: none;
+      color: #7b0000;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 100%;
+      font-size: 15px;
+      height: auto;
+      transition: transform 0.2s;
+    }
+
     .module-overlay.show, .create-overlay.show, .join-overlay.show, .create-module-overlay.show {
       display: block;
     }
@@ -742,7 +762,6 @@
 
     .SearchButton {
       background-color: #7b0000;
-      margin-right: 15px;
       color: white;
       border: none;
       border-radius: 20px;
@@ -991,7 +1010,7 @@
         <div class="tabs">
           <div id="tabHeader">Owned</div>
           <div class="right-buttons">
-            <button onclick="showOverlay('createModuleOverlay','moduleOverlay')">New Module</button>
+            <button onclick="showOverlay('createModuleOverlay','moduleOverlay')" class="SearchButton">New Module</button>
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
               <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
@@ -1007,12 +1026,13 @@
                 SELECT 
                     lm.langID, 
                     lm.moduleName, 
-                    u.username, 
-                    'Classroom'
+                    u.username,
+                    c.className
                 FROM classmodule cm 
                 JOIN classinstructor ci ON cm.classInstID = ci.classInstID
                 JOIN instructor i ON i.instID = ci.instID
                 JOIN users u ON u.userID = i.userID
+                JOIN classroom c ON ci.classroomID = c.classroomID
                 JOIN languagemodule lm ON lm.langID = cm.langID
                 WHERE i.instID = ?;
                 ";
@@ -1030,11 +1050,11 @@
                     <img src="images/Module_Icon.jpg" alt="Module Icon" class="module-icon">
                     <div class="module-info">
                     <div class="module-title"><?= htmlspecialchars($row['moduleName']) ?></div>
-                    <div class="module-creator">By <?= htmlspecialchars($row['username']) ?></div>
+                    <div class="module-creator">In <?= htmlspecialchars($row['className']) ?></div>
                     </div>
-                    <button type="button" onclick="showSubOverlay('','moduleOverlay')">
+                    <Button id="viewModule" onclick="showSubOverlay('','moduleOverlay')">
                       <img src="images/Search_Icon.jpg" alt="View Module" class="search-image-icon">
-                    </button>
+                    </Button>
                 </div>    
               <?php
                 }
