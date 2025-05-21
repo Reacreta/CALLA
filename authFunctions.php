@@ -133,7 +133,7 @@
         $stmt->bind_param('sss', $logID, $userID, $action);
         $stmt->execute();
       }
-
+      
 
     function checkFiles($files) {
         debug_console("Checking Files");
