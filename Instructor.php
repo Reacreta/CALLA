@@ -676,6 +676,48 @@
       padding: 20px;
       overflow-y: auto;
     }
+    #template{
+      border-radius: 15px;
+      background-color: lightgray;
+      padding: 15px;
+    }
+
+    .create-module-SC, .create-module-con{
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      justify-content: right;
+    }
+
+    #classroomIDField{
+      height: auto;
+      width: 100%;
+      padding: 10px;
+
+      border: lightgray 1px solid;
+      border-radius: 10px;
+    }
+
+    #files{
+      height: auto;
+      width: 100%;
+      padding: 10px;
+
+      border: lightgray 1px solid;
+      border-radius: 10px;
+    }
+    
+    .create-mod-btn{
+      background: #e6e6e6;
+      border: none;
+      color: #7b0000;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 10px 10px;
+      border-radius: 6px 6px;
+      font-size: 15px;
+    }
 
     .module-overlay.show, .create-overlay.show, .join-overlay.show, .create-module-overlay.show {
       display: block;
@@ -1007,13 +1049,29 @@
         <div id="createModuleMain">
           <button class="close-btn" onclick="hideSubOverlay('createModuleOverlay','moduleOverlay')">×</button>
           <h2 style="color: #7b0000; margin-bottom: 20px;">Upload a Module</h2>
+          <div id="template">
+            <h3 style="color: #7b0000; margin-bottom: 10px;">Template:</h3>
+                <pre>
+Module Name, Module Description{
+  {Lesson 1 Name, Lesson 1 Description{
+    {Word 1, Meaning},
+    {Word 2, Meaning}
+  }},
+  {Lesson 2 Name, Lesson 2 Description{
+    {Word 1, Meaning},
+    {Word 2, Meaning}
+  }}	
+}</pre>
+          </div>
           <form action="" method="post" enctype="multipart/form-data">
-            <input type="text" placeholder="ClassroomID" name="classIDField">
-            <input type="file" name="files[]" multiple>
+            <div class="create-module-con">
+              <input id="classroomIDField" type="text" placeholder="ClassroomID" name="classIDField">
+              <input id="files" type="file" name="files[]" multiple>
+            </div>
 
-            <div class = join-SC>
-              <button type="submit" name="upload">Upload</button>
-              <button type="button" onclick="hideSubOverlay('createModuleOverlay','moduleOverlay')">Cancel</button>
+            <div class = create-module-SC>
+              <button type="submit" class="create-mod-btn" name="upload">Upload</button>
+              <button type="button" class="create-mod-btn" onclick="hideSubOverlay('createModuleOverlay','moduleOverlay')">Cancel</button>
             </div>
           </form>
         </div>
