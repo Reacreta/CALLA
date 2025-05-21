@@ -43,6 +43,9 @@
     $classroomID = $_POST['classIDField'];
     $instID = $_SESSION['roleID'];
     $fileArray = $_FILES['files'];
+    debug_console("Post Went In");
+    debug_console("Classroom ID: " . $classroomID);
+    debug_console("Instructor ID: " . $instID);
 
     // Check if instructor is part of classroom
     $sql = "SELECT * FROM classinstructor WHERE classroomID = ? AND instID = ?";
@@ -130,9 +133,6 @@
             }
           }
         }
-      }
-      else {
-        $response = "You are not part of the Classroom";
       }
       header("Location: " . $_SERVER['PHP_SELF']);
       exit();
@@ -749,7 +749,7 @@
       top: 10%;
       left: 30%;
       height: fit-content;
-      width: fit-content;
+      width: 50%;
       background: rgba(241, 241, 241, 0.85);
       backdrop-filter: blur(5px);
       z-index: 20;
@@ -1125,7 +1125,7 @@ Module Name, Module Description{
           </div>
           <form action="" method="post" enctype="multipart/form-data">
             <div class="create-module-con">
-              <select name="classroomIDField" id="classroomIDField" placeholder="ClassroomID">
+              <select name="classIDField" id="classroomIDField" placeholder="ClassroomID">
                 <option value="" disabled selected>Select a Classroom</option>
                   <?php
                     $sql = "SELECT ci.classroomID, c.className FROM classinstructor ci 
@@ -1506,7 +1506,7 @@ Module Name, Module Description{
   function deleteModule(element) {
     console.log("Delete Module");
     const moduleCard = element.closest('.module-card');
-    const moduleID = moduleCard.getAttribute('module-id');
+    const moduleID = selectedModuleID;
 
     if (!moduleID) {
       console.error("Error: Module ID not found.");
@@ -1529,7 +1529,6 @@ Module Name, Module Description{
     })
     .then(result => {
       if (result.success) {
-        alert('Module deleted successfully!');
         location.reload(); // Optionally refresh the page
       } else {
         alert('Failed to delete module: ' + result.message);
