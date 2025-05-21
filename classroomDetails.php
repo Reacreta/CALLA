@@ -49,8 +49,30 @@
     if ($result->num_rows > 0) {
         $classroom = $result->fetch_assoc();
 
-        debug_console($classroom);
+        // debug_console($classroom);
     } 
+
+    // checking ownership
+    $checkOwner = 'false'; // set initial
+    $instUID = null;
+    if ($accountRole === 'Instructor') {
+        $uid = $_SESSION['userID'];
+        $sql = "SELECT * FROM instructor i
+                JOIN users u ON i.userID = u.userID
+                WHERE i.userID = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('s', $uid);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $instUID = $result->fetch_assoc()['instID'];
+            // debug_console('Owner ID: '. $instUID);
+        }
+        $instID = $classroom['instID'];
+        $checkOwner = ($instUID === $instID) ? 'true' : 'false';
+    }
+    
 
     // fetch instructors
     $sql= "SELECT *
@@ -100,6 +122,70 @@
     }
 
     // fetch classroom instructors
+
+    // -- FUNCTIONS --
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $data = json_decode(file_get_contents('php://input'), true);
+        // update classroom
+        if (isset($data['updateClass'])) {
+            $className = trim($data['className']);
+            $classDesc = trim($data['classDesc']);
+            $classID = trim($data['classID']);
+
+            $sql = "UPDATE classroom SET className = ?, classDesc = ? WHERE classroomID = ?";
+            $stmt = $conn->prepare($sql);
+            if ($stmt) {
+                $stmt->bind_param("sss", $className, $classDesc, $classID);
+                $stmt->execute();
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false, 'error' => $conn->error]);
+            }
+            exit;
+        }
+        // delete classroom
+        // -- PUT HERE -- 
+
+        // leave classroom
+        if (isset($data['leaveClassroom'])) {
+            $classID = trim($data['classID']);
+            $role = $data['role'];
+            $owner = $data['owner'];
+            $userID = $_SESSION['userID'];
+
+            if ($owner === true || $owner === 'true') { // THIS IS NOT WORKING YET, PLEASE FIX DB TO BOMB THE CLASSROOM FOREIGN KEYS
+                // Owner leaves → delete classroom
+                $sql = "DELETE FROM classroom WHERE classroomID = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("s", $classID);
+                $stmt->execute();
+            } else {
+                // Normal instructor or student leaving
+                if ($role === 'Instructor') {
+                    $sql = "DELETE FROM classinstructor WHERE instID = ? AND classroomID = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("ss", $instUID, $classID);
+                    $stmt->execute();
+                } elseif ($role === 'Student') {
+                    $sql = "DELETE FROM enrolledstudent WHERE userID = ? AND classroomID = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("ss", $userID, $classID);
+                    $stmt->execute();
+                } else {
+                    echo json_encode(['success' => false, 'error' => 'Invalid role']);
+                    exit;
+                }
+
+                
+            }
+
+            echo json_encode([
+                'success' => true,
+                'redirect' => ($role === 'Instructor') ? 'Instructor.php' : 'Student.php'
+            ]);
+            exit;
+        }
+    }
 
 ?>
 
@@ -284,6 +370,21 @@
         background-color: rgba(255, 255, 255, 0.2);
     }
 
+    .editable-input {
+        font-size: 1.2rem;
+        padding: 6px;
+        width: 100%;
+    }
+
+    .editable-textarea {
+        width: 100%;
+        resize: none;
+        min-height: 300px;
+        font-size: 1rem;
+        padding: 6px;
+    }
+
+
     .dash-main{
         background-color: whitesmoke;
         background-size: cover;
@@ -448,9 +549,16 @@
         <div class="dash-head">
             <div class="nav-group">
                 <button class="nav-btn" id="back" onclick="backToDashboard()">Back</button>
-                <button class="nav-btn" id="editBtn" onclick="">Edit</button>
-                <button class="nav-btn" id="deleteBtn" onclick="">Delete</button>
-                <button class="nav-btn" id="leaveBtn" onclick="">Leave</button>
+                <!-- Adapts to the accountRole -->
+                <?php if ($accountRole === 'Administrator' || $accountRole === 'Instructor' && $checkOwner === 'true'): ?>
+                    <button class="nav-btn" id="editBtn" onclick="editClass()">Edit</button>
+                    <button id='cancel' class="nav-btn" style="display:none;" onclick="cancelEdit()">Cancel</button>
+                    <button id='save' class="nav-btn" style="display:none;" onclick="saveEdit()">Save</button>
+                    <button class="nav-btn" id="deleteBtn" onclick="deleteClass()">Delete</button>
+                <?php endif; ?>
+                <?php if ($accountRole === 'Instructor' || $accountRole === 'Student'): ?>
+                    <button class="nav-btn" id="leaveBtn" onclick="leaveClass()">Leave</button>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -754,12 +862,13 @@
 
         }
 
-        // Classroom Functions
-        
-        function backToDashboard() {
-            // Pass PHP variable to JS as a string
-            const accountRole = "<?php echo htmlspecialchars($accountRole, ENT_QUOTES); ?>";
+        // -- Classroom Functions --
 
+        const accountRole = "<?php echo htmlspecialchars($accountRole, ENT_QUOTES); ?>"; // declare role variable
+        const checkOwner = "<?php echo htmlspecialchars($checkOwner, ENT_QUOTES); ?>";
+
+        // Back Button
+        function backToDashboard() {
             if (accountRole === 'Administrator') {
                 window.location.href = 'Admin.php';
             } else if (accountRole === 'Instructor') {
@@ -769,6 +878,189 @@
             } else {
                 alert('No account role detected. Please login again.');
             }
+        }
+
+        // when using the functions (except back)
+        function notifyAndRedirect(message, redirectUrl) {
+            const successDiv = document.createElement('div');
+            successDiv.textContent = message;
+
+            successDiv.style.position = 'absolute';
+            successDiv.style.display = 'flex';
+            successDiv.style.margin = '20px auto';
+            successDiv.style.padding = '15px 25px';
+            successDiv.style.backgroundColor = '#d4edda';
+            successDiv.style.color = '#155724';
+            successDiv.style.border = '1px solid #c3e6cb';
+            successDiv.style.borderRadius = '8px';
+            successDiv.style.width = 'fit-content';
+            successDiv.style.fontFamily = 'Inter, sans-serif';
+            successDiv.style.fontSize = '16px';
+            successDiv.style.textAlign = 'center';
+            successDiv.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.1)';
+            successDiv.style.zIndex = '1000';
+            successDiv.style.left = '0';
+            successDiv.style.right = '0';
+            successDiv.style.top = '30px';
+            successDiv.style.justifyContent = 'center';
+
+            document.body.appendChild(successDiv);
+
+            if (redirectUrl === 'reload')
+                setTimeout(() => {
+                successDiv.remove();
+                window.location.reload();
+            }, 3000);
+            else
+                setTimeout(() => {
+                    successDiv.remove();
+                    window.location.href = redirectUrl;
+                }, 3000);
+        }
+
+
+        // Editing
+        let originalTitle = '';
+        let originalDesc = '';
+
+        function editClass() {
+            const titleEl = document.getElementById('classTitle');
+            const descEl = document.getElementById('classDesc');
+            const editBtn = document.getElementById('editBtn');
+            const deleteBtn = document.getElementById('deleteBtn');
+            const leaveBtn = document.getElementById('leaveBtn');
+            const editControls = document.getElementById('editControls');
+
+            // Store original values
+            originalTitle = titleEl.innerText;
+            originalDesc = descEl.innerText;
+
+            // Replace with editable fields
+            titleEl.outerHTML = `<input id="editTitle" type="text" value="${originalTitle}" class="editable-input">`;
+            descEl.outerHTML = `<textarea id="editDesc" class="editable-textarea">${originalDesc}</textarea>`;
+
+            // Hide other buttons and show Save/Cancel
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.style.display = 'none';
+            });
+            document.getElementById('cancel').style.display = 'flex';
+            document.getElementById('save').style.display = 'flex';
+        }
+
+        function cancelEdit() {
+            // Revert back to original content
+            document.getElementById('editTitle').outerHTML = `<div id="classTitle">${originalTitle}</div>`;
+            document.getElementById('editDesc').outerHTML = `<div id="classDesc">${originalDesc}</div>`;
+
+            // Show original buttons again
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.style.display = 'flex';
+            });
+            document.getElementById('cancel').style.display = 'none';
+            document.getElementById('save').style.display = 'none';
+
+        }
+
+        function saveEdit() {
+            const classTitle = document.getElementById('editTitle').value;
+            const classDesc = document.getElementById('editDesc').value;
+
+            if (classTitle.trim() === '' || classDesc.trim() === '') {
+                alert('Title and description cannot be empty.');
+                return;
+            }
+
+            fetch('', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    updateClass: true,
+                    className: classTitle,
+                    classDesc: classDesc,
+                    classID: <?= json_encode($classid) ?>
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    notifyAndRedirect('Changes updated sucessfully!', 'reload');
+                } else {
+                    alert('Update failed.');
+                    console.error(data.error);
+                }
+            });
+
+            
+        }
+
+        // Deletion
+        function deleteClass() {
+            const confirmed = confirm("Are you sure you want to delete this classroom?");
+            message = 'Classroom Deleted Successfully.';
+            if (confirmed) {
+                // Add classroom deletion process here
+
+                // redirection
+                if (accountRole === 'Administrator') {
+                    notifyAndRedirect(message, 'Admin.php');
+                    exit();
+                } else if (accountRole === 'Instructor') {
+                    notifyAndRedirect(message, 'Instructor.php');
+                    exit();
+                } else {
+                    alert('No account role detected. Please login again.');
+                }
+
+            }
+        }
+
+        // Leaving
+        function leaveClass() {
+            // check if owner
+            const isOwner = checkOwner === 'true';
+            let confirmed = false;
+
+            if (isOwner) {
+                confirmed = confirm("Are you sure you want to leave this classroom? As the owner, leaving will permanently delete the classroom and all its contents.");
+            } else {
+                confirmed = confirm("Are you sure you want to leave this classroom?");
+            }
+
+            if (!confirmed) return;
+
+            fetch('', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    leaveClassroom: true,
+                    classID: <?= json_encode($classroom['classroomID']) ?>,
+                    role: "<?= $accountRole ?>",
+                    owner: isOwner
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const message = isOwner 
+                        ? 'Classroom deleted successfully.' 
+                        : 'You have left the Classroom Successfully.';
+                    // Redirect based on role
+                    if (accountRole === 'Instructor') {
+                        notifyAndRedirect(message, 'Instructor.php');
+                    } else if (accountRole === 'Student') {
+                        notifyAndRedirect(message, 'Student.php');
+                    } else {
+                        alert('No account role detected. Please login again.');
+                    }
+                } else {
+                    alert('Failed to leave the classroom.');
+                    console.error(data.error);
+                }
+            })
+            .catch(err => {
+                console.error('Error leaving classroom:', err);
+                alert('An error occurred while trying to leave the classroom.');
+            });
         }
       
     </script>
