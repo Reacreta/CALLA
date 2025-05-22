@@ -44,15 +44,21 @@
               exit; // Stop further execution
           }
 
-          if($action === 'getModuleDetails'){
+          if ($action === 'getModuleDetails') {
             $data = $input['data'];
             $moduleID = $data['moduleID'] ?? null;
-
+        
+            if (!$moduleID) {
+                echo json_encode(['success' => false, 'message' => 'Module ID is required.']);
+                exit;
+            }
+        
+            // Fetch module details
             $sql = "SELECT 
                         lm.langID, 
                         lm.moduleName, 
                         lm.moduleDesc,
-                        u.username,
+                        u.username AS creator,
                         c.className
                     FROM classmodule cm 
                     JOIN classinstructor ci ON cm.classInstID = ci.classInstID
@@ -60,70 +66,45 @@
                     JOIN users u ON u.userID = i.userID
                     JOIN classroom c ON ci.classroomID = c.classroomID
                     JOIN languagemodule lm ON lm.langID = cm.langID
-                    WHERE lm.langID = ?;
-            ";
+                    WHERE lm.langID = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param('s', $moduleID);
             $stmt->execute();
             $result = $stmt->get_result();
             $row = $result->fetch_assoc();
-
+        
+            if (!$row) {
+                echo json_encode(['success' => false, 'message' => 'Module not found.']);
+                exit;
+            }
+        
             $moduleName = $row['moduleName'];
             $moduleDesc = $row['moduleDesc'];
             $className = $row['className'];
-            $creator = $row['username'];
-            
-            echo '
-            <div id="viewModuleInfo">
-              <div id="viewModuleTitle">
-                <img src="images/Module_Icon.jpg" alt="Module Icon" class="module-icon">
-                <div id="viewModuleInfoText">
-                    <div id="viewModuleTitle">'.$moduleName.'</div>
-                    <div id="viewModuleClass">'.$creator.'</div>
-                </div>
-              </div>
-
-              <div id="viewModuleDesc">
-                <div id="viewModuleDescText">'.$moduleDesc.'</div>
-              </div>
-
-              <div id="lessonList">
-                <div class="list-wrapper">
-                    <div class="dynamic-list">
-            ';
-
-            $sql = "SELECT * from lesson WHERE langID = ? ORDER BY `lesson`.`lessonName` ASC;
-            ";
+            $creator = $row['creator'];
+        
+            // Fetch lessons for the module
+            $sql = "SELECT lessID, lessonName, lessonDesc FROM lesson WHERE langID = ? ORDER BY `lesson`.`lessonName` ASC";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param('s', $moduleID);
             $stmt->execute();
             $result = $stmt->get_result();
-
-            while($row = $result->fetch_assoc()){
-                $lessonID = $row['lessID'];
-                $lessonName = $row['lessonName'];
-                echo '
-                <div class="module-card" 
-                  lesson-id = "'.$lessonID.'">
-                    <img src="images/Module_Icon.jpg" alt="Module Icon" class="module-icon">
-                    <div class="module-info">
-                        <div class="module-title">'.$lessonName.'</div>
-                        <div class="module-creator">In '.$moduleName.'</div>
-                    </div>
-                    <button class="view-lesson" onclick="showSubOverlay(\'showLessonOverlay\', \'moduleOverlay\')">
-                      <img src="images/Search_Icon.jpg" alt="View Lesson" class="search-image-icon">
-                    </Button>
-                </div> 
-                ';
+        
+            $lessons = [];
+            while ($row = $result->fetch_assoc()) {
+                $lessons[] = $row;
             }
-
-            echo'
-                    </div>
-                </div>
-              </div>
-            </div>
-            ';
-            
+        
+            // Return module details and lessons as JSON
+            echo json_encode([
+                'success' => true,
+                'moduleName' => $moduleName,
+                'moduleDesc' => $moduleDesc,
+                'className' => $className,
+                'creator' => $creator,
+                'lessons' => $lessons
+            ]);
+            exit;
         }
 
         if($action === 'deleteModule'){
@@ -138,6 +119,49 @@
             }else{
                 echo json_encode(['success' => false, 'message' => 'SQL execution error: ' . $stmt->error]);
             }
+        }
+
+        if ($action === 'getLessonDetails') {
+            $data = $input['data'];
+            $lessonID = $data['lessonID'] ?? null;
+        
+            // Validate the lesson ID
+            if (!$lessonID) {
+                echo json_encode(['success' => false, 'message' => 'Lesson ID is required.']);
+                exit;
+            }
+        
+            // Fetch lesson details
+            $sql = "SELECT lessonName, lessonDesc FROM lesson WHERE lessID = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('s', $lessonID);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $lesson = $result->fetch_assoc();
+        
+            // Fetch vocabulary for the lesson
+            $sql = "SELECT word, meaning FROM vocabulary WHERE lessID = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('s', $lessonID);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            $vocabulary = [];
+            while ($row = $result->fetch_assoc()) {
+                $vocabulary[] = $row;
+            }
+        
+            // Return lesson details and vocabulary as JSON
+            echo json_encode([
+                'success' => true,
+                'data' => [
+                    'lessonName' => $lesson['lessonName'],
+                    'lessonDesc' => $lesson['lessonDesc'],
+                    'vocabulary' => $vocabulary
+                ]
+            ]);
+            exit;
         }
     }
 

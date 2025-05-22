@@ -519,9 +519,9 @@
       border-radius: 6px 6px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       top: 10%;
-      left: 30%;
+      left: 20%;
       height: fit-content;
-      width: fit-content;
+      width: 50%;
       background: rgba(241, 241, 241, 0.85);
       backdrop-filter: blur(5px);
       z-index: 20;
@@ -573,10 +573,9 @@
       border-radius: 6px 6px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       top: 10%;
-      left: 30%;
+      left: 20%;
       height: fit-content;
-      max-height: 55%;
-      width: 35%;
+      width: 50%;
       background: rgba(241, 241, 241, 0.85);
       backdrop-filter: blur(5px);
       z-index: 20;
@@ -675,9 +674,9 @@
       border-radius: 6px 6px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       top: 10%;
-      left: 30%;
+      left: 20%;
       height: fit-content;
-      width: fit-content;
+      width: 50%;
       background: rgba(241, 241, 241, 0.85);
       backdrop-filter: blur(5px);
       z-index: 20;
@@ -690,7 +689,7 @@
       padding: 15px;
     }
 
-    .create-module-SC, .create-module-con{
+    .create-module-SC, .create-module-con, .view-module-SC{
       margin-top: 20px;
       display: flex;
       align-items: center;
@@ -747,7 +746,7 @@
       border-radius: 6px 6px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       top: 10%;
-      left: 30%;
+      left: 20%;
       height: fit-content;
       width: 50%;
       background: rgba(241, 241, 241, 0.85);
@@ -756,6 +755,7 @@
       padding: 20px;
       overflow-y: auto;
     }
+    
     #viewModuleInfo{
       display: flex;
       flex-direction: column;
@@ -766,20 +766,155 @@
       display: flex;
       gap: 10px;
       align-items: center;
+      font-size: 25px;
+      font-weight: bold;
+      color: black;
     }
     #viewModuleInfoText{
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
+
+    #viewModuleTitle img{
+      width: 100px;
+      height: 100px;
+    }
+
     #viewModuleDesc{
       background-color: gainsboro;
       border-radius: 15px;
       padding: 15px;
+      font-size: 20px;
+      color: #444;
+    }
+    
+    #viewModuleClass{
+      font-size: 15px;
+      color: #444;
     }
 
-    .show, #viewModuleOverlay.show{
-      display: block;
+    #lessonList .list-wrapper{
+      height: 260px;
+    }
+
+    #lessonListTitle{
+      font-size: 20px;
+      font-weight: bold;
+      color: #7b0000;
+      margin-bottom: 10px;
+    }
+
+    /* General styling for the overlay */
+    #viewLessonOverlay {
+      display: none;
+          position: absolute;
+          border: 2px solid white;
+          border-radius: 6px 6px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+          top: 10%;
+          left: 20%;
+          height: fit-content;
+          width: 50%;
+          background: rgba(241, 241, 241, 0.85);
+          backdrop-filter: blur(5px);
+          z-index: 20;
+          padding: 20px;
+          overflow-y: auto;
+    }
+
+    /* Header styling for the lesson title */
+    #viewLessonTitle {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    #viewLessonTitle img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%; /* Circular icon */
+      object-fit: cover;
+    }
+
+    #viewLessonName {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #333;
+    }
+
+    /* Styling for the lesson description */
+    #viewLessonDesc {
+      margin-bottom: 20px;
+    }
+
+    #viewLessonDescText {
+      font-size: 1rem;
+      color: #555;
+      line-height: 1.5;
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    /* Vocabulary section styling */
+    #viewLessonWords {
+      margin-top: 20px;
+    }
+
+    #viewLessonWordsTitle {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #444;
+    }
+
+    .list-wrapper {
+      overflow-x: auto; /* Allow horizontal scrolling for smaller screens */
+    }
+
+    .dynamic-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .dynamic-table th, .dynamic-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .dynamic-table th {
+      background-color: #f4f4f4;
+      font-weight: bold;
+    }
+
+    .dynamic-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .dynamic-table tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    /* Close button styling */
+    #viewLessonOverlay .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #555;
+      cursor: pointer;
+    }
+
+    #viewLessonOverlay .close-btn:hover {
+      color: #000;
     }
 
     /* SEARCH INPUTS */
@@ -860,7 +995,9 @@
       gap: 15px;
     }
 
-
+    .show, #viewModuleOverlay.show, #viewLessonOverlay.show, #createOverlay.show, #joinOverlay.show{
+      display: block;
+    }
     
   </style>
 </head>
@@ -1165,11 +1302,34 @@ Module Name, Module Description{
           <div id="viewModuleMain">
                   <!-- I Edit ni siya sa adtong scipt sa java script i love jollibee -->
           </div>
-          <div id="viewModuleSC">
+          <div id="viewModuleSC" class="view-module-SC">
             <button type="button" class="create-mod-btn" onclick="deleteModule(this)">Delete</button>
             <button type="button" class="create-mod-btn" onclick="hideSubOverlay('viewModuleOverlay','moduleOverlay')">Close</button>
+          </div>
         </div>
       </div><!-- End View Module Overlay -->
+
+      <!-- View Lesson Overlay -->
+      <div id="viewLessonOverlay" class="view-lesson-overlay" overlay-type="view-lesson-overlay">
+        <div id="viewLessonCon">
+
+          <div id="viewLessonHeader">
+            <button class="close-btn" onclick="hideSubOverlay('viewLessonOverlay', 'viewModuleOverlay')">×</button>
+            <h2 style="color: #7b0000; margin-bottom: 20px;">View Lesson</h2>
+          </div>
+
+          <div id="viewLessonMain">
+            <div id="viewLessonInfo">
+                  <!-- Inject SQL-->
+            </div>
+
+            <div id="viewLessonSC" class="view-lesson-SC">
+                <button type="button" class="create-mod-btn" onclick="hideSubOverlay('viewModuleOverlay','moduleOverlay')">Close</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
 
     </div><!-- End Main Content-->
   </div><!-- End dashboard-container-->
@@ -1327,15 +1487,15 @@ Module Name, Module Description{
     }
   }
 
-  function showOverlay(targetId, backgroundId = null) {
-    const overlays = ['classroomOverlay', 'moduleOverlay', 'createOverlay', 'joinOverlay', 'createModuleOverlay','viewModuleOverlay'];
+  function showOverlay(targetId, backgroundIds = null) {
+    const overlays = ['classroomOverlay', 'moduleOverlay', 'createOverlay', 'joinOverlay', 'createModuleOverlay','viewModuleOverlay', 'viewLessonOverlay'];
     const bg = document.getElementById('backgroundContent');
 
     overlays.forEach(id => {
       const overlay = document.getElementById(id); // gets element with corresponding name from overlay array
       console.log("Overlay ID: " + id); // Debugging line
 
-      const shouldShow = (id === targetId || (backgroundId && id === backgroundId));// BOOLEAN MAN DIAY NI PUTANGINA MO
+      const shouldShow = (id === targetId || (Array.isArray(backgroundIds) && backgroundIds.includes(id)) || (backgroundIds === id));      
       console.log("Should Show: " + shouldShow); // Debugging line
       overlay.classList.toggle('show', shouldShow);
     });
@@ -1465,7 +1625,7 @@ Module Name, Module Description{
 
   function showViewModule(element) {
     console.log("View Module");
-    showOverlay('viewModuleOverlay', 'moduleOverlay');
+    showOverlay('viewModuleOverlay', ['moduleOverlay']);
 
     const moduleCard = element.closest('.module-card');
     const moduleID = moduleCard.getAttribute('module-id');
@@ -1491,11 +1651,52 @@ Module Name, Module Description{
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-      return response.text();
+      return response.json(); 
     })
     .then(data => {
-      console.log(data);
-      document.getElementById('viewModuleMain').innerHTML = data;
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to load module data.');
+      }
+
+      const { moduleName, moduleDesc, className, lessons: lessonArray } = data;
+
+      const htmlContent = `
+        <div id="viewModuleInfo">
+          <div id="viewModuleTitle">
+            <img src="images/Module_Icon.jpg" alt="Module Icon" class="view-module-icon">
+            <div id="viewModuleInfoText">
+              <div id="viewModuleTitle">${moduleName}</div>
+              <div id="viewModuleClass">${className}</div>
+            </div>
+          </div>
+
+          <div id="viewModuleDesc">
+            <div id="viewModuleDescText">${moduleDesc}</div>
+          </div>
+
+          <div id="lessonList">
+            <div id="lessonListTitle">Lessons</div>
+            <div class="list-wrapper">
+              <div class="dynamic-list">
+                ${lessonArray.map(lesson => `
+                  <div class="module-card" lesson-id="${lesson.lessID}">
+                    <img src="images/Module_Icon.jpg" alt="Module Icon" class="module-icon">
+                    <div class="module-info">
+                      <div class="module-title">${lesson.lessonName}</div>
+                      <div class="module-creator">In ${moduleName}</div>
+                    </div>
+                    <button class="view-lesson" onclick="showViewLesson(this)">
+                      <img src="images/Search_Icon.jpg" alt="View Lesson" class="search-image-icon">
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('viewModuleMain').innerHTML = htmlContent;
     })
     .catch(error => {
       console.error("Fetch error:", error);
@@ -1540,6 +1741,91 @@ Module Name, Module Description{
     });
   }
   
+  function showViewLesson(element) {
+  console.log("View Lesson");
+  showOverlay('viewLessonOverlay', ['viewModuleOverlay','moduleOverlay']);
+
+  // Get the lesson ID from the clicked element
+  const lessonCard = element.closest('.module-card');
+  const lessonID = lessonCard.getAttribute('lesson-id');
+
+  console.log("Lesson ID: " + lessonID);
+
+  if (!lessonID) {
+    console.error("Error: Lesson ID not found.");
+    return;
+  }
+
+  // Fetch lesson details from the server
+  fetch('instructorFunctions.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'getLessonDetails',
+      data: { lessonID: lessonID }
+    })
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json(); // Parse JSON response
+    })
+    .then(result => {
+      if (result.success) {
+        const lesson = result.data;
+
+        // Format the lesson details as HTML
+        const htmlContent = `
+          <div id="viewLessonTitle">
+                <img src="images/Module_Icon.jpg" alt="">
+                <div id="viewLessonName">${lesson.lessonName}</div>
+              </div>
+
+              <div id="viewLessonDesc">
+                <div id="viewLessonDescText">${lesson.lessonDesc}</div>
+              </div>
+
+              <div id="viewLessonWords">
+                <div id="viewLessonWordsTitle">Vocabulary</div>
+                <div id="viewLessonWordsList">
+                  <div class="list-wrapper">
+                    <table class="dynamic-table">
+                      <thead>
+                        <tr>
+                          <th>Word</th>
+                          <th>Meaning</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${lesson.vocabulary.map(word => `
+                          <tr>
+                            <td>${word.word}</td>
+                            <td>${word.meaning}</td>
+                          </tr>
+                        `).join('')}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+        `;
+
+        // Inject the HTML into the overlay
+        document.getElementById('viewLessonMain').innerHTML = htmlContent;
+      } else {
+        document.getElementById('viewLessonMain').innerHTML = `
+          <div class="error">Failed to load lesson details: ${result.message}</div>
+        `;
+      }
+    })
+    .catch(error => {
+      console.error("Fetch error:", error);
+      document.getElementById('viewLessonMain').innerHTML = `
+        <div class="error">An error occurred while fetching lesson details.</div>
+      `;
+    });
+  }
 </script>
 
 </body>
