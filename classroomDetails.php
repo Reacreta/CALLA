@@ -144,7 +144,22 @@
             exit;
         }
         // delete classroom
-        // -- PUT HERE -- 
+        if (isset($data['deleteClass'])) {
+            $classID = trim($data['classID']);
+
+            $sql = "DELETE FROM classroom WHERE classroomID = ?";
+            $stmt = $conn->prepare($sql);
+
+            if ($stmt) {
+                $stmt->bind_param("s", $classID);
+                $stmt->execute();
+                echo json_encode(['success' => true]);
+
+            } else {
+                echo json_encode(['success' => false, 'error' => $conn->error]);
+            }
+            exit;
+        }
 
         // leave classroom
         if (isset($data['leaveClassroom'])) {
@@ -153,7 +168,7 @@
             $owner = $data['owner'];
             $userID = $_SESSION['userID'];
 
-            if ($owner === true || $owner === 'true') { // THIS IS NOT WORKING YET, PLEASE FIX DB TO BOMB THE CLASSROOM FOREIGN KEYS
+            if ($owner === true || $owner === 'true') { 
                 // Owner leaves → delete classroom
                 $sql = "DELETE FROM classroom WHERE classroomID = ?";
                 $stmt = $conn->prepare($sql);
@@ -999,17 +1014,33 @@
             message = 'Classroom Deleted Successfully.';
             if (confirmed) {
                 // Add classroom deletion process here
-
-                // redirection
-                if (accountRole === 'Administrator') {
-                    notifyAndRedirect(message, 'Admin.php');
-                    exit();
-                } else if (accountRole === 'Instructor') {
-                    notifyAndRedirect(message, 'Instructor.php');
-                    exit();
-                } else {
-                    alert('No account role detected. Please login again.');
-                }
+                fetch('', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        deleteClass: true,
+                        classID: <?= json_encode($classid) ?>
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        // redirection
+                        if (accountRole === 'Administrator') {
+                            notifyAndRedirect(message, 'Admin.php');
+                            exit();
+                        } else if (accountRole === 'Instructor') {
+                            notifyAndRedirect(message, 'Instructor.php');
+                            exit();
+                        } else {
+                            alert('No account role detected. Please login again.');
+                        }
+                    } else {
+                        alert('Deletion failed.');
+                        console.error(data.error);
+                    }
+                });
+                
 
             }
         }
