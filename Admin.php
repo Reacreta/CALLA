@@ -1,57 +1,142 @@
 <?php
-  ob_start();
-  session_start();
-  require_once 'database.php';
-  require_once 'authFunctions.php';
+ob_start();
+session_start();
+require_once 'database.php';
+require_once 'authFunctions.php';
 
-  if(isset($_POST["createPartner"])){
+// Fetch all users
+$sql = "SELECT * FROM users";
+$result = $conn->query($sql);
+
+// Setup search
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$search_param = "%" . $conn->real_escape_string($search) . "%";
+
+// WHERE clause
+$where_clause = "usertype IN ('Student', 'Instructor')";
+if (!empty($search)) {
+    $where_clause .= " AND username LIKE '$search_param'";
+}
+
+// Filtered user fetch
+$sql = "SELECT * FROM users WHERE $where_clause";
+$result = $conn->query($sql);
+
+// Activity logs
+$allLogs = [];
+$logResult = $conn->query("SELECT userID, action, dateTimeCreated FROM activity ORDER BY dateTimeCreated DESC");
+if ($logResult && $logResult->num_rows > 0) {
+    while ($row = $logResult->fetch_assoc()) {
+        $allLogs[] = $row;
+    }
+}
+
+// classroom details
+if (isset($_GET['classroomID'])) {
+    $classroomID = $_GET['classroomID'];
+    
+    // Debug log
+    error_log("Fetching classroom details for ID: " . $classroomID);
+
+    // Fetch classroom
+    $sql = "SELECT classroom.className, classroom.code, classroom.createdAt, classroom.description, users.username AS creator, instructor.instID
+            FROM classroom
+            JOIN instructor ON classroom.instID = instructor.instID
+            JOIN users ON instructor.userID = users.userID
+            WHERE classroom.classroomID = ?";
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        error_log("Prepare failed: " . $conn->error);
+        echo json_encode(['error' => 'Database error: ' . $conn->error]);
+        exit;
+    }
+    
+    $stmt->bind_param("i", $classroomID);
+    if (!$stmt->execute()) {
+        error_log("Execute failed: " . $stmt->error);
+        echo json_encode(['error' => 'Database error: ' . $stmt->error]);
+        exit;
+    }
+    
+    $result = $stmt->get_result();
+    $classroom = $result->fetch_assoc();
+
+    if (!$classroom) {
+        error_log("No classroom found for ID: " . $classroomID);
+        echo json_encode(['error' => 'Classroom not found']);
+        exit;
+    }
+
+    error_log("Found classroom: " . json_encode($classroom));
+
+    // Instructor name
+    $instructorName = $classroom['creator'];
+
+    // Fetch students
+    $students = [];
+    $sql = "SELECT users.username FROM student
+            JOIN users ON student.userID = users.userID
+            WHERE student.classroomID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $classroomID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $students[] = [
+            'name' => $row['username'],
+            'role' => 'Student'
+        ];
+    }
+
+    // Fetch modules
+    $modules = [];
+    $sql = "SELECT title, source FROM module WHERE classroomID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $classroomID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $modules[] = [
+            'title' => $row['title'],
+            'source' => $row['source']
+        ];
+    }
+
+    // ✅ Respond with JSON
+    $response = [
+        'className' => $classroom['className'],
+        'code' => $classroom['code'],
+        'created' => $classroom['createdAt'],
+        'creator' => $classroom['creator'],
+        'instructor' => $instructorName,
+        'description' => $classroom['description'], // now real!
+        'students' => $students,
+        'modules' => $modules
+    ];
+
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit; // ✅ stop here so rest of page doesn't load
+}
+
+// ✅ Normal page logic continues below
+
+if(isset($_POST["createPartner"])) {
     $partnerName = $_POST["partnerName"];
     $partnerDesc = $_POST["partnerDesc"];
     $partnerEmail = $_POST["partnerEmail"];
     $partnerContact = $_POST["partnerContact"];
     $partnerID = generateID("P",9);
 
-    $stmt = $conn->prepare("INSERT INTO partner VALUES(?,?,?,?,?)"); // preparation 
-    $stmt->bind_param('sssss', $partnerID,$partnerName,$partnerDesc,$partnerEmail,$partnerContact); // subtitute ? with variable
+    $stmt = $conn->prepare("INSERT INTO partner VALUES(?,?,?,?,?)");
+    $stmt->bind_param('sssss', $partnerID,$partnerName,$partnerDesc,$partnerEmail,$partnerContact);
     $stmt->execute(); 
     $stmt->close();
 
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
-  }
-  
-  // Fetch all users
-  $sql = "SELECT * FROM users";
-  $result = $conn->query($sql);
+}
 
-  // Setup
-  $items_per_page = 10;
-  $current_page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-  $search = isset($_GET['search']) ? trim($_GET['search']) : '';
-  $search_param = "%" . $conn->real_escape_string($search) . "%";
-
-  // Filter clause
-  $where_clause = "usertype IN ('Student', 'Instructor')";
-  if (!empty($search)) {
-      $where_clause .= " AND username LIKE '$search_param'";
-  }
-
-  // Fetch matching users
-  $sql = "SELECT * FROM users WHERE $where_clause";
-  $result = $conn->query($sql);
-
-  // Optional: Count total users (if you still need it)
-  $total_users = $result ? $result->num_rows : 0;
-
-  // Fetch logs from activity
-  $allLogs = [];
-  $logResult = $conn->query("SELECT userID, action, dateTimeCreated FROM activity ORDER BY dateTimeCreated DESC");
-
-  if ($logResult && $logResult->num_rows > 0) {
-      while ($row = $logResult->fetch_assoc()) {
-          $allLogs[] = $row;
-      }
-  }
 
 ?>
 
@@ -744,6 +829,221 @@
       color: #444;
     }
 
+    /* Classroom details */
+    #classroomDetailsOverlay {
+        background: #f5f5f5;
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, sans-serif;
+        position: relative;
+    }
+
+    .cd-header-banner {
+        height: 200px;
+        background: url('images/classroom-banner.jpg') center/cover;
+        position: relative;
+    }
+
+    .cd-content-wrapper {
+        max-width: 1200px;
+        margin: -100px auto 0;
+        padding: 0 20px;
+        position: relative;
+    }
+
+    /* Header Section Styles */
+    #cd-header-section {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    .cd-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .cd-icon {
+        width: 50px;
+        height: 50px;
+    }
+
+    #cd-course-title {
+        color: #333;
+        font-size: 24px;
+        margin: 0;
+        font-weight: 600;
+    }
+
+    #cd-creator-name {
+        color: #666;
+        margin: 5px 0 0;
+        font-size: 16px;
+    }
+
+    /* Main Grid Layout */
+    .cd-main-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+
+    /* Card Styles */
+    .cd-card {
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+
+    /* Section Titles */
+    .cd-section-title {
+        color: #333;
+        font-size: 18px;
+        margin: 0 0 15px 0;
+        font-weight: 600;
+    }
+
+    /* Metadata Styles */
+    #cd-metadata {
+        display: flex;
+        gap: 20px;
+        margin: 20px 0;
+        padding: 15px 0;
+        border-top: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+    }
+
+    .cd-metadata-item {
+        color: #666;
+    }
+
+    .cd-label {
+        font-weight: 500;
+        margin-right: 5px;
+    }
+
+    /* Description Styles */
+    #cd-description-container {
+        background: #f8f8f8;
+        padding: 20px;
+        border-radius: 6px;
+        margin-top: 20px;
+    }
+
+    #cd-description-text {
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+
+    /* Student and Module Cards */
+    .cd-student-card, .cd-module-card {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 12px;
+        border-radius: 6px;
+        background: #f8f8f8;
+        margin-bottom: 10px;
+    }
+
+    .cd-student-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .cd-student-info h3, .cd-module-info h3 {
+        margin: 0;
+        font-size: 16px;
+        color: #333;
+    }
+
+    .cd-student-info p, .cd-module-info p {
+        margin: 5px 0 0;
+        color: #666;
+        font-size: 14px;
+    }
+
+    /* Header Actions */
+    #cd-students-header, .cd-module-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .cd-view-all {
+        color: #8b0000;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    /* Buttons */
+    .cd-btn {
+        padding: 8px 20px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .cd-edit-btn {
+        background: #8b0000;
+        color: white;
+        padding: 8px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 15px;
+    }
+
+    .cd-btn-logs {
+        background: #8b0000;
+        color: white;
+    }
+
+    .cd-btn-delete {
+        background: #8b0000;
+        color: white;
+        margin-right: 10px;
+    }
+
+    .cd-btn-close {
+        background: #ccc;
+        color: #333;
+    }
+
+    /* Footer Actions */
+    .cd-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .cd-actions-right {
+        display: flex;
+        gap: 10px;
+    }
+
+
+
+
+    /* partners CSS */ 
+
     .partners-card {
       background-color: #e0e0e0;
       padding: 15px 20px;
@@ -776,6 +1076,22 @@
       color: #444;
     }
 
+    .NewP {
+       background-color: #7b0000;
+      margin-right: 15px;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 15px;
+      cursor: pointer;
+      z-index: 1;
+    }
+
+    .NewP:hover {
+      transition: transform 0.2s;
+      transform: scale(1.1);
+    }
+
     .create-overlay { 
       display: none;
       position: absolute;
@@ -803,12 +1119,6 @@
       gap: 30px;
     }
 
-    .create-item1,
-    .create-item2 {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
 
     .create-info {
       display: flex;
@@ -858,17 +1168,6 @@
       background-color: #fff;
     }
     
-    .items-per-page {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    
-    .items-per-page select {
-      padding: 5px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
 
   </style>
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
@@ -889,10 +1188,25 @@
   <div class="dashboard-container">
     <div class="sidebar">
       <div class="nav-group">
-      <button class="nav-btn" onclick="toggleUserOverlay()"><img src="images/Human_Icon.jpg" class="User-icon" alt="User Icon"> Users</button>
-      <button class="nav-btn" onclick="toggleClassroomOverlay()"><img src="images/Class_Icon.jpg" class="User-icon" alt="Classroom Icon"> Classrooms</button>
-      <button class="nav-btn" onclick="toggleModuleOverlay()"><img src="images/Module_Icon.jpg" class="User-icon" alt="Module Icon"> Modules</button>
-      <button class="nav-btn" onclick="togglePartnersOverlay()"><img src="images/Partners_Icon.jpg" class="User-icon" alt="Partners Icon"> Partners</button>
+      <!-- Users -->
+      <button class="nav-btn" onclick="showOverlay('userOverlay')">
+        <img src="images/Human_Icon.jpg" class="User-icon" alt="User Icon"> Users
+      </button>
+      
+      <!-- Classrooms -->
+      <button class="nav-btn" onclick="showOverlay('classroomOverlay')">
+        <img src="images/Class_Icon.jpg" class="User-icon" alt="Classroom Icon"> Classrooms
+      </button>
+      
+      <!-- Modules -->
+      <button class="nav-btn" onclick="showOverlay('moduleOverlay')">
+        <img src="images/Module_Icon.jpg" class="User-icon" alt="Module Icon"> Modules
+      </button>
+      
+      <!-- Partners -->
+      <button class="nav-btn" onclick="showOverlay('partnersOverlay')">
+        <img src="images/Partners_Icon.jpg" class="User-icon" alt="Partners Icon"> Partners
+      </button>
       </div>
     </div>
 
@@ -1041,8 +1355,6 @@
                 </div>
               </div>
             </div>
-
-            <!-- ✅ Fixed Close Button -->
             <button class="logs-close-btn" onclick="closeUserLogs()">Close</button>
           </div>
         </div>
@@ -1062,12 +1374,12 @@
               </div>
             </div>
           </div>
-          <div class="list-wrapper">
+          
+          <!-- Main Classroom List (default view) -->
+          <div id="classroomListView" class="list-wrapper">
             <div class="dynamic-list">
-
-              <!-- Dynamic Classroom  Table -->
               <?php
-                $sql = "SELECT classroom.className, users.username 
+                $sql = "SELECT classroom.className, users.username, classroom.classroomID 
                         FROM classroom 
                         JOIN instructor ON classroom.instID = instructor.instID 
                         JOIN users ON instructor.userID = users.userID;";
@@ -1076,21 +1388,122 @@
                 while ($row = $result->fetch_assoc()) {
                   $className = htmlspecialchars($row['className']);
                   $creatorName = htmlspecialchars($row['username']);
-                  debug_console($className);
-                  debug_console($creatorName);
+                  $classroomID = htmlspecialchars($row['classroomID']);
               ?>
-                <div class="classroom-item">
+                <div class="classroom-item" onclick="showClassroomDetails('<?php echo $classroomID; ?>')">
                   <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
                   <div class="classroom-info">
                     <div class="classroom-title"><?php echo $className; ?></div>
                     <div class="classroom-creator"><?php echo $creatorName; ?></div>
                   </div>
-                  <a href="classroom-details.html?classId=math4" class="search-icon-link">
+                  <div class="search-icon-link">
                     <img src="images/Search_Icon.jpg" alt="View Classroom" class="search-image-icon">
-                  </a>
+                  </div>
                 </div>
               <?php } ?>
             </div>
+          </div>
+
+              <!-- Classroom Details overlay -->
+              <div id="classroomDetailsOverlay" class="create-overlay" style="display: none;">
+              <div class="cd-header-banner">
+                  <!-- Background banner image -->
+              </div>
+
+              <div class="cd-content-wrapper">
+                  <!-- Course Icon and Title Section -->
+                  <div id="cd-header-section">
+                      <div class="cd-icon-wrapper">
+                          <img src="images/graduation-cap.svg" alt="Course Icon" class="cd-icon">
+                      </div>
+                      <div id="cd-title-wrapper">
+                          <h1 id="cd-course-title"></h1>
+                          <p id="cd-creator-name"></p>
+                      </div>
+                  </div>
+
+                  <!-- Main Content Grid -->
+                  <div class="cd-main-grid">
+                      <!-- Left Column -->
+                      <div class="cd-left-column">
+                          <div class="cd-card">
+                              <div id="cd-instructor-container">
+                                  <h2 class="cd-section-title">Instructors:</h2>
+                                  <div id="cd-instructor-list">Joshua Gatmin</div>
+                              </div>
+
+                              <div id="cd-metadata">
+                                  <div class="cd-metadata-item">
+                                      <span class="cd-label">Created On:</span>
+                                      <span id="cd-created-date">10/12/2023</span>
+                                  </div>
+                                  <div class="cd-metadata-item">
+                                      <span class="cd-label">Code:</span>
+                                      <span id="cd-access-code">EngBSHH1</span>
+                                  </div>
+                              </div>
+
+                              <div id="cd-description-container">
+                                  <h2 class="cd-section-title">Description:</h2>
+                                  <div id="cd-description-text">
+                                      At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                                      blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et
+                                      quas molestias excepturi sint occaecati cupiditate non provident...
+                                  </div>
+                                  <button class="cd-edit-btn">Edit Details</button>
+                              </div>
+                          </div>
+                      </div>
+
+                      <!-- Right Column -->
+                      <div class="cd-right-column">
+                          <!-- Students Section -->
+                          <div class="cd-card">
+                              <div id="cd-students-header">
+                                  <h2 class="cd-section-title"></h2>
+                                  <a href="#" class="cd-view-all"></a>
+                              </div>
+                              <div id="cd-students-list">
+                                  <div class="cd-student-card">
+                                      <img src="images/student-avatar.jpg" alt="Student" class="cd-student-avatar">
+                                      <div class="cd-student-info">
+                                          <h3></h3>
+                                          <p></p>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+
+                          <!-- Modules Section -->
+                          <div class="cd-card">
+                              <div class="cd-module-header">
+                                  <h2 class="cd-section-title">Modules</h2>
+                                  <a href="#" class="cd-view-all">View All</a>
+                              </div>
+                              <div class="cd-module-list">
+                                  <div class="cd-module-card">
+                                      <div class="cd-module-icon">
+                                          <img src="images/module-icon.svg" alt="Module Icon">
+                                      </div>
+                                      <div class="cd-module-info">
+                                          <h3>Bisaya 101</h3>
+                                          <p>DepEd</p>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-- Footer Actions -->
+                  <div class="cd-actions">
+                      <button class="cd-btn cd-btn-logs">Check Logs</button>
+                      <div class="cd-actions-right">
+                          <button class="cd-btn cd-btn-delete">Delete</button>
+                          <button class="cd-btn cd-btn-close" onclick="closeClassroomDetails()">Close</button>
+                      </div>
+                  </div>
+              </div>
           </div>
         </div>
 
@@ -1127,8 +1540,7 @@
           <h2 style="color: #7b0000; margin-bottom: 20px;">Partners</h2>
           
           <div class="tabs">
-            <button class="tab active">Partners</button>
-            <button class="tab" onclick="toggleCreatePartnersOverlay()">New</button>
+            <button class="NewP" onclick="toggleCreatePartnersOverlay()">Add New</button>
             <div class="right-buttons">
               <div class="search-container">
                 <input type="text" placeholder="Search..." class="search-input">
@@ -1207,8 +1619,6 @@
 
   <script>
 
-  const lastOpened = "";
-
 
 
   // On Webpage Load
@@ -1250,116 +1660,111 @@
   }
 
   function hideOverlay(targetId) {
-    const target = document.getElementById(targetId);
-    target.classList.remove('show');
-
-    // If no overlays are visible, show the background
-    const anyOpen = document.querySelectorAll('.user-overlay.show').length > 0;
-    if (!anyOpen) {
-      document.getElementById('backgroundContent').style.display = 'flex';
-    }
-  }
-
- function toggleSearch(label) {
-  const container = label.closest('.search-container');
-  const input = container.querySelector('.search-input');
-  const isOpen = input.style.width === '200px';
-
-  if (isOpen) {
-    if (input.value.trim()) {
-      searchUsers(input.value);
-    } else {
-      closeInput(input);
-    }
-  } else {
-    openInput(input);
-
-    // Handle outside click
-    document.addEventListener('click', function handleOutsideClick(e) {
-      if (!container.contains(e.target)) {
-        closeInput(input);
-        document.removeEventListener('click', handleOutsideClick);
-      }
+    // Close ALL overlays first
+    document.querySelectorAll('.user-overlay.show, .create-overlay.show').forEach(overlay => {
+      overlay.classList.remove('show');
     });
 
-    // Enter key handler
-    const handleKey = function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
+    // Open the target overlay if specified (for tab switching)
+    if (targetId) {
+      document.getElementById(targetId).classList.add('show');
+    }
+
+    // Toggle background visibility
+    const anyOverlayOpen = document.querySelectorAll('.user-overlay.show, .create-overlay.show').length > 0;
+    document.getElementById('backgroundContent').style.display = anyOverlayOpen ? 'none' : 'flex';
+  }
+
+  function toggleSearch(label) {
+    const container = label.closest('.search-container');
+    const input = container.querySelector('.search-input');
+    const isOpen = input.style.width === '200px';
+
+    if (isOpen) {
+      if (input.value.trim()) {
         searchUsers(input.value);
-        input.removeEventListener('keydown', handleKey);
+      } else {
+        closeInput(input);
       }
-    };
-    input.addEventListener('keydown', handleKey);
+    } else {
+      openInput(input);
 
-    // Real-time filtering
-    input.addEventListener('input', function () {
-      searchUsers(input.value);
+      // Handle outside click
+      document.addEventListener('click', function handleOutsideClick(e) {
+        if (!container.contains(e.target)) {
+          closeInput(input);
+          document.removeEventListener('click', handleOutsideClick);
+        }
+      });
+
+      // Enter key handler
+      const handleKey = function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          searchUsers(input.value);
+          input.removeEventListener('keydown', handleKey);
+        }
+      };
+      input.addEventListener('keydown', handleKey);
+
+      // Real-time filtering
+      input.addEventListener('input', function () {
+        searchUsers(input.value);
+      });
+    }
+  }
+
+  function searchUsers(query) {
+    const activeTabElement = document.querySelector('#userOverlay .tab.active');
+    const cards = document.querySelectorAll('.user-card');
+    const searchValue = query.toLowerCase();
+
+    // Normalize tab name (e.g. "Students" -> "student")
+    let activeTab = activeTabElement ? activeTabElement.textContent.trim().toLowerCase() : 'all';
+    if (activeTab.endsWith('s') && activeTab !== 'all') {
+      activeTab = activeTab.slice(0, -1); // remove trailing 's' for matching
+    }
+
+    cards.forEach(card => {
+      const username = card.querySelector('.user-info strong').textContent.toLowerCase();
+      const role = card.getAttribute('data-role').toLowerCase(); // e.g., "student" or "instructor"
+
+      const matchesSearch = username.includes(searchValue);
+      const matchesTab = (activeTab === 'all') || (role === activeTab);
+
+      card.style.display = (matchesSearch && matchesTab) ? 'flex' : 'none';
     });
   }
-}
 
-function searchUsers(query) {
-  const activeTabElement = document.querySelector('#userOverlay .tab.active');
-  const cards = document.querySelectorAll('.user-card');
-  const searchValue = query.toLowerCase();
-
-  // Normalize tab name (e.g. "Students" -> "student")
-  let activeTab = activeTabElement ? activeTabElement.textContent.trim().toLowerCase() : 'all';
-  if (activeTab.endsWith('s') && activeTab !== 'all') {
-    activeTab = activeTab.slice(0, -1); // remove trailing 's' for matching
+  function openInput(input) {
+    input.style.width = '200px';
+    input.style.padding = '10px';
+    input.style.border = '1px solid #ccc';
+    input.style.borderRadius = '20px';
+    input.focus();
   }
 
-  cards.forEach(card => {
-    const username = card.querySelector('.user-info strong').textContent.toLowerCase();
-    const role = card.getAttribute('data-role').toLowerCase(); // e.g., "student" or "instructor"
-
-    const matchesSearch = username.includes(searchValue);
-    const matchesTab = (activeTab === 'all') || (role === activeTab);
-
-    card.style.display = (matchesSearch && matchesTab) ? 'flex' : 'none';
-  });
-}
-
-function openInput(input) {
-  input.style.width = '200px';
-  input.style.padding = '10px';
-  input.style.border = '1px solid #ccc';
-  input.style.borderRadius = '20px';
-  input.focus();
-}
-
-function closeInput(input) {
-  input.style.width = '0';
-  input.style.padding = '0';
-  input.style.border = 'none';
-  input.value = '';
-}
-
-  // Aliases for buttons
-  function toggleUserOverlay() {
-    showOverlay('userOverlay');
+  function closeInput(input) {
+    input.style.width = '0';
+    input.style.padding = '0';
+    input.style.border = 'none';
+    input.value = '';
   }
 
-  function toggleClassroomOverlay() {
-    showOverlay('classroomOverlay');
+    // Unified overlay control
+  function showOverlay(targetId) {
+    // Close all overlays first, then open the target
+    hideOverlay(targetId); 
   }
 
-  function toggleModuleOverlay() {
-  showOverlay('moduleOverlay');
-  }
-
-  function togglePartnersOverlay() {
-  showOverlay('partnersOverlay'); 
-  }
 
   function toggleCreatePartnersOverlay() {
-    const overlay = document.getElementById('createPartnersOverlay');
-    if (overlay.classList.contains('show')) {
-      hideCreateOverlay('createPartnersOverlay');
-    } else {
-      showCreateOverlay('createPartnersOverlay');
-    }
+      const overlay = document.getElementById('createPartnersOverlay');
+      if (overlay.classList.contains('show')) {
+        hideCreateOverlay('createPartnersOverlay');
+      } else {
+        showCreateOverlay('createPartnersOverlay');
+      }
   }
 
   function setUserTab(role) {
@@ -1425,72 +1830,149 @@ function closeInput(input) {
   /* userdetail overlay */
 
   function showUserDetails(element) {
-  const userCard = element.closest('.user-card');
+    const userCard = element.closest('.user-card');
 
-  // Get data attributes directly
-  const name = userCard.dataset.name;
-  const role = userCard.dataset.role;
-  const fname = userCard.dataset.fname;
-  const lname = userCard.dataset.lname;
-  const gender = userCard.dataset.gender;
-  const email = userCard.dataset.email;
-  const contact = userCard.dataset.contact;
-  const dob = userCard.dataset.dob;
-  const uid = userCard.dataset.uid;
+    // Get data attributes directly
+    const name = userCard.dataset.name;
+    const role = userCard.dataset.role;
+    const fname = userCard.dataset.fname;
+    const lname = userCard.dataset.lname;
+    const gender = userCard.dataset.gender;
+    const email = userCard.dataset.email;
+    const contact = userCard.dataset.contact;
+    const dob = userCard.dataset.dob;
+    const uid = userCard.dataset.uid;
 
-  // Update overlay fields
-  document.getElementById('userDetailName').textContent = name;
-  document.getElementById('userDetailRole').textContent = role;
-  document.getElementById('userDetailFirstName').textContent = fname;
-  document.getElementById('userDetailLastName').textContent = lname;
-  document.getElementById('userDetailGender').textContent = gender;
-  document.getElementById('userDetailEmail').textContent = email;
-  document.getElementById('userDetailContact').textContent = contact;
-  document.getElementById('userDetailDOB').textContent = dob;
-  document.getElementById('userDetailUID').textContent = uid;
+    // Update overlay fields
+    document.getElementById('userDetailName').textContent = name;
+    document.getElementById('userDetailRole').textContent = role;
+    document.getElementById('userDetailFirstName').textContent = fname;
+    document.getElementById('userDetailLastName').textContent = lname;
+    document.getElementById('userDetailGender').textContent = gender;
+    document.getElementById('userDetailEmail').textContent = email;
+    document.getElementById('userDetailContact').textContent = contact;
+    document.getElementById('userDetailDOB').textContent = dob;
+    document.getElementById('userDetailUID').textContent = uid;
 
-  // Show the overlay
-  document.getElementById('userDetailsOverlay').classList.add('show');
-}
-
-// checkuserlogs
-function checkUserLogs() {
-  const userID = document.getElementById('userDetailUID')?.textContent?.trim();
-  const userName = document.getElementById('userDetailName')?.textContent?.trim();
-
-  const overlay = document.getElementById('userChecklogsOverlay');
-  const checkContainer = overlay.querySelector('.check');
-  checkContainer.innerHTML = ''; // Clear logs
-
-  overlay.style.display = 'block';
-
-  if (!userID) {
-    checkContainer.innerHTML = '<div style="padding:10px;color:red;">User ID missing.</div>';
-    return;
+    // Show the overlay
+    document.getElementById('userDetailsOverlay').classList.add('show');
   }
 
-  const logs = Array.isArray(allLogs) ? allLogs.filter(log => log.userID === userID) : [];
+    // checkuserlogs
+  function checkUserLogs() {
+    const userID = document.getElementById('userDetailUID')?.textContent?.trim();
+    const userName = document.getElementById('userDetailName')?.textContent?.trim();
 
-  if (logs.length > 0) {
-    logs.forEach(log => {
-      const entry = document.createElement('div');
-      entry.classList.add('log-entry');
-      entry.innerHTML = `
-        <div class="user-col">${userName}</div>
-        <div class="action-col">${log.action}</div>
-        <div class="date-col">${log.dateTimeCreated}</div>
-      `;
-      checkContainer.appendChild(entry);
+    const overlay = document.getElementById('userChecklogsOverlay');
+    const checkContainer = overlay.querySelector('.check');
+    checkContainer.innerHTML = ''; // Clear logs
+
+    overlay.style.display = 'block';
+
+    if (!userID) {
+      checkContainer.innerHTML = '<div style="padding:10px;color:red;">User ID missing.</div>';
+      return;
+    }
+
+    const logs = Array.isArray(allLogs) ? allLogs.filter(log => log.userID === userID) : [];
+
+    if (logs.length > 0) {
+      logs.forEach(log => {
+        const entry = document.createElement('div');
+        entry.classList.add('log-entry');
+        entry.innerHTML = `
+          <div class="user-col">${userName}</div>
+          <div class="action-col">${log.action}</div>
+          <div class="date-col">${log.dateTimeCreated}</div>
+        `;
+        checkContainer.appendChild(entry);
+      });
+    } else {
+      checkContainer.innerHTML = '<div style="padding:10px;">No logs found for this user.</div>';
+    }
+  }
+
+
+function showClassroomDetails(classroomID) {
+  fetch(`Admin.php?classroomID=${classroomID}`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.error) {
+        console.error('Server error:', data.error);
+        alert(data.error);
+        return;
+      }
+
+      // Update the overlay content
+      document.getElementById("cd-course-title").textContent = data.className || "N/A";
+      document.getElementById("cd-creator-name").textContent = "Created by: " + (data.creator || "Unknown");
+      document.getElementById("cd-instructor-list").textContent = data.instructor || "N/A";
+      document.getElementById("cd-created-date").textContent = data.created || "N/A";
+      document.getElementById("cd-access-code").textContent = data.code || "N/A";
+      document.getElementById("cd-description-text").textContent = data.description || "No description available";
+
+      // Update students list
+      const studentsList = document.getElementById("cd-students-list");
+      studentsList.innerHTML = ''; // Clear existing students
+      if (data.students && data.students.length > 0) {
+        data.students.forEach(student => {
+          const studentCard = document.createElement("div");
+          studentCard.className = "cd-student-card";
+          studentCard.innerHTML = `
+            <img src="images/student-avatar.jpg" alt="Student" class="cd-student-avatar">
+            <div class="cd-student-info">
+              <h3>${student.name}</h3>
+              <p>${student.role}</p>
+            </div>
+          `;
+          studentsList.appendChild(studentCard);
+        });
+      } else {
+        studentsList.innerHTML = '<p>No students enrolled</p>';
+      }
+
+      // Update modules list
+      const modulesList = document.querySelector(".cd-module-list");
+      modulesList.innerHTML = ''; // Clear existing modules
+      if (data.modules && data.modules.length > 0) {
+        data.modules.forEach(module => {
+          const moduleCard = document.createElement("div");
+          moduleCard.className = "cd-module-card";
+          moduleCard.innerHTML = `
+            <div class="cd-module-icon">
+              <img src="images/module-icon.svg" alt="Module Icon">
+            </div>
+            <div class="cd-module-info">
+              <h3>${module.title}</h3>
+              <p>${module.source}</p>
+            </div>
+          `;
+          modulesList.appendChild(moduleCard);
+        });
+      } else {
+        modulesList.innerHTML = '<p>No modules available</p>';
+      }
+
+      // Show the overlay
+      document.getElementById("classroomDetailsOverlay").style.display = "block";
+    })
+    .catch(error => {
+      console.error('Error fetching classroom details:', error);
+      alert('Failed to load classroom details. Please try again.');
     });
-  } else {
-    checkContainer.innerHTML = '<div style="padding:10px;">No logs found for this user.</div>';
-  }
 }
 
-function closeUserLogs() {
-  const overlay = document.getElementById('userChecklogsOverlay');
-  overlay.style.display = 'none';
+function closeClassroomDetails() {
+  document.getElementById("classroomDetailsOverlay").style.display = "none";
 }
+
+
+
 
 
 
