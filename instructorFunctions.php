@@ -3,6 +3,8 @@
     include_once 'authFunctions.php';
     ob_start();
     session_start();
+
+    // Handler for Ajax Requests
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Decode the JSON payload
         $input = json_decode(file_get_contents('php://input'), true);
@@ -243,5 +245,132 @@
             exit;
         }
     }
+    
+    // Everything else lol
+    // Module Upload Reading Parsing and Insert
+  if (isset($_FILES['files']) && isset($_POST['upload'])) {
+    $response = "";
+    $classroomID = $_POST['classIDField'];
+    $instID = $_SESSION['roleID'];
+    $fileArray = $_FILES['files'];
+    debug_console("Post Went In");
+    debug_console("Classroom ID: " . $classroomID);
+    debug_console("Instructor ID: " . $instID);
 
+    // Check if instructor is part of classroom
+    $sql = "SELECT * FROM classinstructor WHERE classroomID = ? AND instID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('ss', $classroomID, $instID);
+    $stmt->execute();
+    $results = $stmt->get_result();
+    $rows = $results->fetch_assoc();
+
+    $classInstID = $rows['classInstID'];
+
+    if ($results->num_rows !== 0) {
+      // check if Files are uploaded and valid then loop through each file
+      if (checkFiles($fileArray)) {
+        for($i = 0; $i < count($fileArray['name']); $i++) {
+          $file = [
+              'name' => $fileArray['name'][$i],
+              'tmp_name' => $fileArray['tmp_name'][$i],
+              'type' => $fileArray['type'][$i],
+              'error' => $fileArray['error'][$i],
+              'size' => $fileArray['size'][$i],
+          ];
+
+          $fileContent = file_get_contents($file['tmp_name']);
+
+          // Loop, parse and insert modules
+          $modulePattern = '/^(.*?),\s*(.*?)\s*{(.*)}$/s';
+          if (preg_match($modulePattern, $fileContent, $moduleMatches)) {
+            $moduleName = trim($moduleMatches[1]);
+            $moduleDesc = trim($moduleMatches[2]);
+            $moduleContent = trim($moduleMatches[3]);
+
+            debug_console("Module Name: " . $moduleName);
+            debug_console("Module Desc: " . $moduleDesc);
+
+            $moduleID = generateID("M", 9);
+            $cmID = generateID("CM", 8);
+
+            // Insert into Language Modules
+            $sql = "INSERT INTO languagemodule (langID, moduleName, moduleDesc, dateCreated)
+                    VALUES (?, ?, ?, CURRENT_DATE)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('sss', $moduleID, $moduleName, $moduleDesc);
+            $stmt->execute();
+
+            // Insert ClassModule
+
+            $sql = "INSERT INTO classmodule (cmID, classInstID, langID) VALUES (?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('sss', $cmID, $classInstID, $moduleID);
+            $stmt->execute();
+
+            // loop, parse and insert lessons
+            preg_match_all('/{(.*?),\s*(.*?)\s*{(.*?)}}/s', $moduleContent, $lessonMatches, PREG_SET_ORDER);
+            error_log("Lesson Matches: " . print_r($lessonMatches, true)); // Debugging line
+            foreach ($lessonMatches as $lesson) {
+              $lessonName = trim($lesson[1]);
+              $lessonDesc = trim($lesson[2]);
+              $lessonContent = trim($lesson[3]);
+              $lessonID = generateID("L", 9);
+
+              debug_console("Lesson Name: " . $lessonName);
+              debug_console("Lesson Desc: " . $lessonDesc);
+
+              $sql = "INSERT INTO lesson (lessID, langID, lessonName, lessonDesc, dateCreated)
+                      VALUES (?, ?, ?, ?, CURRENT_DATE)";
+              $stmt = $conn->prepare($sql);
+              $stmt->bind_param('ssss', $lessonID, $moduleID, $lessonName, $lessonDesc);
+              $stmt->execute();
+              // loop, parse and insert word-meaning pairs
+              preg_match_all('/{\s*(.*?),\s*(.*?)}/s', $lessonContent, $wordMeaningPairs, PREG_SET_ORDER);
+              foreach ($wordMeaningPairs as $pair) {
+                  $word = trim($pair[1]);
+                  $meaning = trim($pair[2]);
+                  debug_console("Word: " . $word);
+                  debug_console("Meaning: " . $meaning);
+                  $wordID = generateID("W", 9);
+
+                  $sql = "INSERT INTO vocabulary (wordID, lessID, word, meaning) VALUES (?, ?, ?, ?)";
+                  $stmt = $conn->prepare($sql);
+                  $stmt->bind_param('ssss', $wordID, $lessonID, $word, $meaning);
+                  $stmt->execute();
+                }
+              }
+            }
+          }
+        }
+      }
+      header('Location: instructor.php');
+      exit();
+    }// Yawa ni abot og 10 ka nests jesus
+
+  /*
+            Expected Text Format:
+            Module name, Module description {
+              {Lesson1Name, lesson1Description{
+                {word, meaning},
+                {Word, meaning}
+              }
+              {Lesson2Name, lesson2Description{
+                {word, meaning},
+                {Word, meaning}
+              }
+            }
+
+
+            Regex Pattern: "/^(.*?),\s*(.*?)\s*{(.*)}$/s" same rani siya nga pattern for lesson ang 
+            medjo lahi lang is ang kadtong word-meaning pairs so goonerific 😋🤤
+
+            ^$ - start and end of string
+            (.*?), - Module Name - detects up to comma
+            \s* - whitespace
+            (.*?) - Module Description - detects up to {
+            {(.*)} - Module Content - detects everything inside the brackets type shit yawa
+            dugay ni sulaton pre atay
+
+    */
 ?>

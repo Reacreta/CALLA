@@ -36,133 +36,7 @@
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
   }
-
-  // Module Upload Reading Parsing and Insert
-  if (isset($_FILES['files']) && isset($_POST['upload'])) {
-    $response = "";
-    $classroomID = $_POST['classIDField'];
-    $instID = $_SESSION['roleID'];
-    $fileArray = $_FILES['files'];
-    debug_console("Post Went In");
-    debug_console("Classroom ID: " . $classroomID);
-    debug_console("Instructor ID: " . $instID);
-
-    // Check if instructor is part of classroom
-    $sql = "SELECT * FROM classinstructor WHERE classroomID = ? AND instID = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('ss', $classroomID, $instID);
-    $stmt->execute();
-    $results = $stmt->get_result();
-    $rows = $results->fetch_assoc();
-
-    $classInstID = $rows['classInstID'];
-
-    if ($results->num_rows !== 0) {
-      // check if Files are uploaded and valid then loop through each file
-      if (checkFiles($fileArray)) {
-        for($i = 0; $i < count($fileArray['name']); $i++) {
-          $file = [
-              'name' => $fileArray['name'][$i],
-              'tmp_name' => $fileArray['tmp_name'][$i],
-              'type' => $fileArray['type'][$i],
-              'error' => $fileArray['error'][$i],
-              'size' => $fileArray['size'][$i],
-          ];
-
-          $fileContent = file_get_contents($file['tmp_name']);
-
-          // Loop, parse and insert modules
-          $modulePattern = '/^(.*?),\s*(.*?)\s*{(.*)}$/s';
-          if (preg_match($modulePattern, $fileContent, $moduleMatches)) {
-            $moduleName = trim($moduleMatches[1]);
-            $moduleDesc = trim($moduleMatches[2]);
-            $moduleContent = trim($moduleMatches[3]);
-
-            debug_console("Module Name: " . $moduleName);
-            debug_console("Module Desc: " . $moduleDesc);
-
-            $moduleID = generateID("M", 9);
-            $cmID = generateID("CM", 8);
-
-            // Insert into Language Modules
-            $sql = "INSERT INTO languagemodule (langID, moduleName, moduleDesc, dateCreated)
-                    VALUES (?, ?, ?, CURRENT_DATE)";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param('sss', $moduleID, $moduleName, $moduleDesc);
-            $stmt->execute();
-
-            // Insert ClassModule
-
-            $sql = "INSERT INTO classmodule (cmID, classInstID, langID) VALUES (?, ?, ?)";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param('sss', $cmID, $classInstID, $moduleID);
-            $stmt->execute();
-
-            // loop, parse and insert lessons
-            preg_match_all('/{(.*?),\s*(.*?)\s*{(.*?)}}/s', $moduleContent, $lessonMatches, PREG_SET_ORDER);
-            error_log("Lesson Matches: " . print_r($lessonMatches, true)); // Debugging line
-            foreach ($lessonMatches as $lesson) {
-              $lessonName = trim($lesson[1]);
-              $lessonDesc = trim($lesson[2]);
-              $lessonContent = trim($lesson[3]);
-              $lessonID = generateID("L", 9);
-
-              debug_console("Lesson Name: " . $lessonName);
-              debug_console("Lesson Desc: " . $lessonDesc);
-
-              $sql = "INSERT INTO lesson (lessID, langID, lessonName, lessonDesc, dateCreated)
-                      VALUES (?, ?, ?, ?, CURRENT_DATE)";
-              $stmt = $conn->prepare($sql);
-              $stmt->bind_param('ssss', $lessonID, $moduleID, $lessonName, $lessonDesc);
-              $stmt->execute();
-              // loop, parse and insert word-meaning pairs
-              preg_match_all('/{\s*(.*?),\s*(.*?)}/s', $lessonContent, $wordMeaningPairs, PREG_SET_ORDER);
-              foreach ($wordMeaningPairs as $pair) {
-                  $word = trim($pair[1]);
-                  $meaning = trim($pair[2]);
-                  debug_console("Word: " . $word);
-                  debug_console("Meaning: " . $meaning);
-                  $wordID = generateID("W", 9);
-
-                  $sql = "INSERT INTO vocabulary (wordID, lessID, word, meaning) VALUES (?, ?, ?, ?)";
-                  $stmt = $conn->prepare($sql);
-                  $stmt->bind_param('ssss', $wordID, $lessonID, $word, $meaning);
-                  $stmt->execute();
-                }
-              }
-            }
-          }
-        }
-      }
-      header("Location: " . $_SERVER['PHP_SELF']);
-      exit();
-    }// Yawa ni abot og 10 ka nests jesus
-
-  /*
-            Expected Text Format:
-            Module name, Module description {
-              {Lesson1Name, lesson1Description{
-                {word, meaning},
-                {Word, meaning}
-              }
-              {Lesson2Name, lesson2Description{
-                {word, meaning},
-                {Word, meaning}
-              }
-            }
-
-
-            Regex Pattern: "/^(.*?),\s*(.*?)\s*{(.*)}$/s" same rani siya nga pattern for lesson ang 
-            medjo lahi lang is ang kadtong word-meaning pairs so goonerific 😋🤤
-
-            ^$ - start and end of string
-            (.*?), - Module Name - detects up to comma
-            \s* - whitespace
-            (.*?) - Module Description - detects up to {
-            {(.*)} - Module Content - detects everything inside the brackets type shit yawa
-            dugay ni sulaton pre atay
-
-    */
+  
 ?>
 
 
@@ -1401,8 +1275,8 @@
 
           <!-- Footer Actions -->
           <div class="cd-actions">
-            <button class="cd-btn cd-btn-logs">Check Logs</button>
             <div class="cd-actions-right">
+              <button></button>
               <button class="cd-btn cd-btn-delete">Delete</button>
               <button class="cd-btn cd-btn-close" onclick="hideSubOverlay('viewClassroomDetailsOverlay','classroomOverlay')">Close</button>
             </div>
@@ -1442,7 +1316,7 @@
           </div>
 
         </div>
-      </div> <!-- End View Classroom Overlay -->
+      </div> <!-- End Join Classroom Overlay -->
 
       <!-- Modules Overlay -->
       <div id="moduleOverlay" class="module-overlay" overlay-type ="module">
@@ -1526,7 +1400,7 @@ Module Name, Module Description{
   }}, ...	
 }</pre>
           </div>
-          <form action="" method="post" enctype="multipart/form-data">
+          <form action="instructorFunctions.php" method="post" enctype="multipart/form-data">
             <div class="create-module-con">
               <select name="classIDField" id="classroomIDField" placeholder="ClassroomID">
                 <option value="" disabled selected>Select a Classroom</option>
@@ -1802,125 +1676,285 @@ Module Name, Module Description{
   }
 
   // Show Classroom Details
+  var selectedClassroomID = '';
   function showClassDetails(element) {
-  console.log("Show Classroom Details");
-  showOverlay('viewClassroomDetailsOverlay', 'classroomOverlay');
+    console.log("Show Classroom Details");
+    showOverlay('viewClassroomDetailsOverlay', 'classroomOverlay');
 
-  const classCard = element.closest('.classroom-card');
-  const classID = classCard.getAttribute('classroom-id');
+    const classCard = element.closest('.classroom-card');
+    const classID = classCard.getAttribute('classroom-id');
+    selectedClassroomID = classID;
+    if (!classID) {
+      console.error("Error: Classroom ID not found.");
+      return;
+    }
 
-  if (!classID) {
-    console.error("Error: Classroom ID not found.");
-    return;
+    // Fetch classroom details
+    console.log('Sending Fetch Request to instructorFunctions.php');
+    fetch('instructorFunctions.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'getClassroomDetails', // Correct action
+        data: { classID: classID }
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (!data.success) {
+          throw new Error(data.message || 'Failed to load classroom data.');
+        }
+
+        const { classroomDetails, instructors, students, modules } = data;
+        console.log("Classroom Details:", classroomDetails);
+        console.log("Instructors:", instructors);
+        console.log("Students:", students);
+        console.log("Modules:", modules);
+
+        // Generate HTML content
+        const headerContent = `
+          <div id="cdClassName">${classroomDetails.className}</div>
+          <div id="cdCreator">${classroomDetails.username}</div>
+        `;
+        const descriptionContent = `
+          <h2 class="cd-section-title">Description:</h2>
+          <div id="cd-description-text">${classroomDetails.classDesc}</div>
+          <div id="editBtn"><button class="cd-edit-btn">Edit Details</button></div>
+        `;
+        const metadataContent = `
+          <div class="cd-metadata-item">
+            <span class="cd-label">Created On:</span>
+            <span id="cd-created-date">${classroomDetails.dateCreated}</span>
+          </div>
+          <div class="cd-metadata-item">
+            <span class="cd-label">Code:</span>
+            <span id="cd-access-code">${classroomDetails.classCode}</span>
+          </div>
+        `;
+        const instructorContent = instructors.length > 0 ? `
+          <h2 class="cd-section-title">Instructors</h2>
+          <div id="cd-instructor-list">
+            ${instructors.map(instructor => `
+              <div class="cd-student-card">
+                <img src="images/Human_Icon.jpg" alt="Instructor" class="cd-list-icon">
+                <div class="cd-student-info">
+                  <h3>${instructor.username}</h3>
+                  <p>${instructor.userID}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<p>No instructors available.</p>`;
+
+        const studentContent = students.length > 0 ? `
+          <h2 class="cd-section-title">Students</h2>
+          <div id="cd-students-list">
+            ${students.map(student => `
+              <div class="cd-student-card">
+                <img src="images/Human_Icon.jpg" alt="Student" class="cd-list-icon">
+                <div class="cd-student-info">
+                  <h3>${student.username}</h3>
+                  <p>${student.userID}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<p>No students available.</p>`;
+
+        const moduleContent = modules.length > 0 ? `
+          <h2 class="cd-section-title">Modules</h2>
+          <div id="cd-module-list">
+            ${modules.map(module => `
+              <div class="cd-module-card">
+                <img src="images/Module_Icon.jpg" alt="Module Icon" class="cd-list-icon">
+                <div class="cd-module-info">
+                  <h3>${module.moduleName}</h3>
+                  <p>${module.username}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<p>No modules available.</p>`;
+
+        // Inject content into the DOM
+        document.getElementById('cd-title-wrapper').innerHTML = headerContent;
+        document.getElementById('cd-description-container').innerHTML = descriptionContent;
+        document.getElementById('cd-metadata').innerHTML = metadataContent;
+        document.getElementById('cdInstructorList').innerHTML = instructorContent;
+        document.getElementById('cdStudentList').innerHTML = studentContent;
+        document.getElementById('cdModuleList').innerHTML = moduleContent;
+      })
+
+      .catch(error => {
+        console.error("Fetch error:", error);
+        document.getElementById('cd-title-wrapper').innerHTML = `<div class="error">Failed to load classroom details. Please try again later.</div>`;
+      });
   }
 
-  // Fetch classroom details
-  console.log('Sending Fetch Request to instructorFunctions.php');
-  fetch('instructorFunctions.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'getClassroomDetails', // Correct action
-      data: { classID: classID }
-    })
-  })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+  // Editing
+  let originalTitle = '';
+  let originalDesc = '';
+
+  function editClass() {
+      const titleEl = document.getElementById('classTitle');
+      const descEl = document.getElementById('classDesc');
+      const editBtn = document.getElementById('editBtn');
+      const deleteBtn = document.getElementById('deleteBtn');
+      const leaveBtn = document.getElementById('leaveBtn');
+      const editControls = document.getElementById('editControls');
+
+      // Store original values
+      originalTitle = titleEl.innerText;
+      originalDesc = descEl.innerText;
+
+      // Replace with editable fields
+      titleEl.outerHTML = `<input id="editTitle" type="text" value="${originalTitle}" class="editable-input">`;
+      descEl.outerHTML = `<textarea id="editDesc" class="editable-textarea">${originalDesc}</textarea>`;
+
+      // Hide other buttons and show Save/Cancel
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.style.display = 'none';
+      });
+      document.getElementById('cancel').style.display = 'flex';
+      document.getElementById('save').style.display = 'flex';
+  }
+
+  function cancelEdit() {
+      // Revert back to original content
+      document.getElementById('editTitle').outerHTML = `<div id="classTitle">${originalTitle}</div>`;
+      document.getElementById('editDesc').outerHTML = `<div id="classDesc">${originalDesc}</div>`;
+
+      // Show original buttons again
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.style.display = 'flex';
+      });
+      document.getElementById('cancel').style.display = 'none';
+      document.getElementById('save').style.display = 'none';
+
+  }
+
+  function saveEdit() {
+      const classTitle = document.getElementById('editTitle').value;
+      const classDesc = document.getElementById('editDesc').value;
+
+      if (classTitle.trim() === '' || classDesc.trim() === '') {
+          alert('Title and description cannot be empty.');
+          return;
       }
-      return response.json();
-    })
-    .then(data => {
-      if (!data.success) {
-        throw new Error(data.message || 'Failed to load classroom data.');
+
+      fetch('', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+          ,
+          body: JSON.stringify({
+              updateClass: true,
+              className: classTitle,
+              classDesc: classDesc,
+              classID: selectedClassroomID
+          })
+      })
+      .then(res => res.json())
+      .then(data => {
+          if (data.success) {
+              notifyAndRedirect('Changes updated sucessfully!', 'reload');
+          } else {
+              alert('Update failed.');
+              console.error(data.error);
+          }
+      });
+  }
+/*
+  // Deletion
+  function deleteClass() {
+      const confirmed = confirm("Are you sure you want to delete this classroom?");
+      message = 'Classroom Deleted Successfully.';
+      if (confirmed) {
+          // Add classroom deletion process here
+          fetch('', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  deleteClass: true,
+                  classID: selectedClassroomID
+              })
+          })
+          .then(res => res.json())
+          .then(data => {
+              if (data.success) {
+                  // redirection
+                  if (accountRole === 'Administrator') {
+                      notifyAndRedirect(message, 'Admin.php');
+                      exit();
+                  } else if (accountRole === 'Instructor') {
+                      notifyAndRedirect(message, 'Instructor.php');
+                      exit();
+                  } else {
+                      alert('No account role detected. Please login again.');
+                  }
+              } else {
+                  alert('Deletion failed.');
+                  console.error(data.error);
+              }
+          });
+          
+
+      }
+  }
+
+  // Leaving
+  function leaveClass() {
+      // check if owner
+      const isOwner = checkOwner === 'true';
+      let confirmed = false;
+
+      if (isOwner) {
+          confirmed = confirm("Are you sure you want to leave this classroom? As the owner, leaving will permanently delete the classroom and all its contents.");
+      } else {
+          confirmed = confirm("Are you sure you want to leave this classroom?");
       }
 
-      const { classroomDetails, instructors, students, modules } = data;
-      console.log("Classroom Details:", classroomDetails);
-      console.log("Instructors:", instructors);
-      console.log("Students:", students);
-      console.log("Modules:", modules);
+      if (!confirmed) return;
 
-      // Generate HTML content
-      const headerContent = `
-        <div id="cdClassName">${classroomDetails.className}</div>
-        <div id="cdCreator">${classroomDetails.username}</div>
-      `;
-      const descriptionContent = `
-        <h2 class="cd-section-title">Description:</h2>
-        <div id="cd-description-text">${classroomDetails.classDesc}</div>
-        <div id="editBtn"><button class="cd-edit-btn">Edit Details</button></div>
-      `;
-      const metadataContent = `
-        <div class="cd-metadata-item">
-          <span class="cd-label">Created On:</span>
-          <span id="cd-created-date">${classroomDetails.dateCreated}</span>
-        </div>
-        <div class="cd-metadata-item">
-          <span class="cd-label">Code:</span>
-          <span id="cd-access-code">${classroomDetails.classCode}</span>
-        </div>
-      `;
-      const instructorContent = instructors.length > 0 ? `
-        <h2 class="cd-section-title">Instructors</h2>
-        <div id="cd-instructor-list">
-          ${instructors.map(instructor => `
-            <div class="cd-student-card">
-              <img src="images/Human_Icon.jpg" alt="Instructor" class="cd-list-icon">
-              <div class="cd-student-info">
-                <h3>${instructor.username}</h3>
-                <p>${instructor.userID}</p>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      ` : `<p>No instructors available.</p>`;
-
-      const studentContent = students.length > 0 ? `
-        <h2 class="cd-section-title">Students</h2>
-        <div id="cd-students-list">
-          ${students.map(student => `
-            <div class="cd-student-card">
-              <img src="images/Human_Icon.jpg" alt="Student" class="cd-list-icon">
-              <div class="cd-student-info">
-                <h3>${student.username}</h3>
-                <p>${student.userID}</p>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      ` : `<p>No students available.</p>`;
-
-      const moduleContent = modules.length > 0 ? `
-        <h2 class="cd-section-title">Modules</h2>
-        <div id="cd-module-list">
-          ${modules.map(module => `
-            <div class="cd-module-card">
-              <img src="images/Module_Icon.jpg" alt="Module Icon" class="cd-list-icon">
-              <div class="cd-module-info">
-                <h3>${module.moduleName}</h3>
-                <p>${module.username}</p>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      ` : `<p>No modules available.</p>`;
-
-      // Inject content into the DOM
-      document.getElementById('cd-title-wrapper').innerHTML = headerContent;
-      document.getElementById('cd-description-container').innerHTML = descriptionContent;
-      document.getElementById('cd-metadata').innerHTML = metadataContent;
-      document.getElementById('cdInstructorList').innerHTML = instructorContent;
-      document.getElementById('cdStudentList').innerHTML = studentContent;
-      document.getElementById('cdModuleList').innerHTML = moduleContent;
-    })
-
-    .catch(error => {
-      console.error("Fetch error:", error);
-      document.getElementById('cd-title-wrapper').innerHTML = `<div class="error">Failed to load classroom details. Please try again later.</div>`;
-    });
-}
-
+      fetch('', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+              leaveClassroom: true,
+              classID: selectedClassroomID,
+              role: "<?= $accountRole ?>",
+              owner: isOwner
+          })
+      })
+      .then(res => res.json())
+      .then(data => {
+          if (data.success) {
+              const message = isOwner 
+                  ? 'Classroom deleted successfully.' 
+                  : 'You have left the Classroom Successfully.';
+              // Redirect based on role
+              if (accountRole === 'Instructor') {
+                  notifyAndRedirect(message, 'Instructor.php');
+              } else if (accountRole === 'Student') {
+                  notifyAndRedirect(message, 'Student.php');
+              } else {
+                  alert('No account role detected. Please login again.');
+              }
+          } else {
+              alert('Failed to leave the classroom.');
+              console.error(data.error);
+          }
+      })
+      .catch(err => {
+          console.error('Error leaving classroom:', err);
+          alert('An error occurred while trying to leave the classroom.');
+      });
+  }
+*/
   var name = "";
   var desc = "";
   var code = "";
