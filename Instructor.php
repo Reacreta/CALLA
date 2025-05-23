@@ -1039,7 +1039,7 @@
     }
 
     textarea {
-      width: 625px;
+      width: 600px;
       height: 200px;
       padding: 15px;
       resize: none;
@@ -1299,7 +1299,7 @@
           <div class="cd-actions">
             <div class="cd-actions-right">
               <button></button>
-              <button class="cd-btn cd-btn-delete">Delete</button>
+              <button class="cd-btn cd-btn-delete" onclick="deleteClass()">Delete</button>
               <button class="cd-btn cd-btn-close" onclick="hideSubOverlay('viewClassroomDetailsOverlay','classroomOverlay')">Close</button>
             </div>
           </div>
@@ -1746,7 +1746,8 @@ Module Name, Module Description{
         const descriptionContent = `
           <h2 class="cd-section-title">Description:</h2>
           <div id="cd-description-text">${classroomDetails.classDesc}</div>
-          <div id="editBtn"><button class="cd-edit-btn">Edit Details</button></div>
+          <div id="editBtn"><button class="cd-edit-btn" onClick="editClass()">Edit Details</button></div>
+          <div id="saveBtn" style="display:none;"><button class="cd-save-btn" onClick="saveEdit()">Save Changes</button></div>
         `;
         const metadataContent = `
           <div class="cd-metadata-item">
@@ -1817,6 +1818,44 @@ Module Name, Module Description{
       });
   }
 
+  // -- Class Functions --
+  function notifyAndRedirect(message, redirectUrl) { // for redirection, if any in the future (only used for reload for now)
+            const successDiv = document.createElement('div');
+            successDiv.textContent = message;
+
+            successDiv.style.position = 'absolute';
+            successDiv.style.display = 'flex';
+            successDiv.style.margin = '20px auto';
+            successDiv.style.padding = '15px 25px';
+            successDiv.style.backgroundColor = '#d4edda';
+            successDiv.style.color = '#155724';
+            successDiv.style.border = '1px solid #c3e6cb';
+            successDiv.style.borderRadius = '8px';
+            successDiv.style.width = 'fit-content';
+            successDiv.style.fontFamily = 'Inter, sans-serif';
+            successDiv.style.fontSize = '16px';
+            successDiv.style.textAlign = 'center';
+            successDiv.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.1)';
+            successDiv.style.zIndex = '1000';
+            successDiv.style.left = '0';
+            successDiv.style.right = '0';
+            successDiv.style.top = '30px';
+            successDiv.style.justifyContent = 'center';
+
+            document.body.appendChild(successDiv);
+
+            if (redirectUrl === 'reload')
+                setTimeout(() => {
+                successDiv.remove();
+                window.location.reload();
+            }, 3000);
+            else
+                setTimeout(() => {
+                    successDiv.remove();
+                    window.location.href = redirectUrl;
+                }, 3000);
+        }
+
   // Editing
   let originalTitle = '';
   let originalDesc = '';
@@ -1827,7 +1866,6 @@ Module Name, Module Description{
       const editBtn = document.getElementById('editBtn');
       const deleteBtn = document.getElementById('deleteBtn');
       const leaveBtn = document.getElementById('leaveBtn');
-      const editControls = document.getElementById('editControls');
 
       // Store original values
       originalTitle = titleEl.innerText;
@@ -1837,25 +1875,18 @@ Module Name, Module Description{
       titleEl.outerHTML = `<input id="editTitle" type="text" value="${originalTitle}" class="editable-input">`;
       descEl.outerHTML = `<textarea id="editDesc" class="editable-textarea">${originalDesc}</textarea>`;
 
-      // Hide other buttons and show Save/Cancel
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-          btn.style.display = 'none';
-      });
-      document.getElementById('cancel').style.display = 'flex';
-      document.getElementById('save').style.display = 'flex';
+      // Reveal Save and swap Edit to Cancel
+      document.getElementById('editBtn').outerHTML = `<div id="editBtn"><button class="cd-edit-btn" onClick="cancelEdit()" style="display:flex;">Cancel</button></div>`;
+      document.getElementById('saveBtn').style.display = 'block';
   }
 
   function cancelEdit() {
       // Revert back to original content
-      document.getElementById('editTitle').outerHTML = `<div id="classTitle">${originalTitle}</div>`;
-      document.getElementById('editDesc').outerHTML = `<div id="classDesc">${originalDesc}</div>`;
+      document.getElementById('editTitle').outerHTML = `<div id="cdClassName">${originalTitle}</div>`;
+      document.getElementById('editDesc').outerHTML = `<div id="cd-description-text">${originalDesc}</div>`;
 
-      // Show original buttons again
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-          btn.style.display = 'flex';
-      });
-      document.getElementById('cancel').style.display = 'none';
-      document.getElementById('save').style.display = 'none';
+      document.getElementById('editBtn').outerHTML = `<div id="editBtn"><button class="cd-edit-btn" onClick="editClass()">Edit Details</button></div>`;
+      document.getElementById('saveBtn').style.display = 'none';
 
   }
 
@@ -1868,65 +1899,73 @@ Module Name, Module Description{
           return;
       }
 
-      fetch('', {
+      fetch('instructorFunctions.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
           ,
           body: JSON.stringify({
-              updateClass: true,
+              action: 'updateClass',
               className: classTitle,
               classDesc: classDesc,
               classID: selectedClassroomID
           })
       })
-      .then(res => res.json())
-      .then(data => {
-          if (data.success) {
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json(); // Parse JSON response
+      })
+      .then(result => {
+          if (result.success) {
               notifyAndRedirect('Changes updated sucessfully!', 'reload');
           } else {
               alert('Update failed.');
-              console.error(data.error);
           }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred: ' + error.message);
       });
   }
-/*
+
   // Deletion
   function deleteClass() {
       const confirmed = confirm("Are you sure you want to delete this classroom?");
-      message = 'Classroom Deleted Successfully.';
       if (confirmed) {
           // Add classroom deletion process here
-          fetch('', {
+          fetch('instructorFunctions.php', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 'Content-Type': 'application/json' }
+              ,
               body: JSON.stringify({
-                  deleteClass: true,
+                  action: 'deleteClass',
                   classID: selectedClassroomID
               })
           })
-          .then(res => res.json())
-          .then(data => {
-              if (data.success) {
-                  // redirection
-                  if (accountRole === 'Administrator') {
-                      notifyAndRedirect(message, 'Admin.php');
-                      exit();
-                  } else if (accountRole === 'Instructor') {
-                      notifyAndRedirect(message, 'Instructor.php');
-                      exit();
-                  } else {
-                      alert('No account role detected. Please login again.');
-                  }
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json(); // Parse JSON response
+          })
+          .then(result => {
+              if (result.success) {
+                  notifyAndRedirect('Classroom deleted succesfully!', 'reload');
               } else {
                   alert('Deletion failed.');
-                  console.error(data.error);
               }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred: ' + error.message);
           });
-          
 
       }
+      else return;
   }
 
+/*
   // Leaving
   function leaveClass() {
       // check if owner
@@ -1976,6 +2015,7 @@ Module Name, Module Description{
       });
   }
 */
+
   var name = "";
   var desc = "";
   var code = "";
@@ -2002,7 +2042,6 @@ Module Name, Module Description{
     classid = classCard.getAttribute('classroom-id');
 
     
-
     // Update overlay fields
     document.getElementById('joinName').textContent = name;
     document.getElementById('joinDesc').textContent = desc;
@@ -2052,8 +2091,10 @@ Module Name, Module Description{
       })
       .then(result => {
         if (result.success) {
-          
-        } 
+          notifyAndRedirect('Classroom joined successfully!', 'reload');
+        } else {
+          alert('Failed to join classroom: ' + result.message);
+        }
       })
       .catch(error => {
         console.error('Error:', error);
