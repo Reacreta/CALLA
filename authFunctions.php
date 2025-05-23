@@ -75,7 +75,9 @@
         debug_console("Debugging to ".$url);
         if ($url == 'Admin.php' || $url == 'Instructor.php' || $url == 'Student.php') { // if logging in
             if (isset($_SESSION['accountRole'])) $accountRole = $_SESSION['accountRole'];
+
             else debug_console("Failed to get accountRole.");
+
             echo "<div style='
             position: absolute;
             display: flex;
@@ -93,11 +95,12 @@
             z-index: 1000;
         '>Logged In Successfully, Welcome {$accountRole}.</div>";
             }
-
-        else if ($url == 'index.php') // if registration
+        else if ($url == 'index.php'){ // if registration
             echo "<div style='
             position: absolute;
             display: flex;
+            top: 45%;
+            left: 40%;
             margin: 20px auto;
             padding: 15px 25px;
             background-color: #d4edda;
@@ -111,7 +114,7 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             z-index: 1000;
         '>Registration successful! You can now log in.</div>";
-        
+        }
         echo "<script type='text/javascript'>
             setTimeout(function() {
                 window.location.href = '$url';

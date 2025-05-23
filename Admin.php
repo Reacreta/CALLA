@@ -1405,7 +1405,7 @@ if(isset($_POST["createPartner"])) {
           </div>
 
               <!-- Classroom Details overlay -->
-              <div id="classroomDetailsOverlay" class="create-overlay" style="display: none;">
+            <div id="classroomDetailsOverlay" class="create-overlay" style="display: none;">
               <div class="cd-header-banner">
                   <!-- Background banner image -->
               </div>
@@ -1642,7 +1642,6 @@ if(isset($_POST["createPartner"])) {
       dropdown.style.display = 'none';
     }
   });
-
 
   function showOverlay(targetId) {
     const overlays = ['userOverlay', 'classroomOverlay',  'moduleOverlay', 'partnersOverlay'];
@@ -1892,7 +1891,6 @@ if(isset($_POST["createPartner"])) {
     }
   }
 
-
 function showClassroomDetails(classroomID) {
   fetch(`Admin.php?classroomID=${classroomID}`)
     .then(response => {
@@ -1970,16 +1968,6 @@ function showClassroomDetails(classroomID) {
 function closeClassroomDetails() {
   document.getElementById("classroomDetailsOverlay").style.display = "none";
 }
-
-
-
-
-
-
-
-  
-
-  
 
 // Load default on page load
 window.onload = () => loadModules('All', document.querySelector('.tab.active'));

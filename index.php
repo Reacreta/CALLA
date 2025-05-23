@@ -77,7 +77,6 @@
             // redirect according to role
             switch($accountRole){
                 case 'Administrator':
-                    
                     redirect("Admin.php");
                     break;
                 case 'Instructor':
@@ -122,12 +121,34 @@
       align-items: center;
     }
 
+    .title{
+      display: flex;
+      flex-direction: row;
+      justify-content: center; 
+      margin-bottom: 30px;
+    }
+
+    .title #role{
+      display: flex;
+      align-items: end;
+    }
+
+    .title #role span{
+      font-size: 45px;
+      font-family: 'Goudy Bookletter 1911', serif;
+    }
+
+    .title #logo{
+      height: 90px;
+      width: auto;
+    }
+
     .login-container {
       display: flex;
       flex-direction: column;
       background-color: #7b0000; /* deep red */
       color: white;
-      padding: 100px 0;
+      padding: 100px 65px;
       border-radius: 20px;
       width: 650px;
       height: auto;
@@ -267,8 +288,7 @@
 <body>
     <div class="login-container">
       <div id="header">
-        <!--<img src="images/" alt="Calla logo"> if mag send na si earl og logo--> 
-        <h1>LOGIN</h1>
+        <div class="title"><img id="logo" src="images/logo.png"><div id="role"><span>LOGIN</span></div></div>
       </div>
       <form action="" method="POST">
         <div class="input-field-group">
