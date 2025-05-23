@@ -1,4 +1,6 @@
 <?php
+    ob_start();
+    session_start();
   require_once 'database.php';
   require_once 'authFunctions.php';
 
@@ -231,5 +233,118 @@
       ]);
       exit;
   }
-  }
+  if($action === 'getPartnerDetails'){
+      $data = $input['data'];
+      $partnerID = $data['partnerID'] ?? null;
+
+      // Validate the data
+      if (!$partnerID) {
+          echo json_encode(['success' => false, 'message' => 'Missing required fields.']);
+          exit; // Stop further execution
+      }
+
+      // SQL statement to fetch partner details
+      $sql = "SELECT * FROM partner  
+              WHERE partnerID=?;";
+      $stmt = $conn->prepare($sql);
+      $stmt->bind_param('s', $partnerID);
+      $stmt->execute();
+      $result = $stmt->get_result();
+      $row = $result->fetch_assoc();
+
+      $partnerDetails = $row;
+      echo json_encode([
+          'success' => true,
+          'partnerDetails' => $partnerDetails
+      ]);
+    }
+  } // End of AJAX Request Handling
+
+
+  // File Handling
+  if (isset($_FILES['files']) && isset($_POST['upload'])) {
+    $response = "";
+    $partnerID = $_POST['partnerIDField'];
+    $adminID = $_SESSION['roleID'];
+    $fileArray = $_FILES['files'];
+
+    // check if Files are uploaded and valid then loop through each file
+    if (checkFiles($fileArray)) {
+        for($i = 0; $i < count($fileArray['name']); $i++) {
+            $file = [
+                'name' => $fileArray['name'][$i],
+                'tmp_name' => $fileArray['tmp_name'][$i],
+                'type' => $fileArray['type'][$i],
+                'error' => $fileArray['error'][$i],
+                'size' => $fileArray['size'][$i],
+            ];
+
+            $fileContent = file_get_contents($file['tmp_name']);
+
+            // Loop, parse and insert modules
+            $modulePattern = '/^(.*?),\s*(.*?)\s*{(.*)}$/s';
+            if (preg_match($modulePattern, $fileContent, $moduleMatches)) {
+            $moduleName = trim($moduleMatches[1]);
+            $moduleDesc = trim($moduleMatches[2]);
+            $moduleContent = trim($moduleMatches[3]);
+
+            debug_console("Module Name: " . $moduleName);
+            debug_console("Module Desc: " . $moduleDesc);
+
+            $moduleID = generateID("M", 9);
+            $pmID = generateID("PM", 8);
+
+            // Insert into Language Modules
+            $sql = "INSERT INTO languagemodule (langID, moduleName, moduleDesc, dateCreated)
+                    VALUES (?, ?, ?, CURRENT_DATE)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('sss', $moduleID, $moduleName, $moduleDesc);
+            $stmt->execute();
+
+            // Insert ClassModule
+            $sql = "INSERT INTO partnermodule (pmID,partnerID,adminID,langID) VALUES (?,?,?,?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('ssss', $pmID,$partnerID,$adminID,$moduleID);
+            $stmt->execute();
+
+            // loop, parse and insert lessons
+            preg_match_all('/{(.*?),\s*(.*?)\s*{(.*?)}}/s', $moduleContent, $lessonMatches, PREG_SET_ORDER);
+            error_log("Lesson Matches: " . print_r($lessonMatches, true)); // Debugging line
+            foreach ($lessonMatches as $lesson) {
+                $lessonName = trim($lesson[1]);
+                $lessonDesc = trim($lesson[2]);
+                $lessonContent = trim($lesson[3]);
+                $lessonID = generateID("L", 9);
+
+                debug_console("Lesson Name: " . $lessonName);
+                debug_console("Lesson Desc: " . $lessonDesc);
+
+                $sql = "INSERT INTO lesson (lessID, langID, lessonName, lessonDesc, dateCreated)
+                        VALUES (?, ?, ?, ?, CURRENT_DATE)";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param('ssss', $lessonID, $moduleID, $lessonName, $lessonDesc);
+                $stmt->execute();
+                // loop, parse and insert word-meaning pairs
+                preg_match_all('/{\s*(.*?),\s*(.*?)}/s', $lessonContent, $wordMeaningPairs, PREG_SET_ORDER);
+                foreach ($wordMeaningPairs as $pair) {
+                    $word = trim($pair[1]);
+                    $meaning = trim($pair[2]);
+                    debug_console("Word: " . $word);
+                    debug_console("Meaning: " . $meaning);
+                    $wordID = generateID("W", 9);
+
+                    $sql = "INSERT INTO vocabulary (wordID, lessID, word, meaning) VALUES (?, ?, ?, ?)";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param('ssss', $wordID, $lessonID, $word, $meaning);
+                    $stmt->execute();
+                }
+                }
+                logAction($conn, $_SESSION['userID'], 'Uploaded module: ' . $moduleName);
+            }
+            }
+        }
+
+      header('Location: admin.php');
+      exit();
+    }
 ?>

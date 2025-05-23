@@ -1394,10 +1394,139 @@ if(isset($_POST["createPartner"])) {
     .create-SC .creates:hover {
       background-color: #fff;
     }
+
+    #viewPartnerOverlay {
+      display: none;
+      position: absolute;
+      border: 2px solid white;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      top: 10%;
+      left: 20%;
+      height: fit-content;
+      width: 50%;
+      background: rgba(241, 241, 241, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 20;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    #viewPartnerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+#viewPartnerHeader h2 {
+  color: #7b0000; /* Dark red color for the title */
+  font-size: 24px;
+  font-weight: bold;
+}
+
+#viewPartnerHeader .close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  font-weight: bold;
+  color: #666;
+  cursor: pointer;
+}
+
+#viewPartnerHeader .close-btn:hover {
+  color: #000; /* Darker color on hover */
+}
+
+#viewPartnerMain {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#viewPartnerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+#viewPartnerTitle {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+#viewPartnerTitle img {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px; /* Slightly rounded corners */
+  object-fit: cover;
+}
+
+#viewPartnerName {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333; /* Dark gray for text */
+}
+
+#viewPartnerDesc {
+  background: #f8f8f8; /* Light gray background */
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd; /* Subtle border */
+}
+
+#viewPartnerDescText {
+  font-size: 14px;
+  color: #555; /* Medium gray for text */
+  line-height: 1.6;
+}
+
+#viewPartnerContact,
+#viewPartnerEmail {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+#viewPartnerContactTitle,
+#viewPartnerEmailTitle {
+  font-size: 16px;
+  font-weight: bold;
+  color: #7b0000; /* Dark red for section titles */
+}
+
+#viewPartnerContactText,
+#viewPartnerEmailText {
+  font-size: 14px;
+  color: #333; /* Dark gray for text */
+}
+
+#viewPartnerSC {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+#viewPartnerSC .create-mod-btn {
+  background: #e6e6e6; /* Light gray background */
+  border: none;
+  color: #7b0000; /* Dark red text */
+  font-weight: bold;
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+#viewPartnerSC .create-mod-btn:hover {
+  background: #fff; /* White background on hover */
+  color: #5a0000; /* Darker red text on hover */
+}
     
-    .user-overlay.show, .create-overlay.show, #userChecklogsOverlay .show, #viewClassroomDetailsOverlay.show, #viewModuleOverlay.show, #viewLessonOverlay.show {
+    .user-overlay.show, .create-overlay.show, #userChecklogsOverlay .show, #viewClassroomDetailsOverlay.show, #viewModuleOverlay.show, #viewLessonOverlay.show, #viewPartnerOverlay.show {
       display: block;
     }
+
   </style>
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
@@ -1709,6 +1838,7 @@ if(isset($_POST["createPartner"])) {
           <button class="tab" onclick="loadModules('Classroom', this)">Classroom</button>
           <div class="right-buttons">
             <div class="search-container">
+              <button onclick="showOverlay('createModuleOverlay','moduleOverlay')" class="SearchButton">New Partner Module</button>
               <input type="text" placeholder="Search..." class="search-input">
               <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
             </div>
@@ -1742,22 +1872,17 @@ Module Name, Module Description{
   }}, ...	
 }</pre>
           </div>
-          <form action="instructorFunctions.php" method="post" enctype="multipart/form-data">
+          <form action="adminFunctions.php" method="post" enctype="multipart/form-data">
             <div class="create-module-con">
-              <select name="classIDField" id="classroomIDField" placeholder="ClassroomID">
-                <option value="" disabled selected>Select a Classroom</option>
+              <select name="partnerIDField" id="partnerIDField" placeholder="partnerIDField" required>
+                <option value="" disabled selected>Select a Partner</option>
                   <?php
-                    $sql = "SELECT ci.classroomID, c.className FROM classinstructor ci 
-                            JOIN classroom c ON ci.classroomID = c.classroomID 
-                            WHERE ci.instID = ?";
-                    $stmt = $conn->prepare($sql);
-                    $stmt->bind_param('s', $_SESSION['roleID']);
-                    $stmt->execute();
-                    $results = $stmt->get_result();
+                    
+                    $results = $conn->query("SELECT * FROM partner");
                     while($rows = $results->fetch_assoc()){
-                      $classroomID = $rows['classroomID'];
-                      $classroomName = $rows['className'];
-                      echo "<option value='$classroomID'>$classroomName</option>";
+                      $partnerID = $rows['partnerID'];
+                      $partnerName = $rows['partnerName'];
+                      echo "<option value='$partnerID'>$partnerName - $partnerID</option>";
                     }
                   ?>
 
@@ -1818,7 +1943,7 @@ Module Name, Module Description{
         <h2 style="color: #7b0000; margin-bottom: 20px;">Partners</h2>
         
         <div class="tabs">
-          <button class="NewP" onclick="toggleCreatePartnersOverlay()">Add New</button>
+          <button class="NewP" onclick="showOverlay('createPartnersOverlay','partnersOverlay')">Add New</button>
           <div class="right-buttons">
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
@@ -1838,15 +1963,15 @@ Module Name, Module Description{
                 $partnerName = htmlspecialchars($row['partnerName']);
                 $partnerEmail = htmlspecialchars($row['email']);
             ?>
-              <div class="partners-card">
-              <img src="images/Partners_Icon.jpg" alt="Partners Icon" class="partners-icon">
-              <div class="partners-info">
-                <div class="partners-title"><?php echo $partnerName?></div>
-                <div class="partners-role"><?php echo $partnerEmail?></div>
-              </div>
-              <a href="partners-details.html?partnersId=DepEd" class="search-icon-link">
-                <img src="images/Search_Icon.jpg" alt="View Partners" class="search-image-icon">
-              </a>
+              <div class="partners-card" partner-id="<?php echo $row['partnerID']; ?>">
+                <img src="images/Partners_Icon.jpg" alt="Partners Icon" class="partners-icon">
+                <div class="partners-info">
+                  <div class="partners-title"><?php echo $partnerName?></div>
+                  <div class="partners-role"><?php echo $partnerEmail?></div>
+                </div>
+                <button type="button" onclick="showViewPartner(this)" class="search-icon-link">
+                  <img src="images/Search_Icon.jpg" alt="View Partners" class="search-image-icon">
+                </button>
             </div>
             <?php } ?>
           </div>
@@ -1855,7 +1980,7 @@ Module Name, Module Description{
 
       <!-- Partner Creation-->
       <div id="createPartnersOverlay" class="create-overlay">
-          <button class="close-btn" onclick="hideCreateOverlay('createPartnersOverlay')">×</button>
+          <button class="close-btn" onclick="closeOverlay('createPartnersOverlay')">×</button>
           <h2 style="color: #7b0000; margin-bottom: 20px;">Create a Partner</h2>
 
           <div class="create-list">
@@ -1886,12 +2011,29 @@ Module Name, Module Description{
               </div>
               <div class="create-SC">
                 <button class="creates" type="submit" name="createPartner">Create</button>
-                <button class="creates" onclick="hideCreateOverlay('createPartnersOverlay')">Cancel</button>
+                <button class="creates" onclick="closeOverlay('createPartnersOverlay')">Cancel</button>
               </div>
             </form>
           </div>
       </div>
 
+      <div id="viewPartnerOverlay" class="view-partner-overlay">
+        <div id="viewPartnerCon">
+          <div id="viewPartnerHeader">
+            <button class="close-btn" onclick="closeOverlay('viewPartnerOverlay')">×</button>
+            <h2 style="color: #7b0000; margin-bottom: 20px;">View Partner</h2>
+          </div>
+          <div id="viewPartnerMain">
+            <div id="viewPartnerInfo">
+                  
+            </div>
+
+            <div id="viewPartnerSC" class="view-partner-SC">
+                <button type="button" class="create-mod-btn" onclick="closeOverlay('viewPartnerOverlay')">Close</button>
+            </div>
+          </div>
+
+      </div>
       </div>
     </div>  
 
@@ -1931,7 +2073,8 @@ Module Name, Module Description{
     'createModuleOverlay',
 
     'partnersOverlay',
-    'createPartnersOverlay'
+    'createPartnersOverlay',
+    'viewPartnerOverlay'
     ];
     const bg = document.getElementById('backgroundContent');
 
@@ -2022,15 +2165,6 @@ Module Name, Module Description{
     input.style.padding = '0';
     input.style.border = 'none';
     input.value = '';
-  }
-
-  function toggleCreatePartnersOverlay() {
-      const overlay = document.getElementById('createPartnersOverlay');
-      if (overlay.classList.contains('show')) {
-        hideCreateOverlay('createPartnersOverlay');
-      } else {
-        showCreateOverlay('createPartnersOverlay');
-      }
   }
 
   function setUserTab(role) {
@@ -2163,7 +2297,7 @@ Module Name, Module Description{
   });
 }
 
-var selectedClassroomID = '';
+  var selectedClassroomID = '';
   function showClassDetails(element) {
     console.log("Show Classroom Details");
     showOverlay('viewClassroomDetailsOverlay', 'classroomOverlay');
@@ -2282,10 +2416,10 @@ var selectedClassroomID = '';
       });
   }
 
- // Show View Module
- var selectedModuleID = "";
+  // Show View Module
+  var selectedModuleID = "";
 
-function showViewModule(element) {
+  function showViewModule(element) {
   console.log("View Module");
   showOverlay('viewModuleOverlay',['moduleOverlay']);
 
@@ -2361,9 +2495,9 @@ function showViewModule(element) {
     console.error("Fetch error:", error);
     document.getElementById('viewModuleMain').innerHTML = `<div class="error">Failed to load module details.</div>`;
   });
-}
+  }
 
-function deleteModule(element) {
+  function deleteModule(element) {
   console.log("Delete Module");
   const moduleCard = element.closest('.module-card');
   const moduleID = selectedModuleID;
@@ -2398,33 +2532,33 @@ function deleteModule(element) {
     console.error('Error:', error);
     alert('An error occurred: ' + error.message);
   });
-}
+  }
 
-// Show View Lesson
-function showViewLesson(element) {
-console.log("View Lesson");
-showOverlay('viewLessonOverlay', ['viewModuleOverlay','moduleOverlay']);
+  // Show View Lesson
+  function showViewLesson(element) {
+  console.log("View Lesson");
+  showOverlay('viewLessonOverlay', ['viewModuleOverlay','moduleOverlay']);
 
-// Get the lesson ID from the clicked element
-const lessonCard = element.closest('.module-card');
-const lessonID = lessonCard.getAttribute('lesson-id');
+  // Get the lesson ID from the clicked element
+  const lessonCard = element.closest('.module-card');
+  const lessonID = lessonCard.getAttribute('lesson-id');
 
-console.log("Lesson ID: " + lessonID);
+  console.log("Lesson ID: " + lessonID);
 
-if (!lessonID) {
+  if (!lessonID) {
   console.error("Error: Lesson ID not found.");
   return;
-}
+  }
 
-// Fetch lesson details from the server
-fetch('adminFunctions.php', {
+  // Fetch lesson details from the server
+  fetch('adminFunctions.php', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
     action: 'getLessonDetails',
     data: { lessonID: lessonID }
   })
-})
+  })
   .then(response => {
     if (!response.ok) {
       throw new Error('Network response was not ok');
@@ -2485,7 +2619,57 @@ fetch('adminFunctions.php', {
       <div class="error">An error occurred while fetching lesson details.</div>
     `;
   });
-}
+  }
+
+  function showViewPartner(element){
+    showOverlay('viewPartnerOverlay', ['partnersOverlay']);
+
+    // Get the lesson ID from the clicked element
+    const partnerCard = element.closest('.partners-card');
+    const partnerID = partnerCard.getAttribute('partner-id');
+    console.log("Partner ID: " + partnerID);
+    fetch('adminFunctions.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'getPartnerDetails',
+        data: { partnerID: partnerID }
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      console.log("Response: ", response);
+      return response.json(); // Parse JSON response
+    })
+    .then(data =>{
+      const {partnerDetails} = data;
+      console.log("Partner Details: ", partnerDetails);
+      const htmlContent = `
+        <div id="viewPartnerTitle">
+          <img src="images/Partners_Icon.jpg" alt="">
+          <div id="viewPartnerName">${partnerDetails.partnerName}</div>
+        </div>
+
+        <div id="viewPartnerDesc">
+          <div id="viewPartnerDescText">${partnerDetails.partnerDesc}</div>
+        </div>
+
+        <div id="viewPartnerContact">
+          <div id="viewPartnerContactTitle">Contact</div>
+          <div id="viewPartnerContactText">${partnerDetails.contact}</div>
+        </div>
+
+        <div id="viewPartnerEmail">
+          <div id="viewPartnerEmailTitle">Email</div>
+          <div id="viewPartnerEmailText">${partnerDetails.email}</div>
+        </div>
+      `;
+      document.getElementById('viewPartnerInfo').innerHTML = htmlContent;
+    })
+
+  }
 
 // Load default on page load
 window.onload = () => loadModules('All', document.querySelector('.tab.active'));
