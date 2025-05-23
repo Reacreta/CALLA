@@ -134,12 +134,12 @@
     }
 
     .title #role span{
-      font-size: 45px;
+      font-size: 60px;
       font-family: 'Goudy Bookletter 1911', serif;
     }
 
     .title #logo{
-      height: 90px;
+      height: 100px;
       width: auto;
     }
 
