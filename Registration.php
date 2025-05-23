@@ -296,7 +296,7 @@
 <body>
   <div id="contCon">
     <div class="register-container">
-    <div class="title"><img id="logo" src="images/logo.png"><div id="role"><span>REGISTER</span></div></div>
+    <div class="title"><img id="logo" src="images/logo.png"><div><span>REGISTER</span></div></div>
 
       <form method="POST">
         <label>Names</label>
@@ -367,18 +367,22 @@
 
   <script>
     // -- Role Event Listener --
-    function toggleTokenField() {
+    document.addEventListener('DOMContentLoaded', function () {
       const roleSelect = document.getElementById('role');
       const tokenInput = document.getElementById('tokenInput');
 
-      if (roleSelect.value === 'Administrator') {
-        tokenInput.style.display = 'block';
-      } else {
-        tokenInput.style.display = 'none';
+      function toggleTokenField() {
+        console.log('Role changed:', roleSelect.value);
+        if (roleSelect.value === 'Administrator') {
+          tokenInput.style.display = 'block';
+        } else {
+          tokenInput.style.display = 'none';
+        }
       }
-    }
-    // Add an event listener to trigger the function when the role is changed
-    document.getElementById('role').addEventListener('change', toggleTokenField);
+
+      roleSelect.addEventListener('change', toggleTokenField);
+      toggleTokenField(); // Run once on page load
+    });
 
     // -- Format Validation Listener -- NEW
     document.querySelector('form').addEventListener('submit', function (e) {
