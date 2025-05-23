@@ -12,7 +12,9 @@
 
   // Insert into Classroom
   if(isset($_POST['createClassroom'])){
-    $creatorID= array_values($row)[0];
+    
+
+    $creatorID = $_SESSION['roleID'];
 
     $className = $_POST['className'];
     $classDesc = $_POST['classDesc'];
@@ -600,6 +602,16 @@
     height: 50px;
   }
 
+  #cdClassName{
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+  }
+  #cdCreator{
+    font-size: 16px;
+    color: #666;
+  }
+
   #cd-course-title {
     color: #333;
     font-size: 24px;
@@ -672,6 +684,11 @@
     border-radius: 6px;
     background: #f8f8f8;
     margin-bottom: 10px;
+  }
+
+  .cd-right-column{
+    max-height: 720px;
+    overflow-y: scroll;
   }
 
   .cd-list-icon {
@@ -853,7 +870,7 @@
       background-color: gainsboro;
       border-radius: 15px;
       padding: 15px;
-      font-size: 20px;
+      font-size: 13px;
       color: #444;
     }
     
@@ -911,10 +928,15 @@
       font-weight: bold;
       color: #333;
     }
-
+    
+    .view-lesson{
+      background: none;
+      border: none;
+    }
    
     #viewLessonDesc {
       margin-bottom: 20px;
+      height: auto;
     }
 
     #viewLessonDescText {
@@ -1781,7 +1803,6 @@ Module Name, Module Description{
           </div>
         ` : `<p>No modules available.</p>`;
 
-        // Inject content into the DOM
         document.getElementById('cd-title-wrapper').innerHTML = headerContent;
         document.getElementById('cd-description-container').innerHTML = descriptionContent;
         document.getElementById('cd-metadata').innerHTML = metadataContent;
@@ -1801,8 +1822,8 @@ Module Name, Module Description{
   let originalDesc = '';
 
   function editClass() {
-      const titleEl = document.getElementById('classTitle');
-      const descEl = document.getElementById('classDesc');
+      const titleEl = document.getElementById('cdClassName');
+      const descEl = document.getElementById('cd-description-text');
       const editBtn = document.getElementById('editBtn');
       const deleteBtn = document.getElementById('deleteBtn');
       const leaveBtn = document.getElementById('leaveBtn');

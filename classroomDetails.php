@@ -18,7 +18,6 @@
     }
 
     // Set page based on accountRole
-
     if ($accountRole === 'Administrator') { // if admin
         $title = 'CALLA Admin Dashboard';
         $logoHeader = 'ADMIN';

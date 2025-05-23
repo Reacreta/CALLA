@@ -101,7 +101,9 @@
             $sql = "SELECT * FROM classmodule cm 
                     join classinstructor ci on cm.classInstID = ci.classInstID 
                     join classroom c on ci.classroomID = c.classroomID 
-                    join languagemodule lm on cm.langID = lm.langID 
+                    join languagemodule lm on cm.langID = lm.langID
+                    join instructor i on ci.instID = i.instID
+                    join users u on u.userID = i.userID
                     WHERE c.classroomID = ?;";
 
             $stmt = $conn->prepare($sql);
@@ -346,7 +348,7 @@
       }
       header('Location: instructor.php');
       exit();
-    }// Yawa ni abot og 10 ka nests jesus
+    }// ni abot og 10 ka nests jesus
 
   /*
             Expected Text Format:
