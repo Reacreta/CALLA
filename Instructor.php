@@ -1039,7 +1039,7 @@
     }
 
     textarea {
-      width: 625px;
+      width: 600px;
       height: 200px;
       padding: 15px;
       resize: none;
@@ -1746,7 +1746,8 @@ Module Name, Module Description{
         const descriptionContent = `
           <h2 class="cd-section-title">Description:</h2>
           <div id="cd-description-text">${classroomDetails.classDesc}</div>
-          <div id="editBtn"><button class="cd-edit-btn">Edit Details</button></div>
+          <div id="editBtn"><button class="cd-edit-btn" onClick="editClass()">Edit Details</button></div>
+          <div id="saveBtn" style="display:none;"><button class="cd-save-btn" onClick="saveEdit()">Save Changes</button></div>
         `;
         const metadataContent = `
           <div class="cd-metadata-item">
@@ -1817,6 +1818,44 @@ Module Name, Module Description{
       });
   }
 
+  // -- Class Functions --
+  function notifyAndRedirect(message, redirectUrl) { // for redirection, if any in the future (only used for reload for now)
+            const successDiv = document.createElement('div');
+            successDiv.textContent = message;
+
+            successDiv.style.position = 'absolute';
+            successDiv.style.display = 'flex';
+            successDiv.style.margin = '20px auto';
+            successDiv.style.padding = '15px 25px';
+            successDiv.style.backgroundColor = '#d4edda';
+            successDiv.style.color = '#155724';
+            successDiv.style.border = '1px solid #c3e6cb';
+            successDiv.style.borderRadius = '8px';
+            successDiv.style.width = 'fit-content';
+            successDiv.style.fontFamily = 'Inter, sans-serif';
+            successDiv.style.fontSize = '16px';
+            successDiv.style.textAlign = 'center';
+            successDiv.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.1)';
+            successDiv.style.zIndex = '1000';
+            successDiv.style.left = '0';
+            successDiv.style.right = '0';
+            successDiv.style.top = '30px';
+            successDiv.style.justifyContent = 'center';
+
+            document.body.appendChild(successDiv);
+
+            if (redirectUrl === 'reload')
+                setTimeout(() => {
+                successDiv.remove();
+                window.location.reload();
+            }, 3000);
+            else
+                setTimeout(() => {
+                    successDiv.remove();
+                    window.location.href = redirectUrl;
+                }, 3000);
+        }
+
   // Editing
   let originalTitle = '';
   let originalDesc = '';
@@ -1827,7 +1866,6 @@ Module Name, Module Description{
       const editBtn = document.getElementById('editBtn');
       const deleteBtn = document.getElementById('deleteBtn');
       const leaveBtn = document.getElementById('leaveBtn');
-      const editControls = document.getElementById('editControls');
 
       // Store original values
       originalTitle = titleEl.innerText;
@@ -1837,25 +1875,18 @@ Module Name, Module Description{
       titleEl.outerHTML = `<input id="editTitle" type="text" value="${originalTitle}" class="editable-input">`;
       descEl.outerHTML = `<textarea id="editDesc" class="editable-textarea">${originalDesc}</textarea>`;
 
-      // Hide other buttons and show Save/Cancel
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-          btn.style.display = 'none';
-      });
-      document.getElementById('cancel').style.display = 'flex';
-      document.getElementById('save').style.display = 'flex';
+      // Reveal Save and swap Edit to Cancel
+      document.getElementById('editBtn').outerHTML = `<div id="editBtn"><button class="cd-edit-btn" onClick="cancelEdit()" style="display:flex;">Cancel</button></div>`;
+      document.getElementById('saveBtn').style.display = 'block';
   }
 
   function cancelEdit() {
       // Revert back to original content
-      document.getElementById('editTitle').outerHTML = `<div id="classTitle">${originalTitle}</div>`;
-      document.getElementById('editDesc').outerHTML = `<div id="classDesc">${originalDesc}</div>`;
+      document.getElementById('editTitle').outerHTML = `<div id="cdClassName">${originalTitle}</div>`;
+      document.getElementById('editDesc').outerHTML = `<div id="cd-description-text">${originalDesc}</div>`;
 
-      // Show original buttons again
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-          btn.style.display = 'flex';
-      });
-      document.getElementById('cancel').style.display = 'none';
-      document.getElementById('save').style.display = 'none';
+      document.getElementById('editBtn').outerHTML = `<div id="editBtn"><button class="cd-edit-btn" onClick="editClass()">Edit Details</button></div>`;
+      document.getElementById('saveBtn').style.display = 'none';
 
   }
 
@@ -1868,25 +1899,33 @@ Module Name, Module Description{
           return;
       }
 
-      fetch('', {
+      fetch('instructorFunctions.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
           ,
           body: JSON.stringify({
-              updateClass: true,
+              action: 'updateClass',
               className: classTitle,
               classDesc: classDesc,
               classID: selectedClassroomID
           })
       })
-      .then(res => res.json())
-      .then(data => {
-          if (data.success) {
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json(); // Parse JSON response
+      })
+      .then(result => {
+          if (result.success) {
               notifyAndRedirect('Changes updated sucessfully!', 'reload');
           } else {
               alert('Update failed.');
-              console.error(data.error);
           }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred: ' + error.message);
       });
   }
 /*
@@ -2002,7 +2041,6 @@ Module Name, Module Description{
     classid = classCard.getAttribute('classroom-id');
 
     
-
     // Update overlay fields
     document.getElementById('joinName').textContent = name;
     document.getElementById('joinDesc').textContent = desc;
@@ -2052,8 +2090,7 @@ Module Name, Module Description{
       })
       .then(result => {
         if (result.success) {
-          alert('Classroom joined successfully!');
-          location.reload(); // Optionally refresh the page
+          notifyAndRedirect('Classroom joined successfully!', 'reload');
         } else {
           alert('Failed to join classroom: ' + result.message);
         }

@@ -126,6 +126,26 @@
 
           }
 
+          // Classroom functions
+
+          if ($action === 'updateClass') {
+            $data = json_decode(file_get_contents('php://input'), true);
+            $className = trim($data['className']);
+            $classDesc = trim($data['classDesc']);
+            $classID = trim($data['classID']);
+
+            $sql = "UPDATE classroom SET className = ?, classDesc = ? WHERE classroomID = ?";
+            $stmt = $conn->prepare($sql);
+            if ($stmt) {
+                $stmt->bind_param("sss", $className, $classDesc, $classID);
+                $stmt->execute();
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false, 'error' => $conn->error]);
+            }
+            exit;
+        }
+
 
           if ($action === 'getModuleDetails') {
             $data = $input['data'];
