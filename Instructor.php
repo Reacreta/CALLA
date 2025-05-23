@@ -1299,7 +1299,7 @@
           <div class="cd-actions">
             <div class="cd-actions-right">
               <button></button>
-              <button class="cd-btn cd-btn-delete">Delete</button>
+              <button class="cd-btn cd-btn-delete" onclick="deleteClass()">Delete</button>
               <button class="cd-btn cd-btn-close" onclick="hideSubOverlay('viewClassroomDetailsOverlay','classroomOverlay')">Close</button>
             </div>
           </div>
@@ -1928,44 +1928,44 @@ Module Name, Module Description{
         alert('An error occurred: ' + error.message);
       });
   }
-/*
+
   // Deletion
   function deleteClass() {
       const confirmed = confirm("Are you sure you want to delete this classroom?");
-      message = 'Classroom Deleted Successfully.';
       if (confirmed) {
           // Add classroom deletion process here
-          fetch('', {
+          fetch('instructorFunctions.php', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 'Content-Type': 'application/json' }
+              ,
               body: JSON.stringify({
-                  deleteClass: true,
+                  action: 'deleteClass',
                   classID: selectedClassroomID
               })
           })
-          .then(res => res.json())
-          .then(data => {
-              if (data.success) {
-                  // redirection
-                  if (accountRole === 'Administrator') {
-                      notifyAndRedirect(message, 'Admin.php');
-                      exit();
-                  } else if (accountRole === 'Instructor') {
-                      notifyAndRedirect(message, 'Instructor.php');
-                      exit();
-                  } else {
-                      alert('No account role detected. Please login again.');
-                  }
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json(); // Parse JSON response
+          })
+          .then(result => {
+              if (result.success) {
+                  notifyAndRedirect('Classroom deleted succesfully!', 'reload');
               } else {
                   alert('Deletion failed.');
-                  console.error(data.error);
               }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred: ' + error.message);
           });
-          
 
       }
+      else return;
   }
 
+/*
   // Leaving
   function leaveClass() {
       // check if owner
@@ -2015,6 +2015,7 @@ Module Name, Module Description{
       });
   }
 */
+
   var name = "";
   var desc = "";
   var code = "";

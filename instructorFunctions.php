@@ -126,9 +126,9 @@
 
           }
 
-          // Classroom functions
+            // Classroom functions
 
-          if ($action === 'updateClass') {
+            if ($action === 'updateClass') {
             $data = json_decode(file_get_contents('php://input'), true);
             $className = trim($data['className']);
             $classDesc = trim($data['classDesc']);
@@ -140,6 +140,24 @@
                 $stmt->bind_param("sss", $className, $classDesc, $classID);
                 $stmt->execute();
                 echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false, 'error' => $conn->error]);
+            }
+            exit;
+        }
+
+            if ($action === 'deleteClass') {
+            $data = json_decode(file_get_contents('php://input'), true);
+            $classID = trim($data['classID']);
+
+            $sql = "DELETE FROM classroom WHERE classroomID = ?";
+            $stmt = $conn->prepare($sql);
+
+            if ($stmt) {
+                $stmt->bind_param("s", $classID);
+                $stmt->execute();
+                echo json_encode(['success' => true]);
+
             } else {
                 echo json_encode(['success' => false, 'error' => $conn->error]);
             }
