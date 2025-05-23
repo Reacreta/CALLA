@@ -44,6 +44,85 @@
               exit; // Stop further execution
           }
 
+          if($action === 'getClassroomDetails'){
+            $data = $input['data'];
+            $classroomID = $data['classID'] ?? null;
+
+            // Validate the data
+            if (!$classroomID) {
+                echo json_encode(['success' => false, 'message' => 'Missing required fields.']);
+                exit; // Stop further execution
+            }
+
+            // SQL statement to fetch classroom details
+            $sql = "SELECT * FROM classroom c 
+                    join instructor i on c.instID = i.instID 
+                    join users u on i.userID = u.userID 
+                    WHERE c.classroomID=?;";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('s', $classroomID);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+
+            $classroomDetails = $row;
+
+            // SQL statment to fetch Instructor details
+            $sql = "SELECT * FROM classinstructor ci 
+                    JOIN instructor i on ci.instID = i.instID 
+                    JOIN users u ON i.userID = u.userID 
+                    JOIN classroom c ON c.classroomID = ci.classroomID
+                    WHERE c.classroomID = ?;";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('s', $classroomID);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $instructors = [];
+            while($row = $result->fetch_assoc()){
+                $instructors[] = $row;
+            }
+            // SQL statment to fetch Student details
+            $sql = "SELECT * FROM enrolledstudent es 
+                    JOIN student s ON es.studentID = s.studentID 
+                    JOIN users u on s.userID = u.userID 
+                    JOIN classroom c on es.classroomID = c.classroomID
+                    WHERE c.classroomID = ?;";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('s', $classroomID);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $students = [];
+            while($row = $result->fetch_assoc()){
+                $students[] = $row;
+            }
+            // SQL statment to fetch Module details
+            $sql = "SELECT * FROM classmodule cm 
+                    join classinstructor ci on cm.classInstID = ci.classInstID 
+                    join classroom c on ci.classroomID = c.classroomID 
+                    join languagemodule lm on cm.langID = lm.langID 
+                    WHERE c.classroomID = ?;";
+
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('s', $classroomID);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $modules = [];
+            while($row = $result->fetch_assoc()){
+                $modules[] = $row;
+            }
+
+            echo json_encode([
+                'success' => true,
+                'classroomDetails' => $classroomDetails,
+                'instructors' => $instructors,
+                'students' => $students,
+                'modules' => $modules
+            ]);
+            exit;
+
+          }
+
+
           if ($action === 'getModuleDetails') {
             $data = $input['data'];
             $moduleID = $data['moduleID'] ?? null;

@@ -515,15 +515,21 @@
     .create-overlay { 
       display: none;
       position: absolute;
+      float: left;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+
+      background: rgba(241, 241, 241, 0.85);
+      backdrop-filter: blur(5px);
       border: 2px solid white;
       border-radius: 6px 6px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      top: 10%;
-      left: 20%;
+      
       height: fit-content;
-      width: 50%;
-      background: rgba(241, 241, 241, 0.85);
-      backdrop-filter: blur(5px);
+      width: fit-content;
+      
+
       z-index: 20;
       padding: 20px;
       overflow-y: auto;
@@ -666,77 +672,265 @@
       font-size: 20px;
     }
 
-    /* Create Module Overlay */
-    .create-module-overlay{
-      display: none;
-      position: absolute;
-      border: 2px solid white;
-      border-radius: 6px 6px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      top: 10%;
-      left: 20%;
-      height: fit-content;
-      width: 50%;
-      background: rgba(241, 241, 241, 0.85);
-      backdrop-filter: blur(5px);
-      z-index: 20;
-      padding: 20px;
-      overflow-y: auto;
-    }
-    #template{
-      border-radius: 15px;
-      background-color: lightgray;
-      padding: 15px;
-    }
+    /* Classroom Details Overlay */
+  #create-overlay, #viewClassroomDetailsOverlay {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: auto;
+    height: fit-content;
+    background: rgba(241, 241, 241, 0.95);
+    border: 2px solid white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    padding: 20px;
+    overflow-y: auto;
+  }
 
-    .create-module-SC, .create-module-con, .view-module-SC{
-      margin-top: 20px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      justify-content: right;
-    }
+  #viewClassroomDetailsOverlay {
+    width: 60%;
+    height: 80%;
+  }
 
-    #classroomIDField{
-      height: auto;
-      width: 100%;
-      padding: 10px;
+  /* Content Wrapper */
+  .cd-content-wrapper {
+    height: 100%;
+    padding: 20px;
+  }
 
-      border: lightgray 1px solid;
-      border-radius: 10px;
-    }
+  /* Header Section */
+  #cd-header-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 40px;
+    height: auto;
+  }
 
-    #files{
-      height: auto;
-      width: 100%;
-      padding: 10px;
+  .cd-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
 
-      border: lightgray 1px solid;
-      border-radius: 10px;
-    }
-    
-    .create-mod-btn{
-      background: #e6e6e6;
-      border: none;
-      color: #7b0000;
-      font-weight: bold;
-      cursor: pointer;
-      padding: 10px 10px;
-      border-radius: 6px 6px;
-      font-size: 15px;
-    }
+  .cd-class-icon {
+    width: 50px;
+    height: 50px;
+  }
 
-    #viewModule{
-      background: #e6e6e6;
-      border: none;
-      color: #7b0000;
-      font-weight: bold;
-      cursor: pointer;
-      border-radius: 100%;
-      font-size: 15px;
-      height: auto;
-      transition: transform 0.2s;
-    }
+  #cd-course-title {
+    color: #333;
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  #cd-creator-name {
+    color: #666;
+    font-size: 16px;
+  }
+
+  /* Main Grid */
+  .cd-main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    height: 95%;
+  }
+
+  /* Card Styles */
+  .cd-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .cd-section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  /* Metadata */
+  #cd-metadata {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+    padding: 15px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+  }
+
+  .cd-metadata-item {
+    color: #666;
+  }
+
+  .cd-label {
+    font-weight: 500;
+    margin-right: 5px;
+  }
+
+  /* Description */
+  #cd-description-container {
+    background: #f8f8f8;
+    border-radius: 6px;
+  }
+
+  #cd-description-text {
+    color: #555;
+    line-height: 1.6;
+  }
+
+  /* Student and Module Cards */
+  .cd-student-card, .cd-module-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    border-radius: 6px;
+    background: #f8f8f8;
+    margin-bottom: 10px;
+  }
+
+  .cd-list-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .cd-student-info h3, .cd-module-info h3 {
+    font-size: 16px;
+    color: #333;
+  }
+
+  .cd-student-info p, .cd-module-info p {
+    font-size: 14px;
+    color: #666;
+  }
+
+  /* Footer Actions */
+  .cd-actions {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .cd-actions-right {
+    display: flex;
+    gap: 10px;
+  }
+
+  .cd-btn {
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .cd-btn-logs, .cd-btn-delete {
+    background: #8b0000;
+    color: white;
+  }
+
+  .cd-btn-close {
+    background: #ccc;
+    color: #333;
+  }
+
+  /* Create Module Overlay */
+  .create-module-overlay{
+    display: none;
+    position: absolute;
+    border: 2px solid white;
+    border-radius: 6px 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    top: 10%;
+    left: 20%;
+    height: fit-content;
+    width: 50%;
+    background: rgba(241, 241, 241, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 20;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  #cdDesc.cd-card{
+    height: 70%;
+  }
+
+  #cd-description-container{
+    height: 85%;
+  }
+
+  #cd-description-text{
+    height: 90%;
+    overflow-y: auto;
+  }
+
+  #template{
+    border-radius: 15px;
+    background-color: lightgray;
+    padding: 15px;
+  }
+
+  .create-module-SC, .create-module-con, .view-module-SC{
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    justify-content: right;
+  }
+
+  #classroomIDField{
+    height: auto;
+    width: 100%;
+    padding: 10px;
+
+    border: lightgray 1px solid;
+    border-radius: 10px;
+  }
+
+  #files{
+    height: auto;
+    width: 100%;
+    padding: 10px;
+
+    border: lightgray 1px solid;
+    border-radius: 10px;
+  }
+  
+  .create-mod-btn{
+    background: #e6e6e6;
+    border: none;
+    color: #7b0000;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 10px 10px;
+    border-radius: 6px 6px;
+    font-size: 15px;
+  }
+
+  #viewModule{
+    background: #e6e6e6;
+    border: none;
+    color: #7b0000;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 100%;
+    font-size: 15px;
+    height: auto;
+    transition: transform 0.2s;
+  }
 
     /* View Module */
     #viewModuleOverlay{
@@ -805,25 +999,25 @@
       margin-bottom: 10px;
     }
 
-    /* General styling for the overlay */
+    /* View Lessons */
+
     #viewLessonOverlay {
       display: none;
-          position: absolute;
-          border: 2px solid white;
-          border-radius: 6px 6px;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-          top: 10%;
-          left: 20%;
-          height: fit-content;
-          width: 50%;
-          background: rgba(241, 241, 241, 0.85);
-          backdrop-filter: blur(5px);
-          z-index: 20;
-          padding: 20px;
-          overflow-y: auto;
+      position: absolute;
+      border: 2px solid white;
+      border-radius: 6px 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      top: 10%;
+      left: 20%;
+      height: fit-content;
+      width: 50%;
+      background: rgba(241, 241, 241, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 20;
+      padding: 20px;
+      overflow-y: auto;
     }
 
-    /* Header styling for the lesson title */
     #viewLessonTitle {
       display: flex;
       align-items: center;
@@ -834,7 +1028,7 @@
     #viewLessonTitle img {
       width: 50px;
       height: 50px;
-      border-radius: 50%; /* Circular icon */
+      border-radius: 50%;
       object-fit: cover;
     }
 
@@ -844,7 +1038,7 @@
       color: #333;
     }
 
-    /* Styling for the lesson description */
+   
     #viewLessonDesc {
       margin-bottom: 20px;
     }
@@ -872,7 +1066,7 @@
     }
 
     .list-wrapper {
-      overflow-x: auto; /* Allow horizontal scrolling for smaller screens */
+      overflow-x: auto; 
     }
 
     .dynamic-table {
@@ -995,7 +1189,7 @@
       gap: 15px;
     }
 
-    .show, #viewModuleOverlay.show, #viewLessonOverlay.show, #createOverlay.show, #joinOverlay.show{
+    .show, #viewModuleOverlay.show, #viewLessonOverlay.show, #createOverlay.show, #joinOverlay.show, #viewClassroomDetailsOverlay.show, #create-module-overlay.show {
       display: block;
     }
     
@@ -1146,6 +1340,78 @@
 
       </div> <!-- End Classroom Creation-->
 
+
+      <!-- View Classroom Overlay -->
+      <div id="viewClassroomDetailsOverlay" class="create-overlay">
+
+
+        <div class="cd-content-wrapper">
+
+          <!-- Main Content Grid -->
+          <div class="cd-main-grid">
+
+            <!-- Left Column -->
+            <div class="cd-left-column">
+              <div id="cd-header-section">
+
+                <div class="cd-icon-wrapper">
+                  <img src="images/Class_Icon.jpg" alt="Course Icon" class="cd-class-icon">
+                </div>
+                <div id="cd-title-wrapper"> 
+                    <!-- Inject Here -->
+                </div>
+              </div>
+
+              <div id="cdDesc" class="cd-card">
+                
+                <div id="cd-description-container">
+                  <!-- Inject Here -->
+                </div>
+
+                <div id="cd-metadata">
+                  <!-- Inject Here -->
+                </div>
+
+              </div>
+              
+            </div> <!-- End Left column-->
+
+            <!-- Right Column -->
+            <div class="cd-right-column">
+
+              <!-- Instructors Section -->
+              <div id="cdInstructorList" class="cd-card">
+                <!-- Inject Here -->
+                
+              </div>
+
+              <!-- Students Section -->
+              <div id="cdStudentList"  class="cd-card" >
+                <!-- Inject Here -->
+              </div>
+
+              <!-- Modules Section -->
+              <div id="cdModuleList" class="cd-card">
+                <!-- Inject Here -->
+              </div>
+
+            </div><!-- End Right column-->
+
+          </div><!-- End Content-grid  -->
+
+          <!-- Footer Actions -->
+          <div class="cd-actions">
+            <button class="cd-btn cd-btn-logs">Check Logs</button>
+            <div class="cd-actions-right">
+              <button class="cd-btn cd-btn-delete">Delete</button>
+              <button class="cd-btn cd-btn-close" onclick="hideSubOverlay('viewClassroomDetailsOverlay','classroomOverlay')">Close</button>
+            </div>
+          </div>
+
+        </div><!-- End Content-wrapper  -->
+
+      </div> <!-- End viewClassroomOverlay  -->
+
       <!-- Join Classroom -->
       <div id="joinOverlay" class="join-overlay">
       <button class="close-btn" onclick="hideSubOverlay('joinOverlay','classroomOverlay')">×</button>
@@ -1176,7 +1442,7 @@
           </div>
 
         </div>
-      </div>
+      </div> <!-- End View Classroom Overlay -->
 
       <!-- Modules Overlay -->
       <div id="moduleOverlay" class="module-overlay" overlay-type ="module">
@@ -1337,11 +1603,6 @@ Module Name, Module Description{
 
 
 <script>
-  function toggleLogoutDropdown() {
-    const dropdown = document.getElementById('logoutDropdown');
-    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-  }
-
   document.addEventListener('click', function (e) {
     const profileContainer = document.querySelector('.profile-container');
     const dropdown = document.getElementById('logoutDropdown');
@@ -1350,6 +1611,11 @@ Module Name, Module Description{
     }
   });
 
+  function toggleLogoutDropdown() {
+    const dropdown = document.getElementById('logoutDropdown');
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+  }
+  
   // Search Funcs
   function toggleSearch(label) {
     // get container and input field
@@ -1488,15 +1754,19 @@ Module Name, Module Description{
   }
 
   function showOverlay(targetId, backgroundIds = null) {
-    const overlays = ['classroomOverlay', 'moduleOverlay', 'createOverlay', 'joinOverlay', 'createModuleOverlay','viewModuleOverlay', 'viewLessonOverlay'];
+    const overlays = [
+    'classroomOverlay', 'moduleOverlay', 'createOverlay', 'joinOverlay', 'createModuleOverlay',
+    'viewModuleOverlay', 'viewLessonOverlay', 'viewClassroomDetailsOverlay'];
     const bg = document.getElementById('backgroundContent');
 
     overlays.forEach(id => {
       const overlay = document.getElementById(id); // gets element with corresponding name from overlay array
-      console.log("Overlay ID: " + id); // Debugging line
 
-      const shouldShow = (id === targetId || (Array.isArray(backgroundIds) && backgroundIds.includes(id)) || (backgroundIds === id));      
-      console.log("Should Show: " + shouldShow); // Debugging line
+      //console.log("Overlay ID: " + id); // Debug line para maipakita kung unsa na overlay ang ginaspecify
+
+      const shouldShow = (id === targetId || (Array.isArray(backgroundIds) && backgroundIds.includes(id)) || (backgroundIds === id));
+
+      //console.log("Should Show: " + shouldShow); // Debug line to demo ang boolean for showing per overlay 
       overlay.classList.toggle('show', shouldShow);
     });
 
@@ -1531,6 +1801,126 @@ Module Name, Module Description{
 
   }
 
+  // Show Classroom Details
+  function showClassDetails(element) {
+  console.log("Show Classroom Details");
+  showOverlay('viewClassroomDetailsOverlay', 'classroomOverlay');
+
+  const classCard = element.closest('.classroom-card');
+  const classID = classCard.getAttribute('classroom-id');
+
+  if (!classID) {
+    console.error("Error: Classroom ID not found.");
+    return;
+  }
+
+  // Fetch classroom details
+  console.log('Sending Fetch Request to instructorFunctions.php');
+  fetch('instructorFunctions.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'getClassroomDetails', // Correct action
+      data: { classID: classID }
+    })
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to load classroom data.');
+      }
+
+      const { classroomDetails, instructors, students, modules } = data;
+      console.log("Classroom Details:", classroomDetails);
+      console.log("Instructors:", instructors);
+      console.log("Students:", students);
+      console.log("Modules:", modules);
+
+      // Generate HTML content
+      const headerContent = `
+        <div id="cdClassName">${classroomDetails.className}</div>
+        <div id="cdCreator">${classroomDetails.username}</div>
+      `;
+      const descriptionContent = `
+        <h2 class="cd-section-title">Description:</h2>
+        <div id="cd-description-text">${classroomDetails.classDesc}</div>
+        <div id="editBtn"><button class="cd-edit-btn">Edit Details</button></div>
+      `;
+      const metadataContent = `
+        <div class="cd-metadata-item">
+          <span class="cd-label">Created On:</span>
+          <span id="cd-created-date">${classroomDetails.dateCreated}</span>
+        </div>
+        <div class="cd-metadata-item">
+          <span class="cd-label">Code:</span>
+          <span id="cd-access-code">${classroomDetails.classCode}</span>
+        </div>
+      `;
+      const instructorContent = instructors.length > 0 ? `
+        <h2 class="cd-section-title">Instructors</h2>
+        <div id="cd-instructor-list">
+          ${instructors.map(instructor => `
+            <div class="cd-student-card">
+              <img src="images/Human_Icon.jpg" alt="Instructor" class="cd-list-icon">
+              <div class="cd-student-info">
+                <h3>${instructor.username}</h3>
+                <p>${instructor.userID}</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : `<p>No instructors available.</p>`;
+
+      const studentContent = students.length > 0 ? `
+        <h2 class="cd-section-title">Students</h2>
+        <div id="cd-students-list">
+          ${students.map(student => `
+            <div class="cd-student-card">
+              <img src="images/Human_Icon.jpg" alt="Student" class="cd-list-icon">
+              <div class="cd-student-info">
+                <h3>${student.username}</h3>
+                <p>${student.userID}</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : `<p>No students available.</p>`;
+
+      const moduleContent = modules.length > 0 ? `
+        <h2 class="cd-section-title">Modules</h2>
+        <div id="cd-module-list">
+          ${modules.map(module => `
+            <div class="cd-module-card">
+              <img src="images/Module_Icon.jpg" alt="Module Icon" class="cd-list-icon">
+              <div class="cd-module-info">
+                <h3>${module.moduleName}</h3>
+                <p>${module.username}</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : `<p>No modules available.</p>`;
+
+      // Inject content into the DOM
+      document.getElementById('cd-title-wrapper').innerHTML = headerContent;
+      document.getElementById('cd-description-container').innerHTML = descriptionContent;
+      document.getElementById('cd-metadata').innerHTML = metadataContent;
+      document.getElementById('cdInstructorList').innerHTML = instructorContent;
+      document.getElementById('cdStudentList').innerHTML = studentContent;
+      document.getElementById('cdModuleList').innerHTML = moduleContent;
+    })
+
+    .catch(error => {
+      console.error("Fetch error:", error);
+      document.getElementById('cd-title-wrapper').innerHTML = `<div class="error">Failed to load classroom details. Please try again later.</div>`;
+    });
+}
+
   var name = "";
   var desc = "";
   var code = "";
@@ -1539,8 +1929,7 @@ Module Name, Module Description{
   
   // Show Join Overlay
   function showJoinOverlay(element) {
-    console.log("Join Overlay");
-
+  
     // Find the parent classroom-card element
     const classCard = element.closest('.classroom-card');
     if (!classCard) {
@@ -1548,7 +1937,7 @@ Module Name, Module Description{
       return;
     }
 
-    console.log("Join Overlay2");
+    
 
     // Get data attributes directly
     name = classCard.getAttribute('classroom-name');
@@ -1557,7 +1946,7 @@ Module Name, Module Description{
     creator = classCard.getAttribute('classroom-creator');
     classid = classCard.getAttribute('classroom-id');
 
-    console.log(name + " " + desc + " " + code + " " + creator + " " + classid);
+    
 
     // Update overlay fields
     document.getElementById('joinName').textContent = name;
@@ -1741,6 +2130,7 @@ Module Name, Module Description{
     });
   }
   
+  // Show View Lesson
   function showViewLesson(element) {
   console.log("View Lesson");
   showOverlay('viewLessonOverlay', ['viewModuleOverlay','moduleOverlay']);
