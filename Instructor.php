@@ -2052,11 +2052,8 @@ Module Name, Module Description{
       })
       .then(result => {
         if (result.success) {
-          alert('Classroom joined successfully!');
-          location.reload(); // Optionally refresh the page
-        } else {
-          alert('Failed to join classroom: ' + result.message);
-        }
+          
+        } 
       })
       .catch(error => {
         console.error('Error:', error);
@@ -2098,9 +2095,6 @@ Module Name, Module Description{
       return response.json(); 
     })
     .then(data => {
-      if (!data.success) {
-        throw new Error(data.message || 'Failed to load module data.');
-      }
 
       const { moduleName, moduleDesc, className, lessons: lessonArray } = data;
 

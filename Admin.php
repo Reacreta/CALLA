@@ -22,14 +22,6 @@ if (!empty($search)) {
 $sql = "SELECT * FROM users WHERE $where_clause";
 $result = $conn->query($sql);
 
-// Activity logs
-$allLogs = [];
-$logResult = $conn->query("SELECT userID, action, dateTimeCreated FROM activity ORDER BY dateTimeCreated DESC");
-if ($logResult && $logResult->num_rows > 0) {
-    while ($row = $logResult->fetch_assoc()) {
-        $allLogs[] = $row;
-    }
-}
 
 // classroom details
 if (isset($_GET['classroomID'])) {
@@ -119,8 +111,6 @@ if (isset($_GET['classroomID'])) {
     exit; // ✅ stop here so rest of page doesn't load
 }
 
-// ✅ Normal page logic continues below
-
 if(isset($_POST["createPartner"])) {
     $partnerName = $_POST["partnerName"];
     $partnerDesc = $_POST["partnerDesc"];
@@ -136,8 +126,6 @@ if(isset($_POST["createPartner"])) {
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
-
-
 ?>
 
 <script>
@@ -151,897 +139,1136 @@ if(isset($_POST["createPartner"])) {
   <title>CALLA Admin Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter&family=Goudy+Bookletter+1911&display=swap" rel="stylesheet">
   <style>
-    /* ANIMATION */
-    :root {
-      --gradient: linear-gradient(45deg,  #330000, #4A0303, #7B0000, #A30505, #C0660E, #D59004);
-    }
+  /* ANIMATION */
+  :root {
+    --gradient: linear-gradient(45deg,  #330000, #4A0303, #7B0000, #A30505, #C0660E, #D59004);
+  }
 
-    @keyframes grad-anim {
-      0%{
-        background-position: left;}
-      100%{
-          background-position: right;
-        }
-    }
-    /* ---------------------------------------------------------------------- */
+  @keyframes grad-anim {
+    0%{
+      background-position: left;}
+    100%{
+        background-position: right;
+      }
+  }
+  /* ---------------------------------------------------------------------- */
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', sans-serif;
-      letter-spacing: 2px;
-    }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 2px;
+  }
 
-    body, html {
-      height: 100%;
-    }
+  body, html {
+    height: 100%;
+  }
 
-    body {
-      display: flex;
-      flex-direction: column;
-      background-image: var(--gradient);
-      background-size: 300% 100%;
-      animation: grad-anim 10s infinite alternate;
-    }
+  body {
+    display: flex;
+    flex-direction: column;
+    background-image: var(--gradient);
+    background-size: 300% 100%;
+    animation: grad-anim 10s infinite alternate;
+  }
 
-    .header {
-      border: none;
-      color: white;
-      padding: 15px 30px;
+  .header {
+    border: none;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .title{
+    display: flex;
+    flex-direction: row;
+  }
+
+  .title #role{
+    display: flex;
+    align-items: end;
+  }
+
+  .title #role span{
+    font-size: 35px;
+    font-family: 'Goudy Bookletter 1911', serif;
+  }
+
+  .title #logo{
+    height: 70px;
+    width: auto;
+  }
+
+  .header .profile {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-image: url('images/profile.jpg');
+    background-size: cover;
+    background-position: center;
+  }
+
+  .profile-container {
+    margin-left: auto;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid white;
+  }
+
+  .logout-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 50px;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+  }
+
+  .logout-dropdown a {
+    text-decoration: none;
+    color: #7b0000;
+    font-weight: bold;
+    height: 100%;
+    width: 100%;
+  }
+
+  /* DASH */
+  .dashboard-container {
+    display: flex;
+    height: 100%;
+  }
+
+  .sidebar {
+    border: none;
+    width: 250px;
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .User-icon {
+    height: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 50%; /* Makes it circular */
+  }
+
+  .nav-group {
+    background-color: rgba(193, 113, 113, 0.3); /* add transparency */
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    border-radius: 10px;
+  }
+
+  .nav-btn {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: white;
+    height: 90px;
+    border: none;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: left;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+
+  .nav-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+
+  .main-content {
+    flex: 1;
+    position: relative;
+    background-color: lightgray;
+  }
+
+  .background-content {
+    background-image: url('images/USeP_eagle.jpg');
+    background-color: rgb(255, 255, 255, 0.25);
+    background-blend-mode: lighten;
+
+    background-size: cover;
+    background-position: center;
+
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color:rgb(255, 255, 255);
+    font-size: 35px;
+    font-family: 'Goudy Bookletter 1911', serif;
+    font-style: italic;
+    font-weight: bolder;
+    
+  }
+
+  /* User Overlays */
+  .user-overlay { 
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: #f1f1f1;
+    z-index: 10;
+    padding: 20px;
+    overflow:hidden;
+  }
+
+  .list-wrapper{
+    flex: 1;
+    height: 87%;
+  }
+  .dynamic-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+    overflow-y: scroll;
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #a00 #f0f0f0; /* Firefox */
+  }
+
+  .user-overlay.show {
+    display: block;
+  }
+
+  .close-btn {
+    float: right;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #7b0000;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .right-buttons {
+  display: flex;
+  gap: 10px;
+  margin-left: auto; 
+  }
+
+  .tab {
+    background: none;
+    border: none;
+    color: #7b0000;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 6px 6px 0 0;
+    border-bottom: 2px solid transparent;
+    font-size: 20px;
+  }
+
+  .tab:hover{
+    background-color: lightgray;
+  }
+
+  .tab:focus{
+    background-color: #fff;
+    border-bottom: 2px solid #7b0000;
+  }
+
+  .user-card {
+    background: #e0e0e0;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .user-info,.user-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .user-info i {
+    font-size: 24px;
+  }
+
+
+  .search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-input {
+    width: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+
+  .SearchButton {
+    background-color: #7b0000;
+    margin-right: 15px;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 15px;
+    cursor: pointer;
+    z-index: 1;
+  }
+
+  .search-input {
+    transition: width 0.3s ease, padding 0.3s ease, border 0.3s ease;
+  }
+
+  .search-image-icon {
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    border-radius: 50%;
+    object-fit: cover;
+    transition: transform 0.2s;
+  }
+
+  .search-image-icon:hover {
+    transform: scale(1.1);
+  }
+
+  /* User details overlay */
+
+    .user-details-content {
+    padding: 20px;
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+  }
+
+  #userDetailsOverlay {
+    background: rgba(255, 255, 255, 0.95);
+    max-width: 800px;
+    width: 90%;
+    margin: auto;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+
+  .close-btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #666;
+  }
+
+  .edit-profile-link { /* non functioning */ 
+    color: #7b0000;
+    text-decoration: none;
+    font-size: 14px;
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+  }
+
+  .user-title img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+
+  .user-header-flex {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 3px;        
     }
 
-    .title{
-      display: flex;
-      flex-direction: row;
-    }
+  .user-profile-info {
+    flex: 1;
+    margin-top: 10px;
+  }
 
-    .title #role{
-      display: flex;
-      align-items: end;
-    }
+  .user-detail-name {
+    font-size: 20px;
+    font-weight: bold;
+    color: #000;
+    margin-bottom: 5px;
+  }
 
-    .title #role span{
-      font-size: 35px;
-      font-family: 'Goudy Bookletter 1911', serif;
-    }
+  .user-detail-role {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+  }
 
-    .title #logo{
-      height: 70px;
-      width: auto;
-    }
+  .user-profile-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 15px;
+    flex-wrap: wrap;
+  }
 
-    .header .profile {
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      background-image: url('images/profile.jpg');
-      background-size: cover;
-      background-position: center;
-    }
+  .uid-display {
+    font-size: 13px;
+    color: #333;
+    font-style: italic;
+    margin-right: 80px;
+  }
 
-    .profile-container {
-      margin-left: auto;
-      position: relative;
-      cursor: pointer;
-    }
 
-    .profile-pic {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-size: cover;
-      background-position: center;
-      border: 2px solid white;
-    }
+  .user-profile-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #ccc;
+  }
 
-    .logout-dropdown {
+  .user-details-grid {
+    background: #f0f0f0;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  .detail-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .detail-item label {
+    font-weight: 600;
+    color: #000;
+    min-width: 120px;
+  }
+
+  .detail-item div {
+    color: #333;
+  }
+
+  .user-actions {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 0 20px;
+  }
+
+  .action-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: normal;
+    font-size: 14px;
+    background-color: #e0e0e0;
+    color: #000;
+  }
+
+  .action-btn:hover {
+    opacity: 0.9;
+  }
+
+  .delete-btn {
+    background-color: #7b0000;
+    color: white;
+  }
+
+  .deactivate-btn {
+    background-color: #7b0000;
+    color: white;
+  }
+
+
+  /* userchecklogs */ 
+  #userChecklogsOverlay {
+    display: none;
+    background: rgba(255, 255, 255, 0.95);
+    max-width: 1000px;
+    width: 90%;
+    height: 700px;
+    margin: auto;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+
+  .overlay-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  #userChecklogsOverlay .overlay-content {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 70px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* prevent double scrollbar */
+  }
+
+  .check {
+    height: 750px; /* enough for ~10 entries */
+    overflow-y: auto;
+    padding: 0 10px;
+    margin-top: 10px;
+  }
+
+  .logs-header {
+    display: grid;
+    grid-template-columns: 1.5fr 3fr 1.5fr;
+    padding: 12px 20px;
+    background-color: #dcdcdc;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 16px;
+    color: #7b0000;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+  #log-entry {
+    height: 55px;
+    display: grid;
+    grid-template-columns: 1.5fr 3fr 1.5fr;
+    padding: 0 20px;
+    background-color: #f1f1f1;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    font-size: 15px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .log-entry:nth-child(even) {
+    background-color: #e0e0e0;
+  }
+
+  .user-col,
+  .action-col,
+  .date-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .date-col {
+    color: #7b0000;
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  #userChecklogsOverlay .logs-close-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background-color: #7b0000;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+    width: auto;
+    height: auto;
+    line-height: 1.2;
+  }
+
+  #userChecklogsOverlay .logs-close-btn:hover {
+    background-color: #5a0000;
+  }
+
+  /* Classroom Overlays */
+
+  .classroom-item {
+    background-color: #e0e0e0;
+    padding: 15px 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .classroom-icon {
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .classroom-info {
+    flex: 1;
+    margin-left: 15px;
+  }
+
+  .classroom-title {
+    font-weight: bold;
+    font-size: 16px;
+    color: #000;
+  }
+
+  .classroom-creator {
+    font-size: 14px;
+    color: #444;
+  }
+
+  .classroom-search-icon {
+    font-size: 20px;
+    color: #333;
+    cursor: pointer;
+  }
+
+  .module-card {
+    background-color: #e0e0e0;
+    padding: 15px 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .module-icon {
+    height: 50px;
+    width: 50px;
+    border-radius: 10px;
+    object-fit: cover;
+  }
+
+  .module-info {
+    flex: 1;
+    margin-left: 15px;
+  }
+
+  .module-title {
+    font-weight: bold;
+    font-size: 16px;
+    color: #000;
+  }
+
+  .module-creator {
+    font-size: 14px;
+    color: #444;
+  }
+
+      /* Classroom Details Overlay */
+  #create-overlay, #viewClassroomDetailsOverlay {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: auto;
+    height: fit-content;
+    background: rgba(241, 241, 241, 0.95);
+    border: 2px solid white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  #viewClassroomDetailsOverlay {
+    width: 60%;
+    height: 80%;
+  }
+
+  /* Content Wrapper */
+  .cd-content-wrapper {
+    height: 100%;
+    padding: 20px;
+  }
+
+  /* Header Section */
+  #cd-header-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 40px;
+    height: auto;
+  }
+
+  .cd-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .cd-class-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  #cdClassName{
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+  }
+  #cdCreator{
+    font-size: 16px;
+    color: #666;
+  }
+
+  #cd-course-title {
+    color: #333;
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  #cd-creator-name {
+    color: #666;
+    font-size: 16px;
+  }
+
+  /* Main Grid */
+  .cd-main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    height: 95%;
+  }
+
+  /* Card Styles */
+  .cd-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .cd-section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  /* Metadata */
+  #cd-metadata {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+    padding: 15px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+  }
+
+  .cd-metadata-item {
+    color: #666;
+  }
+
+  .cd-label {
+    font-weight: 500;
+    margin-right: 5px;
+  }
+
+  /* Description */
+  #cd-description-container {
+    background: #f8f8f8;
+    border-radius: 6px;
+  }
+
+  #cd-description-text {
+    color: #555;
+    line-height: 1.6;
+  }
+
+  /* Student and Module Cards */
+  .cd-student-card, .cd-module-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    border-radius: 6px;
+    background: #f8f8f8;
+    margin-bottom: 10px;
+  }
+
+  .cd-right-column{
+    max-height: 720px;
+    overflow-y: scroll;
+  }
+
+  .cd-list-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .cd-student-info h3, .cd-module-info h3 {
+    font-size: 16px;
+    color: #333;
+  }
+
+  .cd-student-info p, .cd-module-info p {
+    font-size: 14px;
+    color: #666;
+  }
+
+  /* Footer Actions */
+  .cd-actions {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .cd-actions-right {
+    display: flex;
+    gap: 10px;
+  }
+
+  .cd-btn {
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .cd-btn-logs, .cd-btn-delete {
+    background: #8b0000;
+    color: white;
+  }
+
+  .cd-btn-close {
+    background: #ccc;
+    color: #333;
+  }
+
+    /* Create Module Overlay */
+  .create-module-overlay{
+    display: none;
+    position: absolute;
+    border: 2px solid white;
+    border-radius: 6px 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    top: 10%;
+    left: 20%;
+    height: fit-content;
+    width: 50%;
+    background: rgba(241, 241, 241, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 20;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  #cdDesc.cd-card{
+    height: 70%;
+  }
+
+  #cd-description-container{
+    height: 85%;
+  }
+
+  #cd-description-text{
+    height: 90%;
+    overflow-y: auto;
+  }
+
+  #template{
+    border-radius: 15px;
+    background-color: lightgray;
+    padding: 15px;
+  }
+
+  .create-module-SC, .create-module-con, .view-module-SC{
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    justify-content: right;
+  }
+
+  #classroomIDField{
+    height: auto;
+    width: 100%;
+    padding: 10px;
+
+    border: lightgray 1px solid;
+    border-radius: 10px;
+  }
+
+  #files{
+    height: auto;
+    width: 100%;
+    padding: 10px;
+
+    border: lightgray 1px solid;
+    border-radius: 10px;
+  }
+  
+  .create-mod-btn{
+    background: #e6e6e6;
+    border: none;
+    color: #7b0000;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 10px 10px;
+    border-radius: 6px 6px;
+    font-size: 15px;
+  }
+
+  #viewModule{
+    background: #e6e6e6;
+    border: none;
+    color: #7b0000;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 100%;
+    font-size: 15px;
+    height: auto;
+    transition: transform 0.2s;
+  }
+
+    /* View Module Overlay */
+    #viewModuleOverlay{
       display: none;
       position: absolute;
-      right: 0;
-      top: 50px;
-      background-color: white;
-      border: 1px solid #ccc;
+      border: 2px solid white;
+      border-radius: 6px 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      top: 10%;
+      left: 20%;
+      height: fit-content;
+      width: 50%;
+      background: rgba(241, 241, 241, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 20;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
+    #viewModuleInfo{
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    #viewModuleTitle{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      font-size: 25px;
+      font-weight: bold;
+      color: black;
+    }
+    #viewModuleInfoText{
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #viewModuleTitle img{
+      width: 100px;
+      height: 100px;
+    }
+
+    #viewModuleDesc{
+      background-color: gainsboro;
+      border-radius: 15px;
+      padding: 15px;
+      font-size: 13px;
+      color: #444;
+    }
+    
+    #viewModuleClass{
+      font-size: 15px;
+      color: #444;
+    }
+
+    #lessonList .list-wrapper{
+      height: 260px;
+    }
+
+    #lessonListTitle{
+      font-size: 20px;
+      font-weight: bold;
+      color: #7b0000;
+      margin-bottom: 10px;
+    }
+
+    /* View Lesson Overlay */
+    #viewLessonOverlay {
+      display: none;
+      position: absolute;
+      border: 2px solid white;
+      border-radius: 6px 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      top: 10%;
+      left: 20%;
+      height: fit-content;
+      width: 50%;
+      background: rgba(241, 241, 241, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 20;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    #viewLessonTitle {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    #viewLessonTitle img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    #viewLessonName {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .view-lesson{
+      background: none;
+      border: none;
+    }
+   
+    #viewLessonDesc {
+      margin-bottom: 20px;
+      height: auto;
+    }
+
+    #viewLessonDescText {
+      font-size: 1rem;
+      color: #555;
+      line-height: 1.5;
+      background: #f9f9f9;
       padding: 10px;
       border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      z-index: 9999;
+      border: 1px solid #ddd;
     }
 
-    .logout-dropdown a {
-      text-decoration: none;
-      color: #7b0000;
+    /* Vocabulary section styling */
+    #viewLessonWords {
+      margin-top: 20px;
+    }
+
+    #viewLessonWordsTitle {
+      font-size: 1.2rem;
       font-weight: bold;
-      height: 100%;
-      width: 100%;
-    }
-
-    /* DASH */
-    .dashboard-container {
-      display: flex;
-      height: 100%;
-    }
-
-    .sidebar {
-      border: none;
-      width: 250px;
-      padding: 20px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 25px;
-    }
-
-    .User-icon {
-      height: 100%;
-      aspect-ratio: 1 / 1;
-      object-fit: cover;
-      border-radius: 50%; /* Makes it circular */
-    }
-
-    .nav-group {
-      background-color: rgba(193, 113, 113, 0.3); /* add transparency */
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      border-radius: 10px;
-    }
-
-    .nav-btn {
-      background-color: rgba(255, 255, 255, 0.15);
-      color: white;
-      height: 90px;
-      border: none;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: left;
-      font-size: 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 30px;
-    }
-
-    .nav-btn:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-
-
-    .main-content {
-      flex: 1;
-      position: relative;
-      background-color: lightgray;
-    }
-
-    .background-content {
-      background-image: url('images/USeP_eagle.jpg');
-      background-color: rgb(255, 255, 255, 0.25);
-      background-blend-mode: lighten;
-
-      background-size: cover;
-      background-position: center;
-
-      height: 100%;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color:rgb(255, 255, 255);
-      font-size: 35px;
-      font-family: 'Goudy Bookletter 1911', serif;
-      font-style: italic;
-      font-weight: bolder;
-      
-    }
-
-    /* User Overlays */
-    .user-overlay { 
-      display: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 100%;
-      background: #f1f1f1;
-      z-index: 10;
-      padding: 20px;
-      overflow:hidden;
+      margin-bottom: 10px;
+      color: #444;
     }
 
     .list-wrapper {
-      flex: 1;
-      height: 720px;
+      overflow-x: auto; 
     }
 
-    .dynamic-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      height: 100%;
-      overflow-y: scroll;
-      scrollbar-width: thin; /* Firefox */
-      scrollbar-color: #a00 #f0f0f0; /* Firefox */
-    }
-
-    .user-overlay.show {
-      display: block;
-    }
-
-    .close-btn {
-      float: right;
-      background: none;
-      border: none;
-      font-size: 24px;
-      color: #7b0000;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .right-buttons {
-    display: flex;
-    gap: 10px;
-    margin-left: auto; 
-    }
-
-    .tab {
-      background: none;
-      border: none;
-      color: #7b0000;
-      font-weight: bold;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 6px 6px 0 0;
-      border-bottom: 2px solid transparent;
-      font-size: 20px;
-    }
-
-    .tab:hover{
-      background-color: lightgray;
-    }
-
-    .tab:focus{
-      background-color: #fff;
-      border-bottom: 2px solid #7b0000;
-    }
-
-    .user-card {
-      background: #e0e0e0;
-      padding: 10px 15px;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .user-info i {
-      font-size: 24px;
-    }
-
-
-    .search-container {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .search-input {
-      width: 0;
-      padding: 0;
-      border: none;
-      outline: none;
-      transition: all 0.3s ease;
-      overflow: hidden;
-    }
-
-    .SearchButton {
-      background-color: #7b0000;
-      margin-right: 15px;
-      color: white;
-      border: none;
-      border-radius: 20px;
-      padding: 10px 15px;
-      cursor: pointer;
-      z-index: 1;
-    }
-
-    .search-input {
-      transition: width 0.3s ease, padding 0.3s ease, border 0.3s ease;
-    }
-
-    .search-image-icon {
-      width: 35px;
-      height: 35px;
-      cursor: pointer;
-      border-radius: 50%;
-      object-fit: cover;
-      transition: transform 0.2s;
-    }
-
-    .search-image-icon:hover {
-      transform: scale(1.1);
-    }
-
-    /* User details overlay */
-
-     .user-details-content {
-      padding: 20px;
+    .dynamic-table {
       width: 100%;
-      background: white;
-      border-radius: 8px;
-    }
-
-    #userDetailsOverlay {
-      background: rgba(255, 255, 255, 0.95);
-      max-width: 800px;
-      width: 90%;
-      margin: auto;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .close-btn {
-      position: absolute;
-      right: 10px;
-      top: 10px;
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      color: #666;
-    }
-
-    .edit-profile-link { /* non functioning */ 
-      color: #7b0000;
-      text-decoration: none;
-      font-size: 14px;
-      position: absolute;
-      right: 20px;
-      bottom: 20px;
-    }
-
-
-    .user-header-flex {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 3px;        
-      }
-
-    .user-profile-info {
-      flex: 1;
+      border-collapse: collapse;
       margin-top: 10px;
     }
 
-    .user-detail-name {
-      font-size: 20px;
+    .dynamic-table th, .dynamic-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .dynamic-table th {
+      background-color: #f4f4f4;
       font-weight: bold;
-      color: #000;
-      margin-bottom: 5px;
     }
 
-    .user-detail-role {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 5px;
+    .dynamic-table tr:nth-child(even) {
+      background-color: #f9f9f9;
     }
 
-    .user-profile-header {
-      display: flex;
-      align-items: flex-start;
-      gap: 15px;
-      margin-bottom: 20px;
-      padding: 15px;
-      flex-wrap: wrap;
-    }
-
-    .uid-display {
-      font-size: 13px;
-      color: #333;
-      font-style: italic;
-      margin-right: 80px;
-    }
-
-
-    .user-profile-img {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1px solid #ccc;
-    }
-
-    .user-details-grid {
-      background: #f0f0f0;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-    }
-
-    .detail-item {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .detail-item label {
-      font-weight: 600;
-      color: #000;
-      min-width: 120px;
-    }
-
-    .detail-item div {
-      color: #333;
-    }
-
-    .user-actions {
-      display: flex;
-      justify-content: flex-start;
-      gap: 10px;
-      padding: 0 20px;
-    }
-
-    .action-btn {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: normal;
-      font-size: 14px;
-      background-color: #e0e0e0;
-      color: #000;
-    }
-
-    .action-btn:hover {
-      opacity: 0.9;
-    }
-
-    .delete-btn {
-      background-color: #7b0000;
-      color: white;
-    }
-
-    .deactivate-btn {
-      background-color: #7b0000;
-      color: white;
-    }
-
-
-    /* userchecklogs */ 
-    #userChecklogsOverlay {
-      background: rgba(255, 255, 255, 0.95);
-      max-width: 1000px;
-      width: 90%;
-      height: 700px;
-      margin: auto;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      z-index: 1000;
-    }
-
-    .overlay-wrapper {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-
-    #userChecklogsOverlay .overlay-content {
-      background: #fff;
-      border-radius: 8px;
-      padding: 20px;
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 70px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden; /* prevent double scrollbar */
-    }
-
-    .check {
-      height: 600px; /* enough for ~10 entries */
-      overflow-y: auto;
-      padding: 0 10px;
-      margin-top: 10px;
-    }
-
-    .check::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .check::-webkit-scrollbar-thumb {
-      background: #aaa;
-      border-radius: 6px;
-    }
-
-    .check::-webkit-scrollbar-track {
-      background: #f1f1f1;
-    }
-
-    .logs-header {
-      display: grid;
-      grid-template-columns: 1.5fr 3fr 1.5fr;
-      padding: 12px 20px;
-      background-color: #dcdcdc;
-      border-radius: 12px;
-      font-weight: bold;
-      font-size: 16px;
-      color: #7b0000;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-
-    .log-entry {
-      height: 55px;
-      display: grid;
-      grid-template-columns: 1.5fr 3fr 1.5fr;
-      padding: 0 20px;
+    .dynamic-table tr:hover {
       background-color: #f1f1f1;
-      border-radius: 12px;
-      margin-bottom: 10px;
-      font-size: 15px;
-      align-items: center;
-      transition: background-color 0.3s ease;
     }
 
-    .log-entry:nth-child(even) {
-      background-color: #e0e0e0;
-    }
-
-    .user-col,
-    .action-col,
-    .date-col {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-
-    .date-col {
-      color: #7b0000;
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    #userChecklogsOverlay .logs-close-btn {
+    /* Close button styling */
+    #viewLessonOverlay .close-btn {
       position: absolute;
-      bottom: 20px;
-      right: 20px;
-      background-color: #7b0000;
-      color: #fff;
-      padding: 10px 20px;
+      top: 10px;
+      right: 10px;
+      background: none;
       border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      display: inline-block;
-      width: auto;
-      height: auto;
-      line-height: 1.2;
-    }
-
-    #userChecklogsOverlay .logs-close-btn:hover {
-      background-color: #5a0000;
-    }
-
-    /* Classroom Overlays */
-
-    .classroom-item {
-      background-color: #e0e0e0;
-      padding: 15px 20px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .classroom-icon {
-      height: 50px;
-      width: 50px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .classroom-info {
-      flex: 1;
-      margin-left: 15px;
-    }
-
-    .classroom-title {
+      font-size: 1.5rem;
       font-weight: bold;
-      font-size: 16px;
-      color: #000;
-    }
-
-    .classroom-creator {
-      font-size: 14px;
-      color: #444;
-    }
-
-    .classroom-search-icon {
-      font-size: 20px;
-      color: #333;
+      color: #555;
       cursor: pointer;
     }
 
-    .module-card {
-      background-color: #e0e0e0;
-      padding: 15px 20px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .module-icon {
-      height: 50px;
-      width: 50px;
-      border-radius: 10px;
-      object-fit: cover;
-    }
-
-    .module-info {
-      flex: 1;
-      margin-left: 15px;
-    }
-
-    .module-title {
-      font-weight: bold;
-      font-size: 16px;
+    #viewLessonOverlay .close-btn:hover {
       color: #000;
     }
-
-    .module-creator {
-      font-size: 14px;
-      color: #444;
-    }
-
-    /* Classroom details */
-    #classroomDetailsOverlay {
-        background: #f5f5f5;
-        min-height: 100vh;
-        font-family: system-ui, -apple-system, sans-serif;
-        position: relative;
-    }
-
-    .cd-header-banner {
-        height: 200px;
-        background: url('images/classroom-banner.jpg') center/cover;
-        position: relative;
-    }
-
-    .cd-content-wrapper {
-        max-width: 1200px;
-        margin: -100px auto 0;
-        padding: 0 20px;
-        position: relative;
-    }
-
-    /* Header Section Styles */
-    #cd-header-section {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        margin-bottom: 40px;
-    }
-
-    .cd-icon-wrapper {
-        width: 80px;
-        height: 80px;
-        background: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .cd-icon {
-        width: 50px;
-        height: 50px;
-    }
-
-    #cd-course-title {
-        color: #333;
-        font-size: 24px;
-        margin: 0;
-        font-weight: 600;
-    }
-
-    #cd-creator-name {
-        color: #666;
-        margin: 5px 0 0;
-        font-size: 16px;
-    }
-
-    /* Main Grid Layout */
-    .cd-main-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 30px;
-        margin-bottom: 30px;
-    }
-
-    /* Card Styles */
-    .cd-card {
-        background: white;
-        border-radius: 8px;
-        padding: 24px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        margin-bottom: 20px;
-    }
-
-    /* Section Titles */
-    .cd-section-title {
-        color: #333;
-        font-size: 18px;
-        margin: 0 0 15px 0;
-        font-weight: 600;
-    }
-
-    /* Metadata Styles */
-    #cd-metadata {
-        display: flex;
-        gap: 20px;
-        margin: 20px 0;
-        padding: 15px 0;
-        border-top: 1px solid #eee;
-        border-bottom: 1px solid #eee;
-    }
-
-    .cd-metadata-item {
-        color: #666;
-    }
-
-    .cd-label {
-        font-weight: 500;
-        margin-right: 5px;
-    }
-
-    /* Description Styles */
-    #cd-description-container {
-        background: #f8f8f8;
-        padding: 20px;
-        border-radius: 6px;
-        margin-top: 20px;
-    }
-
-    #cd-description-text {
-        color: #555;
-        line-height: 1.6;
-        margin-bottom: 15px;
-    }
-
-    /* Student and Module Cards */
-    .cd-student-card, .cd-module-card {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 12px;
-        border-radius: 6px;
-        background: #f8f8f8;
-        margin-bottom: 10px;
-    }
-
-    .cd-student-avatar {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        object-fit: cover;
-    }
-
-    .cd-student-info h3, .cd-module-info h3 {
-        margin: 0;
-        font-size: 16px;
-        color: #333;
-    }
-
-    .cd-student-info p, .cd-module-info p {
-        margin: 5px 0 0;
-        color: #666;
-        font-size: 14px;
-    }
-
-    /* Header Actions */
-    #cd-students-header, .cd-module-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-    }
-
-    .cd-view-all {
-        color: #8b0000;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    /* Buttons */
-    .cd-btn {
-        padding: 8px 20px;
-        border-radius: 4px;
-        border: none;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .cd-edit-btn {
-        background: #8b0000;
-        color: white;
-        padding: 8px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-top: 15px;
-    }
-
-    .cd-btn-logs {
-        background: #8b0000;
-        color: white;
-    }
-
-    .cd-btn-delete {
-        background: #8b0000;
-        color: white;
-        margin-right: 10px;
-    }
-
-    .cd-btn-close {
-        background: #ccc;
-        color: #333;
-    }
-
-    /* Footer Actions */
-    .cd-actions {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 20px;
-    }
-
-    .cd-actions-right {
-        display: flex;
-        gap: 10px;
-    }
-
-
-
-
+    
     /* partners CSS */ 
 
     .partners-card {
@@ -1168,7 +1395,9 @@ if(isset($_POST["createPartner"])) {
       background-color: #fff;
     }
     
-
+    .user-overlay.show, .create-overlay.show, #userChecklogsOverlay .show, #viewClassroomDetailsOverlay.show, #viewModuleOverlay.show, #viewLessonOverlay.show {
+      display: block;
+    }
   </style>
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
@@ -1216,22 +1445,14 @@ if(isset($_POST["createPartner"])) {
           Welcome Admin, <?php echo $_SESSION['username']?>!
       </div>
 
-        <!-- Users Overlay -->
-        <div id="userOverlay" class="user-overlay">
-          <!-- Close Button -->
+      <div id="userOverlay" class="user-overlay">
           <button class="close-btn" onclick="hideOverlay('userOverlay')">×</button>
-
-          <!-- Title -->
           <h2 style="color: #7b0000; margin-bottom: 20px;">Users</h2>
 
-          <!-- Tabs and Search -->
           <div class="tabs">
-            <!-- User Type Tabs -->
             <button class="tab" onclick="setUserTab('All')">All</button>
             <button class="tab" onclick="setUserTab('Student')">Student</button>
             <button class="tab" onclick="setUserTab('Instructor')">Instructor</button>
-
-            <!-- Search Box -->
             <div class="right-buttons">
               <div class="search-container">
                 <input type="text" placeholder="Search..." class="search-input">
@@ -1262,9 +1483,13 @@ if(isset($_POST["createPartner"])) {
                  data-dob="<?php echo htmlspecialchars($row['dateOfBirth']); ?>"
                  data-uid="<?php echo htmlspecialchars($row['userID']); ?>">
               <div class="user-info">
-                <div>
-                  <div><strong><?php echo $displayName; ?></strong></div>
-                  <div><?php echo $role; ?></div>
+                <div class="user-title">
+                  <img src="images/Human_Icon.jpg" alt="User Photo" class="user-icon">
+                  <div>
+                    <div><strong><?php echo $displayName; ?></strong></div>
+                    <div><?php echo $role; ?></div>
+                  </div>
+                  
                 </div>
               </div>
               <div class="search-icon-link user-search" onclick="showUserDetails(this)">
@@ -1282,86 +1507,84 @@ if(isset($_POST["createPartner"])) {
               ?>
             </div>
           </div>
+      </div>
 
-          <!-- User Details Overlay -->
-          <div id="userDetailsOverlay" class="create-overlay">
-            <button class="close-btn" onclick="hideCreateOverlay('userDetailsOverlay')">×</button>
-            <h2 style="color: #7b0000; margin-bottom: 20px;">User Details</h2>
-            
-            <div class="user-details-content">
-              <div class="user-profile-section">
-                <div class="user-profile-header">
-                    <img src="images/user-profile.jpg" alt="User Photo" class="user-profile-img" />
-                  <div class="user-profile-info">
-                    <div class="user-header-flex">
-                      <div>
-                        <div id="userDetailName" class="user-detail-name"></div>
-                        <div id="userDetailRole" class="user-detail-role"></div>
-                      </div>
-                      <div class="uid-display" id="userDetailUID"></div>
-                    </div>
+    <!-- User Details Overlay -->
+      <div id="userDetailsOverlay" class="create-overlay">
+        <button class="close-btn" onclick="closeOverlay('userDetailsOverlay')">×</button>
+        <h2 style="color: #7b0000; margin-bottom: 20px;">User Details</h2>
+        
+        <div class="user-details-content">
+          <div class="user-profile-section">
+            <div class="user-profile-header">
+                <img src="images/Human_Icon.jpg" alt="User Photo" class="user-profile-img" />
+              <div class="user-profile-info">
+                <div class="user-header-flex">
+                  <div>
+                    <div id="userDetailName" class="user-detail-name"></div>
+                    <div id="userDetailRole" class="user-detail-role"></div>
                   </div>
-                </div>
-                
-                <div class="user-details-grid">
-                  <div class="detail-item">
-                    <label>First Name:</label>
-                    <div id="userDetailFirstName"></div>
-                  </div>
-                  <div class="detail-item">
-                    <label>Last Name:</label>
-                    <div id="userDetailLastName"></div>
-                  </div>
-                  <div class="detail-item">
-                    <label>Gender:</label>
-                    <div id="userDetailGender"></div>
-                  </div>
-                  <div class="detail-item">
-                    <label>Email:</label>
-                    <div id="userDetailEmail"></div>
-                  </div>
-                  <div class="detail-item">
-                    <label>Contact:</label>
-                    <div id="userDetailContact"></div>
-                  </div>
-                  <div class="detail-item">
-                    <label>Date of Birth:</label>
-                    <div id="userDetailDOB"></div>
-                  </div>
+                  <div class="uid-display" id="userDetailUID"></div>
                 </div>
               </div>
-              
-              <div class="user-actions">
-                <button class="action-btn" onclick="checkUserLogs()">Check Logs</button>
-                <button class="action-btn delete-btn" onclick="deleteUser()">Delete</button>
-                <button class="action-btn deactivate-btn" onclick="deactivateUser()">Deactivate</button>
+            </div>
+            
+            <div class="user-details-grid">
+              <div class="detail-item">
+                <label>First Name:</label>
+                <div id="userDetailFirstName"></div>
+              </div>
+              <div class="detail-item">
+                <label>Last Name:</label>
+                <div id="userDetailLastName"></div>
+              </div>
+              <div class="detail-item">
+                <label>Gender:</label>
+                <div id="userDetailGender"></div>
+              </div>
+              <div class="detail-item">
+                <label>Email:</label>
+                <div id="userDetailEmail"></div>
+              </div>
+              <div class="detail-item">
+                <label>Contact:</label>
+                <div id="userDetailContact"></div>
+              </div>
+              <div class="detail-item">
+                <label>Date of Birth:</label>
+                <div id="userDetailDOB"></div>
               </div>
             </div>
           </div>
-
-         <div id="userChecklogsOverlay" style="display: none;">
-          <div class="overlay-wrapper">
-            <div class="overlay-content">
-              <div class="logs-header">
-                <div>User</div>
-                <div>Action</div>
-                <div>Date</div>
-              </div>
-              <div class="check">
-                <div class="log-entry">
-                  <div class="user-col"></div>
-                  <div class="action-col"></div>
-                  <div class="date-col"></div>
-                </div>
-              </div>
-            </div>
-            <button class="logs-close-btn" onclick="closeUserLogs()">Close</button>
+          
+          <div class="user-actions">
+            <button class="action-btn" onclick="checkUserLogs()">Check Logs</button>
+            <button class="action-btn delete-btn" onclick="deleteUser()">Delete</button>
+            <button class="action-btn deactivate-btn" onclick="deactivateUser()">Deactivate</button>
           </div>
         </div>
       </div>
-                    
 
-        <!-- Classroom Overlay -->
+      <!-- User Check Logs Overlay -->
+      <div id="userChecklogsOverlay" class="checklogs-overlay">
+        <div class="overlay-wrapper">
+          <div class="overlay-content">
+            <div class="logs-header">
+              <div>User</div>
+              <div>Action</div>
+              <div>Date</div>
+            </div>
+            <div class="check">
+              <div id="log-entry">
+                <!-- Inject log entry -->
+              </div>
+            </div>
+          </div>
+          <button class="logs-close-btn" onclick="closeOverlay('userChecklogsOverlay')">Close</button>
+        </div>
+      </div>              
+
+          <!-- Classroom Overlay -->
         <div id="classroomOverlay" class="user-overlay">
           <button class="close-btn" onclick="hideOverlay('classroomOverlay')">×</button>
           <h2 style="color: #7b0000; margin-bottom: 20px;">Classrooms</h2>
@@ -1390,246 +1613,295 @@ if(isset($_POST["createPartner"])) {
                   $creatorName = htmlspecialchars($row['username']);
                   $classroomID = htmlspecialchars($row['classroomID']);
               ?>
-                <div class="classroom-item" onclick="showClassroomDetails('<?php echo $classroomID; ?>')">
+                <div class="classroom-item" classroom-id="<?php echo $classroomID; ?>">
                   <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
                   <div class="classroom-info">
                     <div class="classroom-title"><?php echo $className; ?></div>
                     <div class="classroom-creator"><?php echo $creatorName; ?></div>
                   </div>
-                  <div class="search-icon-link">
+                  <button class="search-icon-link" onclick="showClassDetails(this)">
                     <img src="images/Search_Icon.jpg" alt="View Classroom" class="search-image-icon">
-                  </div>
+                  </button>
                 </div>
               <?php } ?>
             </div>
           </div>
+      </div>
 
-              <!-- Classroom Details overlay -->
-            <div id="classroomDetailsOverlay" class="create-overlay" style="display: none;">
-              <div class="cd-header-banner">
-                  <!-- Background banner image -->
+      <!-- View Classroom Overlay -->
+      <div id="viewClassroomDetailsOverlay" class="create-overlay">
+
+        <div class="cd-content-wrapper">
+
+          <!-- Main Content Grid -->
+          <div class="cd-main-grid">
+
+            <!-- Left Column -->
+            <div class="cd-left-column">
+              <div id="cd-header-section">
+
+                <div class="cd-icon-wrapper">
+                  <img src="images/Class_Icon.jpg" alt="Course Icon" class="cd-class-icon">
+                </div>
+                <div id="cd-title-wrapper"> 
+                    <!-- Inject Here -->
+                </div>
               </div>
 
-              <div class="cd-content-wrapper">
-                  <!-- Course Icon and Title Section -->
-                  <div id="cd-header-section">
-                      <div class="cd-icon-wrapper">
-                          <img src="images/graduation-cap.svg" alt="Course Icon" class="cd-icon">
-                      </div>
-                      <div id="cd-title-wrapper">
-                          <h1 id="cd-course-title"></h1>
-                          <p id="cd-creator-name"></p>
-                      </div>
-                  </div>
+              <div id="cdDesc" class="cd-card">
+                
+                <div id="cd-description-container">
+                  <!-- Inject Here -->
+                </div>
 
-                  <!-- Main Content Grid -->
-                  <div class="cd-main-grid">
-                      <!-- Left Column -->
-                      <div class="cd-left-column">
-                          <div class="cd-card">
-                              <div id="cd-instructor-container">
-                                  <h2 class="cd-section-title">Instructors:</h2>
-                                  <div id="cd-instructor-list">Joshua Gatmin</div>
-                              </div>
+                <div id="cd-metadata">
+                  <!-- Inject Here -->
+                </div>
 
-                              <div id="cd-metadata">
-                                  <div class="cd-metadata-item">
-                                      <span class="cd-label">Created On:</span>
-                                      <span id="cd-created-date">10/12/2023</span>
-                                  </div>
-                                  <div class="cd-metadata-item">
-                                      <span class="cd-label">Code:</span>
-                                      <span id="cd-access-code">EngBSHH1</span>
-                                  </div>
-                              </div>
-
-                              <div id="cd-description-container">
-                                  <h2 class="cd-section-title">Description:</h2>
-                                  <div id="cd-description-text">
-                                      At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                                      blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et
-                                      quas molestias excepturi sint occaecati cupiditate non provident...
-                                  </div>
-                                  <button class="cd-edit-btn">Edit Details</button>
-                              </div>
-                          </div>
-                      </div>
-
-                      <!-- Right Column -->
-                      <div class="cd-right-column">
-                          <!-- Students Section -->
-                          <div class="cd-card">
-                              <div id="cd-students-header">
-                                  <h2 class="cd-section-title"></h2>
-                                  <a href="#" class="cd-view-all"></a>
-                              </div>
-                              <div id="cd-students-list">
-                                  <div class="cd-student-card">
-                                      <img src="images/student-avatar.jpg" alt="Student" class="cd-student-avatar">
-                                      <div class="cd-student-info">
-                                          <h3></h3>
-                                          <p></p>
-                                      </div>
-                                  </div>
-                              </div>
-                          </div>
-
-                          <!-- Modules Section -->
-                          <div class="cd-card">
-                              <div class="cd-module-header">
-                                  <h2 class="cd-section-title">Modules</h2>
-                                  <a href="#" class="cd-view-all">View All</a>
-                              </div>
-                              <div class="cd-module-list">
-                                  <div class="cd-module-card">
-                                      <div class="cd-module-icon">
-                                          <img src="images/module-icon.svg" alt="Module Icon">
-                                      </div>
-                                      <div class="cd-module-info">
-                                          <h3>Bisaya 101</h3>
-                                          <p>DepEd</p>
-                                      </div>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-
-                  <!-- Footer Actions -->
-                  <div class="cd-actions">
-                      <button class="cd-btn cd-btn-logs">Check Logs</button>
-                      <div class="cd-actions-right">
-                          <button class="cd-btn cd-btn-delete">Delete</button>
-                          <button class="cd-btn cd-btn-close" onclick="closeClassroomDetails()">Close</button>
-                      </div>
-                  </div>
               </div>
-          </div>
-        </div>
+              
+            </div> <!-- End Left column-->
 
-        
-        <!-- Modules Overlay -->
-        <div id="moduleOverlay" class="user-overlay">
-          <button class="close-btn" onclick="hideOverlay('moduleOverlay')">×</button>
-          <h2 style="color: #7b0000; margin-bottom: 20px;">Modules</h2>
+            <!-- Right Column -->
+            <div class="cd-right-column">
 
-          <div class="tabs">
-            <button class="tab active" onclick="loadModules('All', this)">All</button>
-            <button class="tab" onclick="loadModules('Partner', this)">Partner</button>
-            <button class="tab" onclick="loadModules('Classroom', this)">Classroom</button>
-            <div class="right-buttons">
-              <div class="search-container">
-                <input type="text" placeholder="Search..." class="search-input">
-                <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
+              <!-- Instructors Section -->
+              <div id="cdInstructorList" class="cd-card">
+                <!-- Inject Here -->
+                
               </div>
+
+              <!-- Students Section -->
+              <div id="cdStudentList"  class="cd-card" >
+                <!-- Inject Here -->
+              </div>
+
+              <!-- Modules Section -->
+              <div id="cdModuleList" class="cd-card">
+                <!-- Inject Here -->
+              </div>
+
+            </div><!-- End Right column-->
+
+          </div><!-- End Content-grid  -->
+
+          <!-- Footer Actions -->
+          <div class="cd-actions">
+            <div class="cd-actions-right">
+              <button></button>
+              <button class="cd-btn cd-btn-delete">Delete</button>
+              <button class="cd-btn cd-btn-close" onclick="closeOverlay('viewClassroomDetailsOverlay')">Close</button>
             </div>
           </div>
 
-              <!--Dynamic Module List-->
-          <div class="list-wrapper">
-            <div class="dynamic-list" id="moduleContainer">
-                <!-- Loading Modules -->
+        </div><!-- End Content-wrapper  -->
+
+      </div> <!-- End viewClassroomOverlay  -->
+
+      <!-- Modules Overlay -->
+      <div id="moduleOverlay" class="user-overlay">
+        <button class="close-btn" onclick="hideOverlay('moduleOverlay')">×</button>
+        <h2 style="color: #7b0000; margin-bottom: 20px;">Modules</h2>
+
+        <div class="tabs">
+          <button class="tab active" onclick="loadModules('All', this)">All</button>
+          <button class="tab" onclick="loadModules('Partner', this)">Partner</button>
+          <button class="tab" onclick="loadModules('Classroom', this)">Classroom</button>
+          <div class="right-buttons">
+            <div class="search-container">
+              <input type="text" placeholder="Search..." class="search-input">
+              <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
             </div>
           </div>
         </div>
-        
 
-        <!-- Partners Overlay -->
-        <div id="partnersOverlay" class="user-overlay">
-          <button class="close-btn" onclick="hideOverlay('partnersOverlay')">x</button>
-          <h2 style="color: #7b0000; margin-bottom: 20px;">Partners</h2>
-          
-          <div class="tabs">
-            <button class="NewP" onclick="toggleCreatePartnersOverlay()">Add New</button>
-            <div class="right-buttons">
-              <div class="search-container">
-                <input type="text" placeholder="Search..." class="search-input">
-                <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
-              </div>
-            </div>
-          </div>
-
-          <!-- Partner Dynamic Table-->
-          <div class="list-wrapper">
-            <div class="dynamic-list">
-            <?php
-                $sql = "SELECT * FROM partner";
-                $result = $conn->query($sql);
-
-                while ($row = $result->fetch_assoc()) {
-                  $partnerName = htmlspecialchars($row['partnerName']);
-                  $partnerEmail = htmlspecialchars($row['email']);
-              ?>
-                <div class="partners-card">
-                <img src="images/Partners_Icon.jpg" alt="Partners Icon" class="partners-icon">
-                <div class="partners-info">
-                  <div class="partners-title"><?php echo $partnerName?></div>
-                  <div class="partners-role"><?php echo $partnerEmail?></div>
-                </div>
-                <a href="partners-details.html?partnersId=DepEd" class="search-icon-link">
-                  <img src="images/Search_Icon.jpg" alt="View Partners" class="search-image-icon">
-                </a>
-              </div>
-              <?php } ?>
-            </div>
-          </div>
-
-          <!-- Partner Creation-->
-          <div id="createPartnersOverlay" class="create-overlay">
-            <button class="close-btn" onclick="hideCreateOverlay('createPartnersOverlay')">×</button>
-            <h2 style="color: #7b0000; margin-bottom: 20px;">Create a Partner</h2>
-
-            <div class="create-list">
-              <form action="" method="post">
-                <div class="create-item1">
-                  <div class="create-info">
-                    <label for="partnerName">Partner Name:</label>
-                    <input type="text" id="partnerName" name="partnerName" placeholder="Partner Name" required>
-                  </div>
-                </div>
-                  <div class="create-item1">
-                  <div class="create-info">
-                    <label for="partnerContact">Contact Number:</label>
-                    <input type="tel" id="partnerContact" name="partnerContact" placeholder="Contact Number" required>
-                  </div>
-                </div>
-                <div class="create-item1">
-                  <div class="create-info">
-                    <label for="partnerEmail">Email:</label>
-                    <input type="email" id="partnerEmail" name="partnerEmail" placeholder="Partner Email" required>
-                  </div>
-                </div>
-                <div class="create-item2">
-                  <div class="create-info">
-                    <label for="partnerDesc">Partner Description:</label>
-                    <textarea id="partnerDesc" name="partnerDesc" placeholder="Partner Description" required></textarea>
-                  </div>
-                </div>
-                <div class="create-SC">
-                  <button class="creates" type="submit" name="createPartner">Create</button>
-                  <button class="creates" onclick="hideCreateOverlay('createPartnersOverlay')">Cancel</button>
-                </div>
-              </form>
-            </div>
+            <!--Dynamic Module List-->
+        <div class="list-wrapper">
+          <div class="dynamic-list" id="moduleContainer">
+              <!-- Loading Modules -->
           </div>
         </div>
       </div>
+
+      <!-- Module Creation -->
+      <div id="createModuleOverlay" class="create-module-overlay" overlay-type ="create-module">
+        <div id="createModuleMain">
+          <button class="close-btn" onclick="hideSubOverlay('createModuleOverlay','moduleOverlay')">×</button>
+          <h2 style="color: #7b0000; margin-bottom: 20px;">Upload a Module</h2>
+          <div id="template">
+            <h3 style="color: #7b0000; margin-bottom: 10px;">Template:</h3>
+                <pre>
+Module Name, Module Description{
+  {Lesson 1 Name, Lesson 1 Description{
+    {Word 1, Meaning},
+    {Word 2, Meaning}, ...
+  }},
+  {Lesson 2 Name, Lesson 2 Description{
+    {Word 1, Meaning},
+    {Word 2, Meaning}, ...
+  }}, ...	
+}</pre>
+          </div>
+          <form action="instructorFunctions.php" method="post" enctype="multipart/form-data">
+            <div class="create-module-con">
+              <select name="classIDField" id="classroomIDField" placeholder="ClassroomID">
+                <option value="" disabled selected>Select a Classroom</option>
+                  <?php
+                    $sql = "SELECT ci.classroomID, c.className FROM classinstructor ci 
+                            JOIN classroom c ON ci.classroomID = c.classroomID 
+                            WHERE ci.instID = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param('s', $_SESSION['roleID']);
+                    $stmt->execute();
+                    $results = $stmt->get_result();
+                    while($rows = $results->fetch_assoc()){
+                      $classroomID = $rows['classroomID'];
+                      $classroomName = $rows['className'];
+                      echo "<option value='$classroomID'>$classroomName</option>";
+                    }
+                  ?>
+
+              </select>
+              <input id="files" type="file" name="files[]" multiple>
+            </div>
+
+            <div class = create-module-SC>
+              <button type="submit" class="create-mod-btn" name="upload">Upload</button>
+              <button type="button" class="create-mod-btn" onclick="hideSubOverlay('createModuleOverlay','moduleOverlay')">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div><!-- End Module Creation -->
+
+      <!-- View Module Overlay -->
+      <div id="viewModuleOverlay" class="view-module-overlay" overlay-type = "view-module-overlay">
+        <div id="viewModuleCon">
+          <div id="viewModuleHeader">
+            <button class="close-btn" onclick="closeOverlay('viewModuleOverlay')">×</button>
+            <h2 style="color: #7b0000; margin-bottom: 20px;">View Module</h2>
+          </div>
+          <div id="viewModuleMain">
+                  <!-- I Edit ni siya sa adtong scipt sa java script i love jollibee -->
+          </div>
+          <div id="viewModuleSC" class="view-module-SC">
+            <button type="button" class="create-mod-btn" onclick="deleteModule(this)">Delete</button>
+            <button type="button" class="create-mod-btn" onclick="closeOverlay('viewModuleOverlay')">Close</button>
+          </div>
+        </div>
+      </div><!-- End View Module Overlay -->
+
+      <!-- View Lesson Overlay -->
+      <div id="viewLessonOverlay" class="view-lesson-overlay" overlay-type="view-lesson-overlay">
+        <div id="viewLessonCon">
+
+          <div id="viewLessonHeader">
+            <button class="close-btn" onclick="hideSubOverlay('viewLessonOverlay', 'viewModuleOverlay')">×</button>
+            <h2 style="color: #7b0000; margin-bottom: 20px;">View Lesson</h2>
+          </div>
+
+          <div id="viewLessonMain">
+            <div id="viewLessonInfo">
+                  <!-- Inject SQL-->
+            </div>
+
+            <div id="viewLessonSC" class="view-lesson-SC">
+                <button type="button" class="create-mod-btn" onclick="hideSubOverlay('viewModuleOverlay','moduleOverlay')">Close</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+        
+        <!-- Partners Overlay -->
+      <div id="partnersOverlay" class="user-overlay">
+        <button class="close-btn" onclick="hideOverlay('partnersOverlay')">x</button>
+        <h2 style="color: #7b0000; margin-bottom: 20px;">Partners</h2>
+        
+        <div class="tabs">
+          <button class="NewP" onclick="toggleCreatePartnersOverlay()">Add New</button>
+          <div class="right-buttons">
+            <div class="search-container">
+              <input type="text" placeholder="Search..." class="search-input">
+              <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Partner Dynamic Table-->
+        <div class="list-wrapper">
+          <div class="dynamic-list">
+          <?php
+              $sql = "SELECT * FROM partner";
+              $result = $conn->query($sql);
+
+              while ($row = $result->fetch_assoc()) {
+                $partnerName = htmlspecialchars($row['partnerName']);
+                $partnerEmail = htmlspecialchars($row['email']);
+            ?>
+              <div class="partners-card">
+              <img src="images/Partners_Icon.jpg" alt="Partners Icon" class="partners-icon">
+              <div class="partners-info">
+                <div class="partners-title"><?php echo $partnerName?></div>
+                <div class="partners-role"><?php echo $partnerEmail?></div>
+              </div>
+              <a href="partners-details.html?partnersId=DepEd" class="search-icon-link">
+                <img src="images/Search_Icon.jpg" alt="View Partners" class="search-image-icon">
+              </a>
+            </div>
+            <?php } ?>
+          </div>
+        </div>
+      </div>
+
+      <!-- Partner Creation-->
+      <div id="createPartnersOverlay" class="create-overlay">
+          <button class="close-btn" onclick="hideCreateOverlay('createPartnersOverlay')">×</button>
+          <h2 style="color: #7b0000; margin-bottom: 20px;">Create a Partner</h2>
+
+          <div class="create-list">
+            <form action="" method="post">
+              <div class="create-item1">
+                <div class="create-info">
+                  <label for="partnerName">Partner Name:</label>
+                  <input type="text" id="partnerName" name="partnerName" placeholder="Partner Name" required>
+                </div>
+              </div>
+                <div class="create-item1">
+                <div class="create-info">
+                  <label for="partnerContact">Contact Number:</label>
+                  <input type="tel" id="partnerContact" name="partnerContact" placeholder="Contact Number" required>
+                </div>
+              </div>
+              <div class="create-item1">
+                <div class="create-info">
+                  <label for="partnerEmail">Email:</label>
+                  <input type="email" id="partnerEmail" name="partnerEmail" placeholder="Partner Email" required>
+                </div>
+              </div>
+              <div class="create-item2">
+                <div class="create-info">
+                  <label for="partnerDesc">Partner Description:</label>
+                  <textarea id="partnerDesc" name="partnerDesc" placeholder="Partner Description" required></textarea>
+                </div>
+              </div>
+              <div class="create-SC">
+                <button class="creates" type="submit" name="createPartner">Create</button>
+                <button class="creates" onclick="hideCreateOverlay('createPartnersOverlay')">Cancel</button>
+              </div>
+            </form>
+          </div>
+      </div>
+
+      </div>
     </div>  
 
-
   <script>
-
-
-
   // On Webpage Load
   window.addEventListener('DOMContentLoaded', () => {
     setUserTab('All');
-    setModuleTab('All');
   });
 
-
-
-  // ------------------------- Logout Dropdown
+  // Logout Dropdown
   function toggleLogoutDropdown() { 
     const dropdown = document.getElementById('logoutDropdown');
     dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
@@ -1643,35 +1915,37 @@ if(isset($_POST["createPartner"])) {
     }
   });
 
-  function showOverlay(targetId) {
-    const overlays = ['userOverlay', 'classroomOverlay',  'moduleOverlay', 'partnersOverlay'];
+  function showOverlay(targetId, backgroundIds = null) {
+    console.log("Show Overlay: " + targetId); // Debug line to show which overlay is being opened
+    const overlays = [
+    'userOverlay',
+    'userDetailsOverlay',
+    'userChecklogsOverlay',
+
+    'classroomOverlay',
+    'viewClassroomDetailsOverlay',
+
+    'moduleOverlay',
+    'viewModuleOverlay',
+    'viewLessonOverlay',
+    'createModuleOverlay',
+
+    'partnersOverlay',
+    'createPartnersOverlay'
+    ];
     const bg = document.getElementById('backgroundContent');
 
-    overlays.forEach(id => document.getElementById(id).classList.remove('show'));
+    overlays.forEach(id => {
+      const overlay = document.getElementById(id); 
 
-    const target = document.getElementById(targetId);
-    target.classList.add('show');
-
+      const shouldShow = (id === targetId || (Array.isArray(backgroundIds) && backgroundIds.includes(id)) || (backgroundIds === id));
+      overlay.style.display = shouldShow ? 'block' : 'none';
+    });
     bg.style.display = 'none';
-
-    setUserTab('All');
-    setModuleTab('All');
   }
 
-  function hideOverlay(targetId) {
-    // Close ALL overlays first
-    document.querySelectorAll('.user-overlay.show, .create-overlay.show').forEach(overlay => {
-      overlay.classList.remove('show');
-    });
-
-    // Open the target overlay if specified (for tab switching)
-    if (targetId) {
-      document.getElementById(targetId).classList.add('show');
-    }
-
-    // Toggle background visibility
-    const anyOverlayOpen = document.querySelectorAll('.user-overlay.show, .create-overlay.show').length > 0;
-    document.getElementById('backgroundContent').style.display = anyOverlayOpen ? 'none' : 'flex';
+  function closeOverlay (targetID) {
+    document.getElementById(targetID).style.display = "none";
   }
 
   function toggleSearch(label) {
@@ -1750,13 +2024,6 @@ if(isset($_POST["createPartner"])) {
     input.value = '';
   }
 
-    // Unified overlay control
-  function showOverlay(targetId) {
-    // Close all overlays first, then open the target
-    hideOverlay(targetId); 
-  }
-
-
   function toggleCreatePartnersOverlay() {
       const overlay = document.getElementById('createPartnersOverlay');
       if (overlay.classList.contains('show')) {
@@ -1805,7 +2072,7 @@ if(isset($_POST["createPartner"])) {
     clickedBtn.classList.add('active');
 
     // Send AJAX request
-    fetch('adminFunctions.php', {
+    fetch('fetchModules.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'type=' + encodeURIComponent(type)
@@ -1827,9 +2094,10 @@ if(isset($_POST["createPartner"])) {
   }
 
   /* userdetail overlay */
-
+  var selectedUser = '';
   function showUserDetails(element) {
     const userCard = element.closest('.user-card');
+    showOverlay('userDetailsOverlay', ['userOverlay']);
 
     // Get data attributes directly
     const name = userCard.dataset.name;
@@ -1853,120 +2121,370 @@ if(isset($_POST["createPartner"])) {
     document.getElementById('userDetailDOB').textContent = dob;
     document.getElementById('userDetailUID').textContent = uid;
 
-    // Show the overlay
-    document.getElementById('userDetailsOverlay').classList.add('show');
+    selectedUser = uid;
+    console.log("Selected User ID: " + selectedUser); // Debug line to show selected user ID
   }
 
-    // checkuserlogs
+  // checkuserlogs
   function checkUserLogs() {
-    const userID = document.getElementById('userDetailUID')?.textContent?.trim();
-    const userName = document.getElementById('userDetailName')?.textContent?.trim();
+  console.log("Fetch Activity Logs");
+  showOverlay('userChecklogsOverlay', ['userDetailsOverlay', 'userOverlay']);
 
-    const overlay = document.getElementById('userChecklogsOverlay');
-    const checkContainer = overlay.querySelector('.check');
-    checkContainer.innerHTML = ''; // Clear logs
+  fetch('adminFunctions.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'getActivityLogs',
+      data: { selectedUser: selectedUser }
+    })
+  })
+  .then(response => {
+    console.log("Raw response:", response);
+    return response.json();
+  })
+  .then(data => {
+    console.log("Parsed data:", data);
+    const { logs } = data;
+    console.log("Logs: ", logs);
 
-    overlay.style.display = 'block';
+    const htmlContent = logs.map(log => `
+      <div class="user-col">${log.username + " - " + log.userID}</div>
+      <div class="action-col">${log.action}</div>
+      <div class="date-col">${log.dateTimeCreated}</div>
+    `).join('');
 
-    if (!userID) {
-      checkContainer.innerHTML = '<div style="padding:10px;color:red;">User ID missing.</div>';
+    document.getElementById('log-entry').innerHTML = htmlContent;
+  })
+  .catch(error => {
+    console.error("Fetch error:", error);
+    document.getElementById('log-entry').innerHTML = `
+      <div class="error">An error occurred while fetching lesson details.</div>
+    `;
+  });
+}
+
+var selectedClassroomID = '';
+  function showClassDetails(element) {
+    console.log("Show Classroom Details");
+    showOverlay('viewClassroomDetailsOverlay', 'classroomOverlay');
+
+    const classCard = element.closest('.classroom-item');
+    const classID = classCard.getAttribute('classroom-id');
+    selectedClassroomID = classID;
+    if (!classID) {
+      console.error("Error: Classroom ID not found.");
       return;
     }
 
-    const logs = Array.isArray(allLogs) ? allLogs.filter(log => log.userID === userID) : [];
+    // Fetch classroom details
+    console.log('Sending Fetch Request to instructorFunctions.php');
+    fetch('adminFunctions.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'getClassroomDetails', // Correct action
+        data: { classID: classID }
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (!data.success) {
+          throw new Error(data.message || 'Failed to load classroom data.');
+        }
 
-    if (logs.length > 0) {
-      logs.forEach(log => {
-        const entry = document.createElement('div');
-        entry.classList.add('log-entry');
-        entry.innerHTML = `
-          <div class="user-col">${userName}</div>
-          <div class="action-col">${log.action}</div>
-          <div class="date-col">${log.dateTimeCreated}</div>
+        const { classroomDetails, instructors, students, modules } = data;
+        console.log("Classroom Details:", classroomDetails);
+        console.log("Instructors:", instructors);
+        console.log("Students:", students);
+        console.log("Modules:", modules);
+
+        // Generate HTML content
+        const headerContent = `
+          <div id="cdClassName">${classroomDetails.className}</div>
+          <div id="cdCreator">${classroomDetails.username}</div>
         `;
-        checkContainer.appendChild(entry);
+        const descriptionContent = `
+          <h2 class="cd-section-title">Description:</h2>
+          <div id="cd-description-text">${classroomDetails.classDesc}</div>
+          <div id="editBtn"><button class="cd-edit-btn">Edit Details</button></div>
+        `;
+        const metadataContent = `
+          <div class="cd-metadata-item">
+            <span class="cd-label">Created On:</span>
+            <span id="cd-created-date">${classroomDetails.dateCreated}</span>
+          </div>
+          <div class="cd-metadata-item">
+            <span class="cd-label">Code:</span>
+            <span id="cd-access-code">${classroomDetails.classCode}</span>
+          </div>
+        `;
+        const instructorContent = instructors.length > 0 ? `
+          <h2 class="cd-section-title">Instructors</h2>
+          <div id="cd-instructor-list">
+            ${instructors.map(instructor => `
+              <div class="cd-student-card">
+                <img src="images/Human_Icon.jpg" alt="Instructor" class="cd-list-icon">
+                <div class="cd-student-info">
+                  <h3>${instructor.username}</h3>
+                  <p>${instructor.userID}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<p>No instructors available.</p>`;
+
+        const studentContent = students.length > 0 ? `
+          <h2 class="cd-section-title">Students</h2>
+          <div id="cd-students-list">
+            ${students.map(student => `
+              <div class="cd-student-card">
+                <img src="images/Human_Icon.jpg" alt="Student" class="cd-list-icon">
+                <div class="cd-student-info">
+                  <h3>${student.username}</h3>
+                  <p>${student.userID}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<p>No students available.</p>`;
+
+        const moduleContent = modules.length > 0 ? `
+          <h2 class="cd-section-title">Modules</h2>
+          <div id="cd-module-list">
+            ${modules.map(module => `
+              <div class="cd-module-card">
+                <img src="images/Module_Icon.jpg" alt="Module Icon" class="cd-list-icon">
+                <div class="cd-module-info">
+                  <h3>${module.moduleName}</h3>
+                  <p>${module.username}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<p>No modules available.</p>`;
+
+        document.getElementById('cd-title-wrapper').innerHTML = headerContent;
+        document.getElementById('cd-description-container').innerHTML = descriptionContent;
+        document.getElementById('cd-metadata').innerHTML = metadataContent;
+        document.getElementById('cdInstructorList').innerHTML = instructorContent;
+        document.getElementById('cdStudentList').innerHTML = studentContent;
+        document.getElementById('cdModuleList').innerHTML = moduleContent;
+      })
+
+      .catch(error => {
+        console.error("Fetch error:", error);
+        document.getElementById('cd-title-wrapper').innerHTML = `<div class="error">Failed to load classroom details. Please try again later.</div>`;
       });
-    } else {
-      checkContainer.innerHTML = '<div style="padding:10px;">No logs found for this user.</div>';
-    }
   }
 
-function showClassroomDetails(classroomID) {
-  fetch(`Admin.php?classroomID=${classroomID}`)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
+ // Show View Module
+ var selectedModuleID = "";
+
+function showViewModule(element) {
+  console.log("View Module");
+  showOverlay('viewModuleOverlay',['moduleOverlay']);
+
+  const moduleCard = element.closest('.module-card');
+  const moduleID = moduleCard.getAttribute('module-id');
+
+  selectedModuleID = moduleID;
+  console.log("Module ID: " + moduleID);
+
+  if (!moduleID) {
+    console.error("Error: Module ID not found.");
+    return;
+  }
+
+  console.log('Sending Fetch Request to instructor.php');
+  fetch('adminFunctions.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'getModuleDetails',
+      data: { moduleID: moduleID }
     })
-    .then(data => {
-      if (data.error) {
-        console.error('Server error:', data.error);
-        alert(data.error);
-        return;
-      }
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json(); 
+  })
+  .then(data => {
 
-      // Update the overlay content
-      document.getElementById("cd-course-title").textContent = data.className || "N/A";
-      document.getElementById("cd-creator-name").textContent = "Created by: " + (data.creator || "Unknown");
-      document.getElementById("cd-instructor-list").textContent = data.instructor || "N/A";
-      document.getElementById("cd-created-date").textContent = data.created || "N/A";
-      document.getElementById("cd-access-code").textContent = data.code || "N/A";
-      document.getElementById("cd-description-text").textContent = data.description || "No description available";
+    const { moduleName, moduleDesc, className, lessons: lessonArray } = data;
 
-      // Update students list
-      const studentsList = document.getElementById("cd-students-list");
-      studentsList.innerHTML = ''; // Clear existing students
-      if (data.students && data.students.length > 0) {
-        data.students.forEach(student => {
-          const studentCard = document.createElement("div");
-          studentCard.className = "cd-student-card";
-          studentCard.innerHTML = `
-            <img src="images/student-avatar.jpg" alt="Student" class="cd-student-avatar">
-            <div class="cd-student-info">
-              <h3>${student.name}</h3>
-              <p>${student.role}</p>
+    const htmlContent = `
+      <div id="viewModuleInfo">
+        <div id="viewModuleTitle">
+          <img src="images/Module_Icon.jpg" alt="Module Icon" class="view-module-icon">
+          <div id="viewModuleInfoText">
+            <div id="viewModuleTitle">${moduleName}</div>
+            <div id="viewModuleClass">${className}</div>
+          </div>
+        </div>
+
+        <div id="viewModuleDesc">
+          <div id="viewModuleDescText">${moduleDesc}</div>
+        </div>
+
+        <div id="lessonList">
+          <div id="lessonListTitle">Lessons</div>
+          <div class="list-wrapper">
+            <div class="dynamic-list">
+              ${lessonArray.map(lesson => `
+                <div class="module-card" lesson-id="${lesson.lessID}">
+                  <img src="images/Module_Icon.jpg" alt="Module Icon" class="module-icon">
+                  <div class="module-info">
+                    <div class="module-title">${lesson.lessonName}</div>
+                    <div class="module-creator">In ${moduleName}</div>
+                  </div>
+                  <button class="view-lesson" onclick="showViewLesson(this)">
+                    <img src="images/Search_Icon.jpg" alt="View Lesson" class="search-image-icon">
+                  </button>
+                </div>
+              `).join('')}
             </div>
-          `;
-          studentsList.appendChild(studentCard);
-        });
-      } else {
-        studentsList.innerHTML = '<p>No students enrolled</p>';
-      }
+          </div>
+        </div>
+      </div>
+    `;
 
-      // Update modules list
-      const modulesList = document.querySelector(".cd-module-list");
-      modulesList.innerHTML = ''; // Clear existing modules
-      if (data.modules && data.modules.length > 0) {
-        data.modules.forEach(module => {
-          const moduleCard = document.createElement("div");
-          moduleCard.className = "cd-module-card";
-          moduleCard.innerHTML = `
-            <div class="cd-module-icon">
-              <img src="images/module-icon.svg" alt="Module Icon">
-            </div>
-            <div class="cd-module-info">
-              <h3>${module.title}</h3>
-              <p>${module.source}</p>
-            </div>
-          `;
-          modulesList.appendChild(moduleCard);
-        });
-      } else {
-        modulesList.innerHTML = '<p>No modules available</p>';
-      }
-
-      // Show the overlay
-      document.getElementById("classroomDetailsOverlay").style.display = "block";
-    })
-    .catch(error => {
-      console.error('Error fetching classroom details:', error);
-      alert('Failed to load classroom details. Please try again.');
-    });
+    document.getElementById('viewModuleMain').innerHTML = htmlContent;
+  })
+  .catch(error => {
+    console.error("Fetch error:", error);
+    document.getElementById('viewModuleMain').innerHTML = `<div class="error">Failed to load module details.</div>`;
+  });
 }
 
-function closeClassroomDetails() {
-  document.getElementById("classroomDetailsOverlay").style.display = "none";
+function deleteModule(element) {
+  console.log("Delete Module");
+  const moduleCard = element.closest('.module-card');
+  const moduleID = selectedModuleID;
+
+  if (!moduleID) {
+    console.error("Error: Module ID not found.");
+    return;
+  }
+
+  fetch('adminFunctions.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'deleteModule',
+      data: { moduleID: moduleID }
+    })
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(result => {
+    if (result.success) {
+      location.reload(); // Optionally refresh the page
+    } else {
+      alert('Failed to delete module: ' + result.message);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('An error occurred: ' + error.message);
+  });
+}
+
+// Show View Lesson
+function showViewLesson(element) {
+console.log("View Lesson");
+showOverlay('viewLessonOverlay', ['viewModuleOverlay','moduleOverlay']);
+
+// Get the lesson ID from the clicked element
+const lessonCard = element.closest('.module-card');
+const lessonID = lessonCard.getAttribute('lesson-id');
+
+console.log("Lesson ID: " + lessonID);
+
+if (!lessonID) {
+  console.error("Error: Lesson ID not found.");
+  return;
+}
+
+// Fetch lesson details from the server
+fetch('adminFunctions.php', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    action: 'getLessonDetails',
+    data: { lessonID: lessonID }
+  })
+})
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json(); // Parse JSON response
+  })
+  .then(result => {
+    if (result.success) {
+      const lesson = result.data;
+
+      // Format the lesson details as HTML
+      const htmlContent = `
+        <div id="viewLessonTitle">
+              <img src="images/Module_Icon.jpg" alt="">
+              <div id="viewLessonName">${lesson.lessonName}</div>
+            </div>
+
+            <div id="viewLessonDesc">
+              <div id="viewLessonDescText">${lesson.lessonDesc}</div>
+            </div>
+
+            <div id="viewLessonWords">
+              <div id="viewLessonWordsTitle">Vocabulary</div>
+              <div id="viewLessonWordsList">
+                <div class="list-wrapper">
+                  <table class="dynamic-table">
+                    <thead>
+                      <tr>
+                        <th>Word</th>
+                        <th>Meaning</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${lesson.vocabulary.map(word => `
+                        <tr>
+                          <td>${word.word}</td>
+                          <td>${word.meaning}</td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+      `;
+
+      // Inject the HTML into the overlay
+      document.getElementById('viewLessonMain').innerHTML = htmlContent;
+    } else {
+      document.getElementById('viewLessonMain').innerHTML = `
+        <div class="error">Failed to load lesson details: ${result.message}</div>
+      `;
+    }
+  })
+  .catch(error => {
+    console.error("Fetch error:", error);
+    document.getElementById('viewLessonMain').innerHTML = `
+      <div class="error">An error occurred while fetching lesson details.</div>
+    `;
+  });
 }
 
 // Load default on page load

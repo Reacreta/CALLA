@@ -126,7 +126,6 @@
 
           }
 
-
           if ($action === 'getModuleDetails') {
             $data = $input['data'];
             $moduleID = $data['moduleID'] ?? null;
@@ -342,6 +341,7 @@
                   $stmt->execute();
                 }
               }
+              logAction($conn, $_SESSION['userID'], 'Uploaded module: ' . $moduleName);
             }
           }
         }
