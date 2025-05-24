@@ -837,9 +837,9 @@ if(isset($_POST["createPartner"])) {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 70%;
-    height: 70%;
-    background: rgba(241, 241, 241, 0.95);
+    width: 60%;
+    height: 80%;
+    background: rgba(255, 255, 255, 0.95);
     border: 2px solid white;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -942,7 +942,7 @@ if(isset($_POST["createPartner"])) {
   #cd-metadata {
     display: flex;
     gap: 20px;
-    margin: 30px 0;
+    margin: 15px 0;
     padding: 15px 0;
     border-top: 1px solid #eee;
     border-bottom: 1px solid #eee;
@@ -962,12 +962,55 @@ if(isset($_POST["createPartner"])) {
     background: #f8f8f8;
     border-radius: 6px;
     padding: 10px;
+    position: relative;
+  }
+
+  #editBtn {
+    position: absolute;
+    top: 12px;
+    right: 10px;
+  }
+
+  .cd-edit-btn {
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    width: 130px; /* Set your desired width */
+    text-align: center;
+  }
+
+  .cd-edit-btn:hover {
+    background-color: #0056b3;
   }
 
   #cd-description-text {
     color: #555;
     line-height: 1.6;
     margin-bottom: 20px;
+  }
+
+  /* Editable inputs */
+  .editable-input {
+    width: 100%;
+    font-size: 18px;
+    padding: 6px 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+
+  .editable-textarea {
+    width: 100%;
+    height: 85%;
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    resize: vertical;
   }
 
   .cd-instructorlist,
@@ -977,6 +1020,8 @@ if(isset($_POST["createPartner"])) {
     width: 100%;
     overflow-y: auto;
     padding-right: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: #a00 #f0f0f0;
   }
 
   .cd-instructorlist::-webkit-scrollbar,
@@ -1043,8 +1088,9 @@ if(isset($_POST["createPartner"])) {
   }
 
   .cd-btn {
-    padding: 8px 20px;
+    padding: 10px 25px;
     border-radius: 4px;
+    border: none; 
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -1881,8 +1927,7 @@ if(isset($_POST["createPartner"])) {
           <!-- Footer Actions -->
           <div class="cd-actions">
             <div class="cd-actions-right">
-              <button></button>
-              <button class="cd-btn cd-btn-delete">Delete</button>
+              <button class="cd-btn cd-btn-delete" onclick="deleteClass()">Delete</button>
               <button class="cd-btn cd-btn-close" onclick="closeOverlay('viewClassroomDetailsOverlay')">Close</button>
             </div>
           </div>
@@ -2814,8 +2859,12 @@ Module Name, Module Description{
       descEl.outerHTML = `<textarea id="editDesc" class="editable-textarea">${originalDesc}</textarea>`;
 
       // Reveal Save and swap Edit to Cancel
-      document.getElementById('editBtn').outerHTML = `<div id="editBtn"><button class="cd-edit-btn" onClick="cancelEdit()" style="display:flex;">Cancel</button></div>`;
-      document.getElementById('saveBtn').style.display = 'block';
+      document.getElementById('editBtn').outerHTML = `
+        <div id="editBtn" style="display: flex; gap: 10px;">
+        <button class="cd-edit-btn" onClick="saveEdit()">Save</button>
+          <button class="cd-edit-btn" onClick="cancelEdit()">Cancel</button>
+        </div>
+      `;
   }
 
   function cancelEdit() {
