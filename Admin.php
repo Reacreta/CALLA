@@ -266,7 +266,7 @@ if(isset($_POST["createPartner"])) {
     height: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
-    border-radius: 50%; /* Makes it circular */
+    border-radius: 50%; 
   }
 
   .nav-group {
@@ -326,6 +326,17 @@ if(isset($_POST["createPartner"])) {
     
   }
 
+  .search-icon-link {
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   /* User Overlays */
   .user-overlay { 
     display: none;
@@ -342,7 +353,7 @@ if(isset($_POST["createPartner"])) {
 
   .list-wrapper{
     flex: 1;
-    height: 87%;
+    height: 100%;
   }
   .dynamic-list {
     display: flex;
@@ -404,7 +415,7 @@ if(isset($_POST["createPartner"])) {
   .user-card {
     background: #e0e0e0;
     padding: 15px;
-    border-radius: 8px;
+    border-radius: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -413,7 +424,7 @@ if(isset($_POST["createPartner"])) {
   .user-info,.user-title {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
   }
 
   .user-info i {
@@ -467,6 +478,7 @@ if(isset($_POST["createPartner"])) {
     border-radius: 50%;
     object-fit: cover;
     transition: transform 0.2s;
+    border: none;
   }
 
   .search-image-icon:hover {
@@ -605,8 +617,8 @@ if(isset($_POST["createPartner"])) {
   .user-actions {
     display: flex;
     justify-content: flex-start;
-    gap: 10px;
-    padding: 0 20px;
+    gap: 20px;
+    padding: 0 10px;
   }
 
   .action-btn {
@@ -679,6 +691,8 @@ if(isset($_POST["createPartner"])) {
     overflow-y: auto;
     padding: 0 10px;
     margin-top: 10px;
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #a00 #f0f0f0; /* Firefox */
   }
 
   .logs-header {
@@ -695,16 +709,17 @@ if(isset($_POST["createPartner"])) {
   }
 
   #log-entry {
-    height: 55px;
     display: grid;
     grid-template-columns: 1.5fr 3fr 1.5fr;
-    padding: 0 20px;
+    padding: 10px 20px; /* add vertical padding */
     background-color: #f1f1f1;
     border-radius: 12px;
     margin-bottom: 10px;
     font-size: 15px;
     align-items: center;
     gap: 10px;
+    width: 100%; /* ensure full width */
+    box-sizing: border-box; /* includes padding in total size */
   }
 
   .log-entry:nth-child(even) {
@@ -748,11 +763,11 @@ if(isset($_POST["createPartner"])) {
     background-color: #5a0000;
   }
 
-  /* Classroom Overlays */
 
+  /* Classroom Overlays */
   .classroom-item {
     background-color: #e0e0e0;
-    padding: 15px 20px;
+    padding: 15px;
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -780,12 +795,6 @@ if(isset($_POST["createPartner"])) {
   .classroom-creator {
     font-size: 14px;
     color: #444;
-  }
-
-  .classroom-search-icon {
-    font-size: 20px;
-    color: #333;
-    cursor: pointer;
   }
 
   .module-card {
@@ -820,33 +829,30 @@ if(isset($_POST["createPartner"])) {
     color: #444;
   }
 
-      /* Classroom Details Overlay */
-  #create-overlay, #viewClassroomDetailsOverlay {
+
+  /* Classroom Details Overlay */
+  #viewClassroomDetailsOverlay {
     display: none;
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: auto;
-    height: fit-content;
+    width: 70%;
+    height: 70%;
     background: rgba(241, 241, 241, 0.95);
     border: 2px solid white;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     z-index: 100;
     padding: 20px;
-    overflow-y: auto;
   }
 
-  #viewClassroomDetailsOverlay {
-    width: 60%;
-    height: 80%;
-  }
-
-  /* Content Wrapper */
   .cd-content-wrapper {
     height: 100%;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
 
   /* Header Section */
@@ -855,7 +861,6 @@ if(isset($_POST["createPartner"])) {
     align-items: center;
     gap: 20px;
     margin-bottom: 40px;
-    height: auto;
   }
 
   .cd-icon-wrapper {
@@ -874,12 +879,13 @@ if(isset($_POST["createPartner"])) {
     height: 50px;
   }
 
-  #cdClassName{
+  #cdClassName {
     font-size: 20px;
     font-weight: 600;
     color: #333;
   }
-  #cdCreator{
+
+  #cdCreator {
     font-size: 16px;
     color: #666;
   }
@@ -898,9 +904,23 @@ if(isset($_POST["createPartner"])) {
   /* Main Grid */
   .cd-main-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1.5fr 1fr;
     gap: 30px;
-    height: 95%;
+    height: 100%;
+  }
+
+  /* Left Column */
+  .cd-left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Right Column - remove global scroll */
+  .cd-right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
 
   /* Card Styles */
@@ -911,6 +931,7 @@ if(isset($_POST["createPartner"])) {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 
+  /* Section Title */
   .cd-section-title {
     font-size: 18px;
     font-weight: 600;
@@ -921,7 +942,7 @@ if(isset($_POST["createPartner"])) {
   #cd-metadata {
     display: flex;
     gap: 20px;
-    margin: 20px 0;
+    margin: 30px 0;
     padding: 15px 0;
     border-top: 1px solid #eee;
     border-bottom: 1px solid #eee;
@@ -940,14 +961,48 @@ if(isset($_POST["createPartner"])) {
   #cd-description-container {
     background: #f8f8f8;
     border-radius: 6px;
+    padding: 10px;
   }
 
   #cd-description-text {
     color: #555;
     line-height: 1.6;
+    margin-bottom: 20px;
   }
 
-  /* Student and Module Cards */
+  .cd-instructorlist,
+  .cd-studentlist,
+  .cd-modulelist {
+    height: 150px;
+    width: 100%;
+    overflow-y: auto;
+    padding-right: 8px;
+  }
+
+  .cd-instructorlist::-webkit-scrollbar,
+  .cd-studentlist::-webkit-scrollbar,
+  .cd-modulelist::-webkit-scrollbar {
+    width: 6px;
+  }
+  .cd-instructorlist::-webkit-scrollbar-track,
+  .cd-studentlist::-webkit-scrollbar-track,
+  .cd-modulelist::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  .cd-instructorlist::-webkit-scrollbar-thumb,
+  .cd-studentlist::-webkit-scrollbar-thumb,
+  .cd-modulelist::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+  }
+  .cd-instructorlist::-webkit-scrollbar-thumb:hover,
+  .cd-studentlist::-webkit-scrollbar-thumb:hover,
+  .cd-modulelist::-webkit-scrollbar-thumb:hover {
+    background: #999;
+  }
+
+  /* List Item Styles */
   .cd-student-card, .cd-module-card {
     display: flex;
     align-items: center;
@@ -956,11 +1011,6 @@ if(isset($_POST["createPartner"])) {
     border-radius: 6px;
     background: #f8f8f8;
     margin-bottom: 10px;
-  }
-
-  .cd-right-column{
-    max-height: 720px;
-    overflow-y: scroll;
   }
 
   .cd-list-icon {
@@ -980,10 +1030,11 @@ if(isset($_POST["createPartner"])) {
     color: #666;
   }
 
-  /* Footer Actions */
+  /* Footer */
   .cd-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
+    padding-top: 10px;
   }
 
   .cd-actions-right {
@@ -1095,446 +1146,450 @@ if(isset($_POST["createPartner"])) {
     transition: transform 0.2s;
   }
 
-    /* View Module Overlay */
-    #viewModuleOverlay{
-      display: none;
-      position: absolute;
-      border: 2px solid white;
-      border-radius: 6px 6px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      top: 10%;
-      left: 20%;
-      height: fit-content;
-      width: 50%;
-      background: rgba(241, 241, 241, 0.85);
-      backdrop-filter: blur(5px);
-      z-index: 20;
-      padding: 20px;
-      overflow-y: auto;
-    }
+  /* View Module Overlay */
+  #viewModuleOverlay{
+    display: none;
+    position: absolute;
+    border: 2px solid white;
+    border-radius: 6px 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    top: 10%;
+    left: 20%;
+    height: fit-content;
+    width: 50%;
+    background: rgba(241, 241, 241, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 20;
+    padding: 20px;
+    overflow-y: auto;
+  }
     
-    #viewModuleInfo{
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-    #viewModuleTitle{
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      font-size: 25px;
-      font-weight: bold;
-      color: black;
-    }
-    #viewModuleInfoText{
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+  #viewModuleInfo{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
 
-    #viewModuleTitle img{
-      width: 100px;
-      height: 100px;
-    }
+  #viewModuleTitle{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 25px;
+    font-weight: bold;
+    color: black;
+  }
 
-    #viewModuleDesc{
-      background-color: gainsboro;
-      border-radius: 15px;
-      padding: 15px;
-      font-size: 13px;
-      color: #444;
-    }
+  #viewModuleInfoText{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #viewModuleTitle img{
+    width: 100px;
+    height: 100px;
+  }
+
+  #viewModuleDesc{
+    background-color: gainsboro;
+    border-radius: 15px;
+    padding: 15px;
+    font-size: 13px;
+    color: #444;
+  }
     
-    #viewModuleClass{
-      font-size: 15px;
-      color: #444;
-    }
+  #viewModuleClass{
+    font-size: 15px;
+    color: #444;
+  }
 
-    #lessonList .list-wrapper{
-      height: 260px;
-    }
+  #lessonList .list-wrapper{
+    height: 260px;
+  }
 
-    #lessonListTitle{
-      font-size: 20px;
-      font-weight: bold;
-      color: #7b0000;
-      margin-bottom: 10px;
-    }
+  #lessonListTitle{
+    font-size: 20px;
+    font-weight: bold;
+    color: #7b0000;
+    margin-bottom: 10px;
+  }
 
-    /* View Lesson Overlay */
-    #viewLessonOverlay {
-      display: none;
-      position: absolute;
-      border: 2px solid white;
-      border-radius: 6px 6px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      top: 10%;
-      left: 20%;
-      height: fit-content;
-      width: 50%;
-      background: rgba(241, 241, 241, 0.85);
-      backdrop-filter: blur(5px);
-      z-index: 20;
-      padding: 20px;
-      overflow-y: auto;
-    }
+  /* View Lesson Overlay */
+  #viewLessonOverlay {
+    display: none;
+    position: absolute;
+    border: 2px solid white;
+    border-radius: 6px 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    top: 10%;
+    left: 20%;
+    height: fit-content;
+    width: 50%;
+    background: rgba(241, 241, 241, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 20;
+    padding: 20px;
+    overflow-y: auto;
+  }
 
-    #viewLessonTitle {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
+  #viewLessonTitle {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
 
-    #viewLessonTitle img {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
+  #viewLessonTitle img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
 
-    #viewLessonName {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #333;
-    }
+  #viewLessonName {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+  }
     
-    .view-lesson{
-      background: none;
-      border: none;
-    }
+  .view-lesson{
+    background: none;
+    border: none;
+  }
    
-    #viewLessonDesc {
-      margin-bottom: 20px;
-      height: auto;
-    }
+  #viewLessonDesc {
+    margin-bottom: 20px;
+    height: auto;
+  }
 
-    #viewLessonDescText {
-      font-size: 1rem;
-      color: #555;
-      line-height: 1.5;
-      background: #f9f9f9;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-    }
+  #viewLessonDescText {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.5;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
 
-    /* Vocabulary section styling */
-    #viewLessonWords {
-      margin-top: 20px;
-    }
+  /* Vocabulary section styling */
+  #viewLessonWords {
+    margin-top: 20px;
+  }
 
-    #viewLessonWordsTitle {
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: #444;
-    }
+  #viewLessonWordsTitle {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #444;
+  }
 
-    .list-wrapper {
-      overflow-x: auto; 
-    }
+  .list-wrapper {
+    overflow-x: auto;
+    height: 85%; 
+  }
 
-    .dynamic-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
+  .dynamic-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
 
-    .dynamic-table th, .dynamic-table td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
+  .dynamic-table th, .dynamic-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
 
-    .dynamic-table th {
-      background-color: #f4f4f4;
-      font-weight: bold;
-    }
+  .dynamic-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
 
-    .dynamic-table tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
+  .dynamic-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
 
-    .dynamic-table tr:hover {
-      background-color: #f1f1f1;
-    }
+  .dynamic-table tr:hover {
+    background-color: #f1f1f1;
+  }
 
-    /* Close button styling */
-    #viewLessonOverlay .close-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #555;
-      cursor: pointer;
-    }
+  /* Close button styling */
+  #viewLessonOverlay .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #555;
+    cursor: pointer;
+  }
 
-    #viewLessonOverlay .close-btn:hover {
-      color: #000;
-    }
+  #viewLessonOverlay .close-btn:hover {
+    color: #000;
+  }
     
-    /* partners CSS */ 
+  /* partners CSS */ 
 
-    .partners-card {
-      background-color: #e0e0e0;
-      padding: 15px 20px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+  .partners-card {
+    background-color: #e0e0e0;
+    padding: 15px 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 
-    .partners-icon {
-      height: 50px;
-      width: 50px;
-      border-radius: 10px;
-      object-fit: cover;
-    }
+  .partners-icon {
+    height: 50px;
+    width: 50px;
+    border-radius: 10px;
+    object-fit: cover;
+  }
 
-    .partners-info {
-      flex: 1;
-      margin-left: 15px;
-    }
+  .partners-info {
+    flex: 1;
+    margin-left: 15px;
+  }
 
-    .partners-title {
-      font-weight: bold;
-      font-size: 16px;
-      color: #000;
-    }
+  .partners-title {
+    font-weight: bold;
+    font-size: 16px;
+    color: #000;
+  }
 
-    .partners-role {
-      font-size: 14px;
-      color: #444;
-    }
+  .partners-role {
+    font-size: 14px;
+    color: #444;
+  }
 
-    .NewP {
-       background-color: #7b0000;
-      margin-right: 15px;
-      color: white;
-      border: none;
-      border-radius: 20px;
-      padding: 10px 15px;
-      cursor: pointer;
-      z-index: 1;
-    }
+  .NewP {
+    background-color: #7b0000;
+    margin-right: 15px;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 15px;
+    cursor: pointer;
+    z-index: 1;
+  }
 
-    .NewP:hover {
-      transition: transform 0.2s;
-      transform: scale(1.1);
-    }
+  .NewP:hover {
+    transition: transform 0.2s;
+    transform: scale(1.1);
+  }
 
-    .create-overlay { 
-      display: none;
-      position: absolute;
-      border: 2px solid white;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      top: 10%;
-      left: 30%;
-      height: fit-content;
-      width: fit-content;
-      background: rgba(241, 241, 241, 0.85);
-      backdrop-filter: blur(5px);
-      z-index: 20;
-      padding: 20px;
-      overflow-y: auto;
-    }
+  .create-overlay { 
+    display: none;
+    position: absolute;
+    border: 2px solid white;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    top: 10%;
+    left: 30%;
+    height: fit-content;
+    width: fit-content;
+    background: rgba(241, 241, 241, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 20;
+    padding: 20px;
+    overflow-y: auto;
+  }
 
-    .create-overlay.show {
-      display: block;
-    }
+  .create-overlay.show {
+    display: block;
+  }
 
-    .create-list {
-      display: flex;
-      flex-direction: column;
-      gap: 30px;
-    }
+  .create-list {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
 
 
-    .create-info {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+  .create-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 
-    .create-info label {
-      font-weight: bold;
-      color: #333;
-    }
+  .create-info label {
+    font-weight: bold;
+    color: #333;
+  }
 
-    .create-info input,
-    .create-info textarea {
-      width: 500px;
-      padding: 15px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 16px;
-    }
+  .create-info input,
+  .create-info textarea {
+    width: 500px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+  }
 
-    /* Specific textarea styling */
-    .create-info textarea {
-      height: 150px;
-      resize: none;
-    }
+  /* Specific textarea styling */
+  .create-info textarea {
+    height: 150px;
+    resize: none;
+  }
 
-    .create-SC {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-    }
+  .create-SC {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+  }
 
-    .create-SC .creates {
-      background: #e6e6e6;
-      border: none;
-      color: #7b0000;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 20px;
-      padding: 10px 50px;
-      border-radius: 6px;
-      font-size: 20px;
-    }
+  .create-SC .creates {
+    background: #e6e6e6;
+    border: none;
+    color: #7b0000;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+    padding: 10px 50px;
+    border-radius: 6px;
+    font-size: 20px;
+  }
 
-    .create-SC .creates:hover {
-      background-color: #fff;
-    }
+  .create-SC .creates:hover {
+    background-color: #fff;
+  }
 
-    #viewPartnerOverlay {
-      display: none;
-      position: absolute;
-      border: 2px solid white;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      top: 10%;
-      left: 20%;
-      height: fit-content;
-      width: 50%;
-      background: rgba(241, 241, 241, 0.85);
-      backdrop-filter: blur(5px);
-      z-index: 20;
-      padding: 20px;
-      overflow-y: auto;
-    }
-    #viewPartnerHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
+  #viewPartnerOverlay {
+    display: none;
+    position: absolute;
+    border: 2px solid white;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    top: 10%;
+    left: 20%;
+    height: fit-content;
+    width: 50%;
+    background: rgba(241, 241, 241, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 20;
+    padding: 20px;
+    overflow-y: auto;
+  }
 
-#viewPartnerHeader h2 {
-  color: #7b0000; /* Dark red color for the title */
-  font-size: 24px;
-  font-weight: bold;
-}
+  #viewPartnerHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
 
-#viewPartnerHeader .close-btn {
-  background: none;
-  border: none;
-  font-size: 20px;
-  font-weight: bold;
-  color: #666;
-  cursor: pointer;
-}
+  #viewPartnerHeader h2 {
+    color: #7b0000; /* Dark red color for the title */
+    font-size: 24px;
+    font-weight: bold;
+  }
 
-#viewPartnerHeader .close-btn:hover {
-  color: #000; /* Darker color on hover */
-}
+  #viewPartnerHeader .close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+  }
 
-#viewPartnerMain {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
+  #viewPartnerHeader .close-btn:hover {
+    color: #000; /* Darker color on hover */
+  }
 
-#viewPartnerInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
+  #viewPartnerMain {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
 
-#viewPartnerTitle {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
+  #viewPartnerInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
 
-#viewPartnerTitle img {
-  width: 50px;
-  height: 50px;
-  border-radius: 10px; /* Slightly rounded corners */
-  object-fit: cover;
-}
+  #viewPartnerTitle {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
 
-#viewPartnerName {
-  font-size: 20px;
-  font-weight: bold;
-  color: #333; /* Dark gray for text */
-}
+  #viewPartnerTitle img {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px; /* Slightly rounded corners */
+    object-fit: cover;
+  }
 
-#viewPartnerDesc {
-  background: #f8f8f8; /* Light gray background */
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid #ddd; /* Subtle border */
-}
+  #viewPartnerName {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333; /* Dark gray for text */
+  }
 
-#viewPartnerDescText {
-  font-size: 14px;
-  color: #555; /* Medium gray for text */
-  line-height: 1.6;
-}
+  #viewPartnerDesc {
+    background: #f8f8f8; /* Light gray background */
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ddd; /* Subtle border */
+  }
 
-#viewPartnerContact,
-#viewPartnerEmail {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
+  #viewPartnerDescText {
+    font-size: 14px;
+    color: #555; /* Medium gray for text */
+    line-height: 1.6;
+  }
 
-#viewPartnerContactTitle,
-#viewPartnerEmailTitle {
-  font-size: 16px;
-  font-weight: bold;
-  color: #7b0000; /* Dark red for section titles */
-}
+  #viewPartnerContact,
+  #viewPartnerEmail {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
 
-#viewPartnerContactText,
-#viewPartnerEmailText {
-  font-size: 14px;
-  color: #333; /* Dark gray for text */
-}
+  #viewPartnerContactTitle,
+  #viewPartnerEmailTitle {
+    font-size: 16px;
+    font-weight: bold;
+    color: #7b0000; /* Dark red for section titles */
+  }
 
-#viewPartnerSC {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
+  #viewPartnerContactText,
+  #viewPartnerEmailText {
+    font-size: 14px;
+    color: #333; /* Dark gray for text */
+  }
 
-#viewPartnerSC .create-mod-btn {
-  background: #e6e6e6; /* Light gray background */
-  border: none;
-  color: #7b0000; /* Dark red text */
-  font-weight: bold;
-  cursor: pointer;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 14px;
-}
+  #viewPartnerSC {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
 
-#viewPartnerSC .create-mod-btn:hover {
-  background: #fff; /* White background on hover */
-  color: #5a0000; /* Darker red text on hover */
-}
-    
-    .user-overlay.show, .create-overlay.show, #userChecklogsOverlay .show, #viewClassroomDetailsOverlay.show, #viewModuleOverlay.show, #viewLessonOverlay.show, #viewPartnerOverlay.show {
-      display: block;
-    }
+  #viewPartnerSC .create-mod-btn {
+    background: #e6e6e6; /* Light gray background */
+    border: none;
+    color: #7b0000; /* Dark red text */
+    font-weight: bold;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+
+  #viewPartnerSC .create-mod-btn:hover {
+    background: #fff; /* White background on hover */
+    color: #5a0000; /* Darker red text on hover */
+  }
+        
+  .user-overlay.show, .create-overlay.show, #userChecklogsOverlay .show, #viewClassroomDetailsOverlay.show, #viewModuleOverlay.show, #viewLessonOverlay.show, #viewPartnerOverlay.show {
+    display: block;
+  }
 
   </style>
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
@@ -2100,6 +2155,26 @@ Module Name, Module Description{
     document.getElementById(targetID).style.display = "none";
   }
 
+  function hideOverlay(targetId) {
+    const target = document.getElementById(targetId);
+    if (target) {
+      target.style.display = 'none';
+    }
+
+    // Hide all overlays
+    document.querySelectorAll('.user-overlay, .create-overlay').forEach(overlay => {
+      overlay.style.display = 'none';
+    });
+
+    // If no overlays are visible, show the background
+    const anyOpen = Array.from(document.querySelectorAll('.user-overlay, .create-overlay'))
+      .some(el => el.style.display === 'block');
+
+    if (!anyOpen) {
+      document.getElementById('backgroundContent').style.display = 'flex';
+    }
+  }
+
   function toggleSearch(label) {
     const container = label.closest('.search-container');
     const input = container.querySelector('.search-input');
@@ -2368,8 +2443,8 @@ Module Name, Module Description{
           </div>
         `;
         const instructorContent = instructors.length > 0 ? `
-          <h2 class="cd-section-title">Instructors</h2>
-          <div id="cd-instructor-list">
+          <div class="cd-section-title">Instructors</div>
+          <div class="cd-instructorlist">
             ${instructors.map(instructor => `
               <div class="cd-student-card">
                 <img src="images/Human_Icon.jpg" alt="Instructor" class="cd-list-icon">
@@ -2383,8 +2458,8 @@ Module Name, Module Description{
         ` : `<p>No instructors available.</p>`;
 
         const studentContent = students.length > 0 ? `
-          <h2 class="cd-section-title">Students</h2>
-          <div id="cd-students-list">
+          <div class="cd-section-title">Students <a href="#">View All</a></div>
+          <div class="cd-studentlist">
             ${students.map(student => `
               <div class="cd-student-card">
                 <img src="images/Human_Icon.jpg" alt="Student" class="cd-list-icon">
@@ -2398,8 +2473,8 @@ Module Name, Module Description{
         ` : `<p>No students available.</p>`;
 
         const moduleContent = modules.length > 0 ? `
-          <h2 class="cd-section-title">Modules</h2>
-          <div id="cd-module-list">
+          <div class="cd-section-title">Modules <a href="#">View All</a></div>
+          <div class="cd-modulelist">
             ${modules.map(module => `
               <div class="cd-module-card">
                 <img src="images/Module_Icon.jpg" alt="Module Icon" class="cd-list-icon">
