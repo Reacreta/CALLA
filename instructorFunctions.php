@@ -125,7 +125,7 @@
             exit;
 
           }
-            // Classroom functions
+            // Instructor functions
 
             if ($action === 'updateClass') {
             $className = trim($input['className']);

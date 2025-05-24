@@ -73,11 +73,7 @@
 
     function redirect($url){
         debug_console("Debugging to ".$url);
-        if ($url == 'Admin.php' || $url == 'Instructor.php' || $url == 'Student.php') { // if logging in
-            if (isset($_SESSION['accountRole'])) $accountRole = $_SESSION['accountRole'];
-
-            else debug_console("Failed to get accountRole.");
-
+        if ($url == 'deactive'){
             echo "<div style='
             position: absolute;
             display: flex;
@@ -92,34 +88,65 @@
             font-size: 16px;
             text-align: center;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        '>Logged In Successfully, Welcome {$accountRole}.</div>";
-            }
-        else if ($url == 'index.php'){ // if registration
-            echo "<div style='
-            position: absolute;
-            display: flex;
-            top: 45%;
-            left: 40%;
-            margin: 20px auto;
-            padding: 15px 25px;
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            border-radius: 8px;
-            width: fit-content;
-            font-family: Inter, sans-serif;
-            font-size: 16px;
-            text-align: center;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        '>Registration successful! You can now log in.</div>";
-        }
-        echo "<script type='text/javascript'>
+            z-index: 4000;
+        '>This account is currently deactivated, Please ask an administrator to reactivate this account and log in again.</div>";
+            destroySession();
+            echo "<script type='text/javascript'>
             setTimeout(function() {
-                window.location.href = '$url';
+                window.location.href = 'index.php';
             }, 3000);
         </script>";
+            exit();
+        }
+        else {
+            if ($url == 'Admin.php' || $url == 'Instructor.php' || $url == 'Student.php') { // if logging in
+                if (isset($_SESSION['accountRole'])) $accountRole = $_SESSION['accountRole'];
+
+                else debug_console("Failed to get accountRole.");
+
+                echo "<div style='
+                position: absolute;
+                display: flex;
+                margin: 20px auto;
+                padding: 15px 25px;
+                background-color: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+                border-radius: 8px;
+                width: fit-content;
+                font-family: Inter, sans-serif;
+                font-size: 16px;
+                text-align: center;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+            '>Logged In Successfully, Welcome {$accountRole}.</div>";
+                }
+            else if ($url == 'index.php'){ // if registration
+                echo "<div style='
+                position: absolute;
+                display: flex;
+                top: 45%;
+                left: 40%;
+                margin: 20px auto;
+                padding: 15px 25px;
+                background-color: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+                border-radius: 8px;
+                width: fit-content;
+                font-family: Inter, sans-serif;
+                font-size: 16px;
+                text-align: center;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+            '>Registration successful! You can now log in.</div>";
+            }
+            echo "<script type='text/javascript'>
+                setTimeout(function() {
+                    window.location.href = '$url';
+                }, 3000);
+            </script>";
+        }
     }
 
     function sessionCheck(){

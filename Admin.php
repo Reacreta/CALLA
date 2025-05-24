@@ -1720,7 +1720,8 @@ if(isset($_POST["createPartner"])) {
                  data-email="<?php echo htmlspecialchars($row['email']); ?>"
                  data-contact="<?php echo htmlspecialchars($row['contact']); ?>"
                  data-dob="<?php echo htmlspecialchars($row['dateOfBirth']); ?>"
-                 data-uid="<?php echo htmlspecialchars($row['userID']); ?>">
+                 data-uid="<?php echo htmlspecialchars($row['userID']); ?>"
+                 data-active="<?php echo htmlspecialchars($row['active']); ?>">
               <div class="user-info">
                 <div class="user-title">
                   <img src="images/Human_Icon.jpg" alt="User Photo" class="user-icon">
@@ -1799,7 +1800,7 @@ if(isset($_POST["createPartner"])) {
           <div class="user-actions">
             <button class="action-btn" onclick="checkUserLogs()">Check Logs</button>
             <button class="action-btn delete-btn" onclick="deleteUser()">Delete</button>
-            <button class="action-btn deactivate-btn" onclick="deactivateUser()">Deactivate</button>
+            <button id="deactivateBtn" class="action-btn deactivate-btn" onclick="deactivateUser()">Deactivate</button>
           </div>
         </div>
       </div>
@@ -2296,6 +2297,43 @@ Module Name, Module Description{
     input.value = '';
   }
 
+  function notifyAndRedirect(message, redirectUrl) { // for redirection, if any in the future (only used for reload for now)
+            const successDiv = document.createElement('div');
+            successDiv.textContent = message;
+
+            successDiv.style.position = 'absolute';
+            successDiv.style.display = 'flex';
+            successDiv.style.margin = '20px auto';
+            successDiv.style.padding = '15px 25px';
+            successDiv.style.backgroundColor = '#d4edda';
+            successDiv.style.color = '#155724';
+            successDiv.style.border = '1px solid #c3e6cb';
+            successDiv.style.borderRadius = '8px';
+            successDiv.style.width = 'fit-content';
+            successDiv.style.fontFamily = 'Inter, sans-serif';
+            successDiv.style.fontSize = '16px';
+            successDiv.style.textAlign = 'center';
+            successDiv.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.1)';
+            successDiv.style.zIndex = '1000';
+            successDiv.style.left = '0';
+            successDiv.style.right = '0';
+            successDiv.style.top = '30px';
+            successDiv.style.justifyContent = 'center';
+
+            document.body.appendChild(successDiv);
+
+            if (redirectUrl === 'reload')
+                setTimeout(() => {
+                successDiv.remove();
+                window.location.reload();
+            }, 3000);
+            else
+                setTimeout(() => {
+                    successDiv.remove();
+                    window.location.href = redirectUrl;
+                }, 3000);
+        }
+
   function setUserTab(role) {
     const cards = document.querySelectorAll('.user-card');
     const tabs = document.querySelectorAll('#userOverlay .tab');
@@ -2358,6 +2396,7 @@ Module Name, Module Description{
 
   /* userdetail overlay */
   var selectedUser = '';
+  let active = 1;
   function showUserDetails(element) {
     const userCard = element.closest('.user-card');
     showOverlay('userDetailsOverlay', ['userOverlay']);
@@ -2372,7 +2411,6 @@ Module Name, Module Description{
     const contact = userCard.dataset.contact;
     const dob = userCard.dataset.dob;
     const uid = userCard.dataset.uid;
-
     // Update overlay fields
     document.getElementById('userDetailName').textContent = name;
     document.getElementById('userDetailRole').textContent = role;
@@ -2385,7 +2423,123 @@ Module Name, Module Description{
     document.getElementById('userDetailUID').textContent = uid;
 
     selectedUser = uid;
+    active = parseInt(userCard.dataset.active);
+    console.log(active);
+    if (active === 0) document.getElementById('deactivateBtn').outerHTML = `<button id="deactivateBtn" class="action-btn deactivate-btn" onclick="activateUser()">Activate</button>`;
+    else document.getElementById('deactivateBtn').outerHTML = `<button id="deactivateBtn" class="action-btn deactivate-btn" onclick="deactivateUser()">Deactivate</button>`;
+
     console.log("Selected User ID: " + selectedUser); // Debug line to show selected user ID
+  }
+
+  // -- User Functions -- 
+  
+  // Delete User
+
+  function deleteUser() {
+      const confirmed = confirm("Are you sure you want to delete this user?");
+      if (confirmed) {
+          // Add user deletion process here
+          fetch('adminFunctions.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+              ,
+              body: JSON.stringify({
+                  action: 'deleteUser',
+                  userID: selectedUser
+              })
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json(); // Parse JSON response
+          })
+          .then(result => {
+              if (result.success) {
+                  notifyAndRedirect('User deleted succesfully!', 'reload');
+              } else {
+                  alert('Deletion failed.');
+              }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred: ' + error.message);
+          });
+
+      }
+      else return;
+  }
+
+  // Deactivate User
+  // <button class="action-btn deactivate-btn" onclick="deactivateUser()">Deactivate</button>
+  function deactivateUser() {
+      const confirmed = confirm("Are you sure you want to deactivate this user?");
+      if (confirmed) {
+          // Add user deactivation process here
+          fetch('adminFunctions.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+              ,
+              body: JSON.stringify({
+                  action: 'deactivateUser',
+                  userID: selectedUser
+              })
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json(); // Parse JSON response
+          })
+          .then(result => {
+              if (result.success) {
+                  notifyAndRedirect('User deactivated succesfully!', 'reload');
+              } else {
+                  alert('Deletion failed.');
+              }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred: ' + error.message);
+          });
+
+      }
+      else return;
+  }
+  
+  function activateUser() {
+      const confirmed = confirm("Are you sure you want to activate this user?");
+      if (confirmed) {
+          // Add user reactivation process here
+          fetch('adminFunctions.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+              ,
+              body: JSON.stringify({
+                  action: 'activateUser',
+                  userID: selectedUser
+              })
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json(); // Parse JSON response
+          })
+          .then(result => {
+              if (result.success) {
+                  notifyAndRedirect('User activated succesfully!', 'reload');
+              } else {
+                  alert('Deletion failed.');
+              }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred: ' + error.message);
+          });
+
+      }
+      else return;
   }
 
   // checkuserlogs
@@ -2802,42 +2956,6 @@ Module Name, Module Description{
   }
 
   // -- Class Functions --
-  function notifyAndRedirect(message, redirectUrl) { // for redirection, if any in the future (only used for reload for now)
-            const successDiv = document.createElement('div');
-            successDiv.textContent = message;
-
-            successDiv.style.position = 'absolute';
-            successDiv.style.display = 'flex';
-            successDiv.style.margin = '20px auto';
-            successDiv.style.padding = '15px 25px';
-            successDiv.style.backgroundColor = '#d4edda';
-            successDiv.style.color = '#155724';
-            successDiv.style.border = '1px solid #c3e6cb';
-            successDiv.style.borderRadius = '8px';
-            successDiv.style.width = 'fit-content';
-            successDiv.style.fontFamily = 'Inter, sans-serif';
-            successDiv.style.fontSize = '16px';
-            successDiv.style.textAlign = 'center';
-            successDiv.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.1)';
-            successDiv.style.zIndex = '1000';
-            successDiv.style.left = '0';
-            successDiv.style.right = '0';
-            successDiv.style.top = '30px';
-            successDiv.style.justifyContent = 'center';
-
-            document.body.appendChild(successDiv);
-
-            if (redirectUrl === 'reload')
-                setTimeout(() => {
-                successDiv.remove();
-                window.location.reload();
-            }, 3000);
-            else
-                setTimeout(() => {
-                    successDiv.remove();
-                    window.location.href = redirectUrl;
-                }, 3000);
-        }
 
   // Editing
   let originalTitle = '';

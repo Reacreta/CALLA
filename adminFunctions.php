@@ -114,7 +114,7 @@
 
     }
 
-    // -- Classroom Functions --
+    // -- Admin Functions --
 
     if ($action === 'updateClass') {
             $className = trim($input['className']);
@@ -149,6 +149,59 @@
             }
             exit;
         }
+
+    if ($action === 'deleteUser') {
+            $userID = trim($input['userID']);
+
+            $sql = "DELETE FROM users WHERE userID = ?";
+            $stmt = $conn->prepare($sql);
+
+            if ($stmt) {
+                $stmt->bind_param("s", $userID);
+                $stmt->execute();
+                echo json_encode(['success' => true]);
+
+            } else {
+                echo json_encode(['success' => false, 'error' => $conn->error]);
+            }
+            exit;
+        }
+
+    if ($action === 'deactivateUser') {
+            $userID = trim($input['userID']);
+
+            $sql = "UPDATE users SET active = 0 WHERE userID = ?";
+            $stmt = $conn->prepare($sql);
+
+            if ($stmt) {
+                $stmt->bind_param("s", $userID);
+                $stmt->execute();
+                echo json_encode(['success' => true]);
+
+            } else {
+                echo json_encode(['success' => false, 'error' => $conn->error]);
+            }
+            exit;
+        }
+
+    if ($action === 'activateUser') {
+            $userID = trim($input['userID']);
+
+            $sql = "UPDATE users SET active = 1 WHERE userID = ?";
+            $stmt = $conn->prepare($sql);
+
+            if ($stmt) {
+                $stmt->bind_param("s", $userID);
+                $stmt->execute();
+                echo json_encode(['success' => true]);
+
+            } else {
+                echo json_encode(['success' => false, 'error' => $conn->error]);
+            }
+            exit;
+        }
+
+    // -- End of Functions
 
 
     if ($action === 'getModuleDetails') {

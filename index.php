@@ -51,6 +51,7 @@
             $_SESSION['email'] = $account['email'];
             $accountRole = $account['userType'];
             $_SESSION['accountRole'] = $accountRole;
+            $active = $account['active'];
             debug_console('Check role');
 
             // get user role ID
@@ -66,26 +67,32 @@
                     $stmt = $conn->prepare("SELECT studentID FROM student WHERE userID = ?");
                     break;
             }
-
-            $stmt->bind_param("s", $userID);
-            $stmt->execute();
-            $res = $stmt->get_result();
-            $row = $res->fetch_assoc();
-            $_SESSION['roleID'] = array_values($row)[0];
-            logAction($conn, $userID, 'Logged in as '.$accountRole);
-            
-            // redirect according to role
-            switch($accountRole){
-                case 'Administrator':
-                    redirect("Admin.php");
-                    break;
-                case 'Instructor':
-                    redirect("Instructor.php"); 
-                    break;
-                case 'Student':
-                    redirect("Student.php"); 
-                    break;
+            if ($active === 0){
+                redirect("deactive");
             }
+
+            else {
+              $stmt->bind_param("s", $userID);
+              $stmt->execute();
+              $res = $stmt->get_result();
+              $row = $res->fetch_assoc();
+              $_SESSION['roleID'] = array_values($row)[0];
+              logAction($conn, $userID, 'Logged in as '.$accountRole);
+              
+              // redirect according to role
+              switch($accountRole){
+                  case 'Administrator':
+                      redirect("Admin.php");
+                      break;
+                  case 'Instructor':
+                      redirect("Instructor.php"); 
+                      break;
+                  case 'Student':
+                      redirect("Student.php"); 
+                      break;
+              }
+            }
+
         }
     }
   }
