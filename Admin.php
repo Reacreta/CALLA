@@ -1827,7 +1827,7 @@ if(isset($_POST["createPartner"])) {
           <div class="cd-actions">
             <div class="cd-actions-right">
               <button></button>
-              <button class="cd-btn cd-btn-delete">Delete</button>
+              <button class="cd-btn cd-btn-delete" onclick="deleteClass()">Delete</button>
               <button class="cd-btn cd-btn-close" onclick="closeOverlay('viewClassroomDetailsOverlay')">Close</button>
             </div>
           </div>
