@@ -153,8 +153,6 @@
       margin: 0;
       padding: 0;
       font-family: 'Inter', sans-serif;
-      letter-spacing: 2px;
-
     }
 
     body, html {
@@ -188,32 +186,21 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.4);
     }
 
-    .register-container h2 {
-      font-size: 30px;
-      margin-bottom: 30px;
-      font-family: 'Goudy Bookletter 1911';
-
-    }
-
     .title{
       display: flex;
       flex-direction: row; 
       margin-bottom: 30px;
     }
 
-    .title #role{
-      display: flex;
-      align-items: end;
-    }
-
-    .title #role span{
-      font-size: 55px;
-      font-family: 'Goudy Bookletter 1911', serif;
-    }
-
     .title #logo{
       height: 90px;
       width: auto;
+    }
+
+    #title-span {
+      margin-top: 22px;
+      font-size: 50px;
+      font-family: 'Goudy Bookletter 1911';
     }
 
     #names.form-group input{
@@ -296,7 +283,7 @@
 <body>
   <div id="contCon">
     <div class="register-container">
-    <div class="title"><img id="logo" src="images/logo.png"><div><span>REGISTER</span></div></div>
+    <div class="title"><img id="logo" src="images/logo.png"><div id="title-span"><span>REGISTER</span></div></div>
 
       <form method="POST">
         <label>Names</label>
