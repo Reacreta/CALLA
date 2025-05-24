@@ -459,7 +459,7 @@ if(isset($_POST["createPartner"])) {
       border: 1px solid #ccc;
       border-radius: 4px;
     }
-  
+
   .search-image-icon {
     width: 35px;
     height: 35px;
@@ -2762,7 +2762,7 @@ Module Name, Module Description{
           return;
       }
 
-      fetch('instructorFunctions.php', {
+      fetch('adminFunctions.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
           ,
@@ -2797,7 +2797,7 @@ Module Name, Module Description{
       const confirmed = confirm("Are you sure you want to delete this classroom?");
       if (confirmed) {
           // Add classroom deletion process here
-          fetch('instructorFunctions.php', {
+          fetch('adminFunctions.php', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' }
               ,
