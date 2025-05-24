@@ -117,9 +117,10 @@
     // -- Classroom Functions --
 
     if ($action === 'updateClass') {
-            $className = trim($input['className']);
-            $classDesc = trim($input['classDesc']);
-            $classID = trim($input['classID']);
+            $data = json_decode(file_get_contents('php://input'), true);
+            $className = trim($data['className']);
+            $classDesc = trim($data['classDesc']);
+            $classID = trim($data['classID']);
 
             $sql = "UPDATE classroom SET className = ?, classDesc = ? WHERE classroomID = ?";
             $stmt = $conn->prepare($sql);
@@ -134,7 +135,8 @@
         }
 
     if ($action === 'deleteClass') {
-            $classID = trim($input['classID']);
+            $data = json_decode(file_get_contents('php://input'), true);
+            $classID = trim($data['classID']);
 
             $sql = "DELETE FROM classroom WHERE classroomID = ?";
             $stmt = $conn->prepare($sql);
