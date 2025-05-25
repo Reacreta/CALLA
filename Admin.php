@@ -2799,7 +2799,7 @@ Module Name, Module Description{
         ` : `<p>No instructors available.</p>`;
 
         const studentContent = students.length > 0 ? `
-          <div class="cd-section-title">Students <a href="#">View All</a></div>
+          <div class="cd-section-title">Students</div>
           <div class="cd-studentlist">
             ${students.map(student => `
               <div class="cd-student-card">
@@ -2814,7 +2814,7 @@ Module Name, Module Description{
         ` : `<p>No students available.</p>`;
 
         const moduleContent = modules.length > 0 ? `
-          <div class="cd-section-title">Modules <a href="#">View All</a></div>
+          <div class="cd-section-title">Modules</div>
           <div class="cd-modulelist">
             ${modules.map(module => `
               <div class="module-card" module-id="${module.langID}" onclick="showViewModule(this, ['classroomOverlay', 'viewClassroomDetailsOverlay'])">
@@ -3146,6 +3146,8 @@ Module Name, Module Description{
         <button class="cd-edit-btn" onClick="cancelPartnerEdit()">Cancel</button>
         </div>
       `;
+
+        
   }
 
   function cancelPartnerEdit() {
