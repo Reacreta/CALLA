@@ -1061,9 +1061,10 @@
       display: block;
     }
     
-     /* Enhanced Word Search Game Styles */
+     /* Word Search Game Styles */
         #wordSearchGameOverlay {
           display: none;
+          padding: 20px;
         }
         #wordSearchGame {
             display: flex;
@@ -1356,7 +1357,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        /* Mobile Responsiveness */
+        /*Responsiveness */
         @media (max-width: 768px) {
             #wordSearchGame {
                 flex-direction: column;
@@ -1378,6 +1379,24 @@
             
             .grid {
                 justify-self: center;
+            }
+
+            .nav-group, .sidebar {
+              width: fit-content;
+            }
+            .nav-btn{
+              width: fit-content;
+              background-color: none;
+            }
+            .nav-btn div {
+              display: none;
+            }
+
+            .cd-main-grid {
+              overflow-y: auto;
+              grid-template-columns: 1fr;
+              scrollbar-width: thin; /* Firefox */
+              scrollbar-color: #a00 #f0f0f0; /* Firefox */
             }
         }
 
@@ -1406,7 +1425,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Enhanced completion notification styles */
+        /*Completion notification styles */
         #gameCompletionNotification {
             position: fixed;
             top: 50%;
@@ -1467,8 +1486,8 @@
   <div class="dashboard-container">
     <div class="sidebar">
       <div class="nav-group">
-        <button class="nav-btn" onclick="showOverlay('classroomOverlay')"><img src="images/Class_Icon.jpg" class="User-icon" alt="Classroom Icon"> Classrooms</button>
-        <button class="nav-btn" onclick="showOverlay('moduleOverlay')"><img src="images/Module_Icon.jpg" class="User-icon" alt="Module Icon"> Modules</button>
+        <button class="nav-btn" onclick="showOverlay('classroomOverlay')"><img src="images/Class_Icon.jpg" class="User-icon" alt="Classroom Icon"> <div>Classrooms</div></button>
+        <button class="nav-btn" onclick="showOverlay('moduleOverlay')"><img src="images/Module_Icon.jpg" class="User-icon" alt="Module Icon"><div>Modules</div></button>
       </div>
     </div>
   
