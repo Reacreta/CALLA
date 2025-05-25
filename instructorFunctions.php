@@ -115,12 +115,24 @@
                 $modules[] = $row;
             }
 
+            // Check Ownership
+            $sql = "SELECT * FROM instructor i 
+                    join classroom c on c.instID = i.instID 
+                    join users u on i.userID = u.userID 
+                    WHERE c.instID=? and i.userID=?;";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('ss', $classroomDetails['instID'], $_SESSION['userID']);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $checkOwner = ($result->num_rows > 0) ? 'true' : 'false';
+
             echo json_encode([
                 'success' => true,
                 'classroomDetails' => $classroomDetails,
                 'instructors' => $instructors,
                 'students' => $students,
-                'modules' => $modules
+                'modules' => $modules,
+                'checkOwner' => $checkOwner
             ]);
             exit;
 
@@ -160,6 +172,52 @@
             }
             exit;
         }
+
+        if ($action === 'leaveClass') {
+            $classID = trim($input['classID']);
+            $checkOwner = trim($input['checkOwner']);
+            $accountRole = $_SESSION['accountRole'];
+            $userID = $_SESSION['userID'];
+
+            if ($checkOwner === 'true') { // delete entire class if owner
+                $sql = "DELETE FROM classroom WHERE classroomID = ?";
+                $stmt = $conn->prepare($sql);
+                if ($stmt) {
+                    $stmt->bind_param("s", $classID);
+                    $stmt->execute();
+                    echo json_encode(['success' => true]);
+                } else {
+                    echo json_encode(['success' => false, 'error' => $conn->error]);
+                }
+                exit;
+            } else {
+                if ($accountRole === 'Instructor') {
+                    $sql = "DELETE ci FROM classinstructor ci
+                            JOIN instructor i ON ci.instID = i.instID
+                            JOIN users u ON i.userID = u.userID
+                            WHERE ci.classroomID = ? AND u.userID = ?";
+                } else if ($accountRole === 'Student') {
+                    $sql = "DELETE es FROM enrolledstudent es
+                            JOIN student s ON es.studentID = s.studentID
+                            JOIN users u ON s.userID = u.userID
+                            WHERE es.classroomID = ? AND u.userID = ?";
+                } else {
+                    echo json_encode(['success' => false, 'error' => 'Invalid account role.']);
+                    exit;
+                }
+
+                $stmt = $conn->prepare($sql);
+                if ($stmt) {
+                    $stmt->bind_param("ss", $classID, $userID);
+                    $stmt->execute();
+                    echo json_encode(['success' => true]);
+                } else {
+                    echo json_encode(['success' => false, 'error' => $conn->error]);
+                }
+                exit;
+            }
+        }
+
 
 
           if ($action === 'getModuleDetails') {
