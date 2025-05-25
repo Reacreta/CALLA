@@ -71,7 +71,7 @@
         echo "<script>console.log('Debug Objects: " . $output . "' );</script>";
     }
 
-    function redirect($url){
+    function redirect($url, $from = null){
         debug_console("Debugging to ".$url);
         if ($url == 'deactive'){
             echo "<div style='
@@ -120,7 +120,7 @@
                 z-index: 1000;
             '>Logged In Successfully, Welcome {$accountRole}.</div>";
                 }
-            else if ($url == 'index.php'){ // if registration
+            else if ($url == 'index.php' && $from == 'registration.php'){ // if registration
                 echo "<div style='
                 position: absolute;
                 display: flex;
@@ -143,7 +143,7 @@
             echo "<script type='text/javascript'>
                 setTimeout(function() {
                     window.location.href = '$url';
-                }, 3000);
+                }, 2000);
             </script>";
         }
     }

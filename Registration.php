@@ -134,7 +134,7 @@
             $stmt->bind_param('ss', $studentID, $userID);
             debug_console("insert: ".$stmt->execute());
             logAction($conn, $userID, 'Registered as '.$usertype);
-            redirect('index.php');
+            redirect('index.php', 'registration.php');
             break;
         }
       }
