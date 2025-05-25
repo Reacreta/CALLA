@@ -318,7 +318,7 @@
             'moduleType' => $moduleType
       ]);
       exit;
-  }
+    }
 
   if($action === 'deleteModule'){
     $data = $input['data'];
@@ -348,7 +348,7 @@
             echo json_encode(['success' => false, 'message' => 'SQL execution error: ' . $stmt->error]);
         }
     }
-  }
+    }
 
   if ($action === 'getLessonDetails') {
       $data = $input['data'];
