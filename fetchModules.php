@@ -7,7 +7,8 @@ $type = $_POST['type'] ?? 'All';
 if ($type === 'Partner') {
     $sql = "SELECT p.partnerName AS 'uploader' , lm.moduleName, lm.langID FROM partnermodule pm 
             JOIN partner p ON p.partnerID = pm.partnerID 
-            JOIN languagemodule lm on lm.langID = pm.langID;";
+            JOIN languagemodule lm on lm.langID = pm.langID
+            ORDER BY lm.moduleName ASC";
 
 } elseif ($type === 'Classroom') {
     $sql = " SELECT 
@@ -18,7 +19,8 @@ if ($type === 'Partner') {
             JOIN classinstructor ci ON cm.classInstID = ci.classInstID
             JOIN instructor i ON i.instID = ci.instID
             JOIN users u ON u.userID = i.userID
-            JOIN languagemodule lm ON lm.langID = cm.langID;";
+            JOIN languagemodule lm ON lm.langID = cm.langID
+            ORDER BY lm.moduleName ASC";
 } else {
     $sql = "
       SELECT 
@@ -39,7 +41,8 @@ if ($type === 'Partner') {
       JOIN classinstructor ci ON cm.classInstID = ci.classInstID
       JOIN instructor i ON i.instID = ci.instID
       JOIN users u ON u.userID = i.userID
-      JOIN languagemodule lm ON lm.langID = cm.langID;
+      JOIN languagemodule lm ON lm.langID = cm.langID
+      ORDER BY moduleName ASC
     ";
 }
 

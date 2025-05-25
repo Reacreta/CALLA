@@ -870,11 +870,13 @@ if(isset($_POST["createPartner"])) {
     align-items: center;
     gap: 20px;
     margin-bottom: 40px;
+    background: rgba(241, 241, 241, 0.8);
+    border-radius: 10px;
   }
 
   .cd-icon-wrapper {
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
     background: white;
     border-radius: 50%;
     display: flex;
@@ -1317,7 +1319,7 @@ if(isset($_POST["createPartner"])) {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     top: 10%;
     left: 14%;
-    height: fit-content;
+    height: 615px;
     width: 57%;
     background: rgba(241, 241, 241, 0.85);
     backdrop-filter: blur(5px);
@@ -1376,6 +1378,15 @@ if(isset($_POST["createPartner"])) {
     font-weight: bold;
     margin-bottom: 10px;
     color: #444;
+  }
+
+  #viewLessonWordsList .list-wrapper {
+    max-height: 350px;       /* Adjust height as needed */
+    overflow-y: auto;
+    padding-right: 5px;      /* Optional: space for scrollbar */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
   }
 
   .list-wrapper {
@@ -1480,16 +1491,18 @@ if(isset($_POST["createPartner"])) {
     position: absolute;
     border: 2px solid white;
     border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    top: 10%;
-    left: 30%;
-    height: fit-content;
-    width: fit-content;
-    background: rgba(241, 241, 241, 0.85);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    top: 40%;
+    left: 45%;
+    width: 600px;
+    height: 640px;
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(5px);
+    transform: translate(-50%, -50%);
     z-index: 20;
     padding: 20px;
-    overflow-y: auto;
+    overflow-y: auto; /* Enables scrolling inside if content exceeds height */
+    box-sizing: border-box; /* Ensures padding doesn't push size beyond 600px */
   }
 
   .create-overlay.show {
@@ -1499,9 +1512,8 @@ if(isset($_POST["createPartner"])) {
   .create-list {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 20px;
   }
-
 
   .create-info {
     display: flex;
@@ -1512,18 +1524,20 @@ if(isset($_POST["createPartner"])) {
   .create-info label {
     font-weight: bold;
     color: #333;
+    margin-top: 15px;
   }
 
   .create-info input,
   .create-info textarea {
-    width: 500px;
+    width: 100%; /* Use full available width inside the overlay */
+    max-width: 100%;
     padding: 15px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 16px;
+    box-sizing: border-box;
   }
 
-  /* Specific textarea styling */
   .create-info textarea {
     height: 150px;
     resize: none;
@@ -1533,22 +1547,23 @@ if(isset($_POST["createPartner"])) {
     display: flex;
     gap: 20px;
     justify-content: center;
+    flex-wrap: wrap; /* Allows buttons to wrap if needed */
   }
 
   .create-SC .creates {
-    background: #e6e6e6;
+    background: #7b0000;
     border: none;
-    color: #7b0000;
+    color: white;
     font-weight: bold;
     cursor: pointer;
     margin-top: 20px;
     padding: 10px 50px;
     border-radius: 6px;
-    font-size: 20px;
+    font-size: 16px;
   }
 
   .create-SC .creates:hover {
-    background-color: #fff;
+    opacity: 0.9;
   }
 
   #viewPartnerOverlay {
@@ -1556,12 +1571,13 @@ if(isset($_POST["createPartner"])) {
     position: absolute;
     border: 2px solid white;
     border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    top: 10%;
-    left: 20%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    top: 40%;
+    left: 45%;
     height: fit-content;
     width: 50%;
-    background: rgba(241, 241, 241, 0.85);
+    background: rgba(255, 255, 255, 0.95);
+    transform: translate(-50%, -50%);
     backdrop-filter: blur(5px);
     z-index: 20;
     padding: 20px;
@@ -1591,7 +1607,7 @@ if(isset($_POST["createPartner"])) {
   }
 
   #viewPartnerHeader .close-btn:hover {
-    color: #000; /* Darker color on hover */
+    opacity: 0.9;
   }
 
   #viewPartnerMain {
@@ -1643,6 +1659,7 @@ if(isset($_POST["createPartner"])) {
     display: flex;
     flex-direction: column;
     gap: 5px;
+    margin-left: 15px;
   }
 
   #viewPartnerContactTitle,
@@ -1665,9 +1682,9 @@ if(isset($_POST["createPartner"])) {
   }
 
   #viewPartnerSC .create-mod-btn {
-    background: #e6e6e6; /* Light gray background */
+    background: #8b0000; /* Light gray background */
     border: none;
-    color: #7b0000; /* Dark red text */
+    color: white; /* Dark red text */
     font-weight: bold;
     cursor: pointer;
     padding: 10px 20px;
@@ -1676,8 +1693,7 @@ if(isset($_POST["createPartner"])) {
   }
 
   #viewPartnerSC .create-mod-btn:hover {
-    background: #fff; /* White background on hover */
-    color: #5a0000; /* Darker red text on hover */
+    opacity: 0.9;
   }
         
   .user-overlay.show, .create-overlay.show, #userChecklogsOverlay .show, #viewClassroomDetailsOverlay.show, #viewModuleOverlay.show, #viewLessonOverlay.show, #viewPartnerOverlay.show {
@@ -1998,7 +2014,7 @@ if(isset($_POST["createPartner"])) {
           <div class="right-buttons">
             <div class="search-container">
               <button onclick="showOverlay('createModuleOverlay','moduleOverlay')" class="SearchButton">New Partner Module</button>
-              <input type="text" placeholder="Search..." class="search-input">
+              <input type="text" placeholder="Search..." class="search-input" oninput="searchModules(this.value)">
               <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
             </div>
           </div>
@@ -2096,7 +2112,7 @@ Module Name, Module Description{
         </div>
       </div>
         
-        <!-- Partners Overlay Main -->
+      <!-- Partners Overlay Main -->
       <div id="partnersOverlay" class="user-overlay">
         <button class="close-btn" onclick="hideOverlay('partnersOverlay')">x</button>
         <h2 style="color: #7b0000; margin-bottom: 20px;">Partners</h2>
@@ -2115,7 +2131,7 @@ Module Name, Module Description{
         <div class="list-wrapper">
           <div class="dynamic-list">
           <?php
-              $sql = "SELECT * FROM partner";
+              $sql = "SELECT * FROM partner ORDER BY partnerName ASC";
               $result = $conn->query($sql);
 
               while ($row = $result->fetch_assoc()) {
@@ -2340,6 +2356,19 @@ Module Name, Module Description{
       const creator = card.querySelector('.classroom-creator').textContent.toLowerCase();
 
       const matches = className.includes(searchValue) || creator.includes(searchValue);
+      card.style.display = matches ? 'flex' : 'none';
+    });
+  }
+
+  function searchModules(query) {
+    const moduleCards = document.querySelectorAll('#moduleContainer .module-card');
+    const searchValue = query.toLowerCase();
+
+    moduleCards.forEach(card => {
+      const title = card.querySelector('.module-title').textContent.toLowerCase();
+      const creator = card.querySelector('.module-creator').textContent.toLowerCase();
+
+      const matches = title.includes(searchValue) || creator.includes(searchValue);
       card.style.display = matches ? 'flex' : 'none';
     });
   }
@@ -2762,86 +2791,6 @@ Module Name, Module Description{
       });
   }
 
-  // Show View Module
-  var selectedModuleID = "";
-
-  function showViewModule(element) {
-  console.log("View Module");
-  showOverlay('viewModuleOverlay',['moduleOverlay']);
-
-  const moduleCard = element.closest('.module-card');
-  const moduleID = moduleCard.getAttribute('module-id');
-
-  selectedModuleID = moduleID;
-  console.log("Module ID: " + moduleID);
-
-  if (!moduleID) {
-    console.error("Error: Module ID not found.");
-    return;
-  }
-
-  console.log('Sending Fetch Request to instructor.php');
-  fetch('adminFunctions.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'getModuleDetails',
-      data: { moduleID: moduleID }
-    })
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return response.json(); 
-  })
-  .then(data => {
-
-    const { moduleName, moduleDesc, className, lessons: lessonArray } = data;
-
-    const htmlContent = `
-      <div id="viewModuleInfo">
-        <div id="viewModuleTitle">
-          <img src="images/Module_Icon.jpg" alt="Module Icon" class="view-module-icon">
-          <div id="viewModuleInfoText">
-            <div id="viewModuleTitle">${moduleName}</div>
-            <div id="viewModuleClass">${className}</div>
-          </div>
-        </div>
-
-        <div id="viewModuleDesc">
-          <div id="viewModuleDescText">${moduleDesc}</div>
-        </div>
-
-        <div id="lessonList">
-          <div id="lessonListTitle">Lessons</div>
-          <div class="list-wrapper">
-            <div class="dynamic-list">
-              ${lessonArray.map(lesson => `
-                <div class="module-card" lesson-id="${lesson.lessID}">
-                  <img src="images/Module_Icon.jpg" alt="Module Icon" class="module-icon">
-                  <div class="module-info">
-                    <div class="module-title">${lesson.lessonName}</div>
-                    <div class="module-creator">In ${moduleName}</div>
-                  </div>
-                  <button class="view-lesson" onclick="showViewLesson(this)">
-                    <img src="images/Search_Icon.jpg" alt="View Lesson" class="search-image-icon">
-                  </button>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    document.getElementById('viewModuleMain').innerHTML = htmlContent;
-  })
-  .catch(error => {
-    console.error("Fetch error:", error);
-    document.getElementById('viewModuleMain').innerHTML = `<div class="error">Failed to load module details.</div>`;
-  });
-  }
 
   function deleteModule(element) {
   console.log("Delete Module");
