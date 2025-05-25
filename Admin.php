@@ -514,6 +514,7 @@ if(isset($_POST["createPartner"])) {
     transform: translate(-50%, -50%);
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    height: 500px;
   }
 
   .close-btn {
