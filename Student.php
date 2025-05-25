@@ -9,17 +9,7 @@
   ob_start();
   session_start();
   sessionCheck();
-
-  // fetch instructor Id on load
-  $creatorID = $_SESSION['userID'];
-  $sql = "SELECT studentID FROM student WHERE userID = ?";
-  $stmt = $conn->prepare($sql);
-  $stmt->bind_param('s',$creatorID);
-  $stmt->execute();
-  $res = $stmt->get_result();
-  $row = $res->fetch_assoc();
-  $_SESSION['studentID'] = $row['studentID'];
-
+  
 ?>
 
 <!DOCTYPE html>
@@ -229,10 +219,6 @@
       padding: 20px;
       overflow-y: auto;
     }
-    
-    .module-overlay.show, .create-overlay.show, .join-overlay.show {
-      display: block;
-    }
 
     .close-btn {
       float: right;
@@ -272,6 +258,14 @@
     flex-direction: row;
     gap: 10px;
     margin-left: auto; 
+    }
+
+    #tabHeader{
+      display: flex;
+      font-size: 20px;
+      font-weight: bold;
+      color: #7b0000;
+      align-items: center;
     }
 
     .tab {
@@ -362,6 +356,65 @@
       cursor: pointer;
     }
 
+    /* CREATE CLASS */
+
+    .create-overlay { 
+      display: none;
+      position: absolute;
+      float: left;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+
+      background: rgba(241, 241, 241, 0.85);
+      backdrop-filter: blur(5px);
+      border: 2px solid white;
+      border-radius: 6px 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      
+      height: fit-content;
+      width: fit-content;
+      
+
+      z-index: 20;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .create-con form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .create-SC{
+      display: flex;
+      justify-content: right;
+      gap: 15px;
+    }
+
+    .create-SC .creates{
+      background: #e6e6e6;
+      border: none;
+      color: #7b0000;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 50px;
+      padding: 10px 50px;
+      border-radius: 6px 6px;
+      font-size: 20px;
+    }
+
+    .create-SC .creates:hover{
+      background-color: #fff;
+    }
+
+    #className {
+      width: 500px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
 
     /* JOIN CLASS */
 
@@ -372,10 +425,9 @@
       border-radius: 6px 6px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       top: 10%;
-      left: 30%;
+      left: 20%;
       height: fit-content;
-      max-height: 55%;
-      width: 35%;
+      width: 50%;
       background: rgba(241, 241, 241, 0.85);
       backdrop-filter: blur(5px);
       z-index: 20;
@@ -466,6 +518,465 @@
       font-size: 20px;
     }
 
+    /* Classroom Details Overlay */
+  #create-overlay, #viewClassroomDetailsOverlay {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: auto;
+    height: fit-content;
+    background: rgba(241, 241, 241, 0.95);
+    border: 2px solid white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  #viewClassroomDetailsOverlay {
+    width: 60%;
+    height: 80%;
+  }
+
+  /* Content Wrapper */
+  .cd-content-wrapper {
+    height: 100%;
+    padding: 20px;
+  }
+
+  /* Header Section */
+  #cd-header-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 40px;
+    height: auto;
+  }
+
+  .cd-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .cd-class-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  #cdClassName{
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+  }
+  #cdCreator{
+    font-size: 16px;
+    color: #666;
+  }
+
+  #cd-course-title {
+    color: #333;
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  #cd-creator-name {
+    color: #666;
+    font-size: 16px;
+  }
+
+  /* Main Grid */
+  .cd-main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    height: 95%;
+  }
+
+  /* Card Styles */
+  .cd-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .cd-section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  /* Metadata */
+  #cd-metadata {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+    padding: 15px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+  }
+
+  .cd-metadata-item {
+    color: #666;
+  }
+
+  .cd-label {
+    font-weight: 500;
+    margin-right: 5px;
+  }
+
+  /* Description */
+  #cd-description-container {
+    background: #f8f8f8;
+    border-radius: 6px;
+  }
+
+  #cd-description-text {
+    color: #555;
+    line-height: 1.6;
+  }
+
+  /* Student and Module Cards */
+  .cd-student-card, .cd-module-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    border-radius: 6px;
+    background: #f8f8f8;
+    margin-bottom: 10px;
+  }
+
+  .cd-right-column{
+    max-height: 720px;
+    overflow-y: scroll;
+  }
+
+  .cd-list-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .cd-student-info h3, .cd-module-info h3 {
+    font-size: 16px;
+    color: #333;
+  }
+
+  .cd-student-info p, .cd-module-info p {
+    font-size: 14px;
+    color: #666;
+  }
+
+  /* Footer Actions */
+  .cd-actions {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .cd-actions-right {
+    display: flex;
+    gap: 10px;
+  }
+
+  .cd-btn {
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .cd-btn-logs, .cd-btn-delete {
+    background: #8b0000;
+    color: white;
+  }
+
+  .cd-btn-close {
+    background: #ccc;
+    color: #333;
+  }
+
+  /* Create Module Overlay */
+  .create-module-overlay{
+    display: none;
+    position: absolute;
+    border: 2px solid white;
+    border-radius: 6px 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    top: 10%;
+    left: 20%;
+    height: fit-content;
+    width: 50%;
+    background: rgba(241, 241, 241, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 20;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  #cdDesc.cd-card{
+    height: 70%;
+  }
+
+  #cd-description-container{
+    height: 85%;
+  }
+
+  #cd-description-text{
+    height: 90%;
+    overflow-y: auto;
+  }
+
+  #template{
+    border-radius: 15px;
+    background-color: lightgray;
+    padding: 15px;
+  }
+
+  .create-module-SC, .create-module-con, .view-module-SC{
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    justify-content: right;
+  }
+
+  #classroomIDField{
+    height: auto;
+    width: 100%;
+    padding: 10px;
+
+    border: lightgray 1px solid;
+    border-radius: 10px;
+  }
+
+  #files{
+    height: auto;
+    width: 100%;
+    padding: 10px;
+
+    border: lightgray 1px solid;
+    border-radius: 10px;
+  }
+  
+  .create-mod-btn{
+    background: #e6e6e6;
+    border: none;
+    color: #7b0000;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 10px 10px;
+    border-radius: 6px 6px;
+    font-size: 15px;
+  }
+
+  #viewModule{
+    background: #e6e6e6;
+    border: none;
+    color: #7b0000;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 100%;
+    font-size: 15px;
+    height: auto;
+    transition: transform 0.2s;
+  }
+
+    /* View Module */
+    #viewModuleOverlay{
+      display: none;
+      position: absolute;
+      border: 2px solid white;
+      border-radius: 6px 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      top: 10%;
+      left: 20%;
+      height: fit-content;
+      width: 50%;
+      background: rgba(241, 241, 241, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 20;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
+    #viewModuleInfo{
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    #viewModuleTitle{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      font-size: 25px;
+      font-weight: bold;
+      color: black;
+    }
+    #viewModuleInfoText{
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #viewModuleTitle img{
+      width: 100px;
+      height: 100px;
+    }
+
+    #viewModuleDesc{
+      background-color: gainsboro;
+      border-radius: 15px;
+      padding: 15px;
+      font-size: 13px;
+      color: #444;
+    }
+    
+    #viewModuleClass{
+      font-size: 15px;
+      color: #444;
+    }
+
+    #lessonList .list-wrapper{
+      height: 260px;
+    }
+
+    #lessonListTitle{
+      font-size: 20px;
+      font-weight: bold;
+      color: #7b0000;
+      margin-bottom: 10px;
+    }
+
+    /* View Lessons */
+
+    #viewLessonOverlay {
+      display: none;
+      position: absolute;
+      border: 2px solid white;
+      border-radius: 6px 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      top: 10%;
+      left: 20%;
+      height: fit-content;
+      width: 50%;
+      background: rgba(241, 241, 241, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 20;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    #viewLessonTitle {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    #viewLessonTitle img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    #viewLessonName {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .view-lesson{
+      background: none;
+      border: none;
+    }
+   
+    #viewLessonDesc {
+      margin-bottom: 20px;
+      height: auto;
+    }
+
+    #viewLessonDescText {
+      font-size: 1rem;
+      color: #555;
+      line-height: 1.5;
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    /* Vocabulary section styling */
+    #viewLessonWords {
+      margin-top: 20px;
+    }
+
+    #viewLessonWordsTitle {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #444;
+    }
+
+    .list-wrapper {
+      overflow-x: auto; 
+    }
+
+    .dynamic-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .dynamic-table th, .dynamic-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .dynamic-table th {
+      background-color: #f4f4f4;
+      font-weight: bold;
+    }
+
+    .dynamic-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .dynamic-table tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    /* Close button styling */
+    #viewLessonOverlay .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #555;
+      cursor: pointer;
+    }
+
+    #viewLessonOverlay .close-btn:hover {
+      color: #000;
+    }
+
     /* SEARCH INPUTS */
     .search-container {
       position: relative;
@@ -485,7 +996,6 @@
 
     .SearchButton {
       background-color: #7b0000;
-      margin-right: 15px;
       color: white;
       border: none;
       border-radius: 20px;
@@ -499,7 +1009,7 @@
     }
 
     textarea {
-      width: 625px;
+      width: 600px;
       height: 200px;
       padding: 15px;
       resize: none;
@@ -545,7 +1055,9 @@
       gap: 15px;
     }
 
-
+    .show, #viewModuleOverlay.show, #viewLessonOverlay.show, #joinOverlay.show, #viewClassroomDetailsOverlay.show, #create-module-overlay.show {
+      display: block;
+    }
     
   </style>
 </head>
@@ -584,7 +1096,7 @@
           <div class="left-buttons">
             <button class="tab active" onclick="setClassFilter('all')">All</button>
             <button class="tab" onclick="setClassFilter('joinable')">Joinable</button>
-            <button class="tab" onclick="setClassFilter('owned')">Owned</button>
+            <button class="tab" onclick="setClassFilter('enrolled')">Enrolled</button>
           </div>
 
           <div class="right-buttons">
@@ -593,63 +1105,152 @@
               <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
             </div>
           </div>
+
         </div>
         
         <div class="list-wrapper">
           <div class="dynamic-list">
-            <?php
-              $studentID = $_SESSION['studentID'];
-              $sql = "SELECT c.*, u.username, 
-                      CASE WHEN es.studentID IS NOT NULL THEN 'owned' ELSE 'joinable' END as class_status
-                      FROM classroom c
-                      JOIN instructor i ON c.instID = i.instID
-                      JOIN users u ON i.userID = u.userID
-                      LEFT JOIN enrolledstudent es ON es.classroomID = c.classroomID AND es.studentID = ?
-                      ORDER BY class_status, c.className";
-              $stmt = $conn->prepare($sql);
-              $stmt->bind_param('s', $studentID);
-              $stmt->execute();
-              $result = $stmt->get_result();
+           <?php
+            // get table of all classrooms and their creator
+            $sql = "SELECT * 
+                    FROM classroom 
+                    JOIN instructor ON classroom.instID = instructor.instID 
+                    JOIN users ON instructor.userID = users.userID;";
+            $result = $conn->query($sql);
 
-              while ($row = $result->fetch_assoc()) {
+            while ($row = $result->fetch_assoc()) {
+                $studentID = $_SESSION['roleID']; // Assuming this is the student's ID
                 $classroomID = htmlspecialchars($row['classroomID']);
                 $className = htmlspecialchars($row['className']);
                 $classDesc = htmlspecialchars($row['classDesc']);
                 $classCode = htmlspecialchars($row['classCode']);
                 $creatorName = htmlspecialchars($row['username']);
-                $classStatus = $row['class_status'];
+                
+                // Check if already enrolled
+                $sql = "SELECT * FROM enrolledstudent es 
+                        WHERE es.studentID = ? AND es.classroomID = ?;";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param('ss', $studentID, $classroomID);
+                $stmt->execute();
+                $res = $stmt->get_result();
+
+                // Not enrolled - show as joinable
+                if($res->num_rows == 0) { 
             ?>
-                <div class="classroom-card" 
-                     class-type="<?php echo $classStatus; ?>"
-                     classroom-id="<?php echo $classroomID; ?>"
-                     classroom-name="<?php echo $className; ?>"
-                     classroom-desc="<?php echo $classDesc; ?>"
-                     classroom-code="<?php echo $classCode; ?>"
-                     classroom-creator="<?php echo $creatorName; ?>">
-                    
-                    <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
-                    <div class="classroom-info">
-                      <div class="classroom-title"><?php echo $className; ?></div>
-                      <div class="classroom-creator"><?php echo $creatorName; ?></div>
-                    </div>
-                    
-                    <?php if ($classStatus === 'joinable'): ?>
-                        <Button id="joinClass" onclick="showJoinOverlay(this)">Join</Button>
-                    <?php else: ?>
-                        <div class="search-icon-link user-search" onclick="showClassDetails(this)">
-                          <img src="images/Search_Icon.jpg" alt="View Class" class="search-image-icon">
+                    <div class="classroom-card" class-type="joinable"
+                        classroom-id="<?php echo $classroomID?>"
+                        classroom-name="<?php echo $className?>"
+                        classroom-desc="<?php echo $classDesc?>"
+                        classroom-code="<?php echo $classCode?>"
+                        classroom-creator="<?php echo $creatorName?>">
+
+                        <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
+                        <div class="classroom-info">
+                            <div class="classroom-title"><?php echo $className; ?></div>
+                            <div class="classroom-creator"><?php echo $creatorName; ?></div>
                         </div>
-                    <?php endif; ?>
-                </div>
-            <?php } ?>
+                        <Button id="joinClass" onclick="showJoinOverlay(this)">Join</Button>
+                    </div>
+            <?php 
+                } else {
+                    // Already enrolled - show as enrolled
+            ?>
+                    <div class="classroom-card" class-type="enrolled"
+                        classroom-id="<?php echo $classroomID?>">
+                        <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
+                        <div class="classroom-info">
+                            <div class="classroom-title"><?php echo $className; ?></div>
+                            <div class="classroom-creator"><?php echo $creatorName; ?></div>
+                        </div>
+                        <div class="search-icon-link user-search" onclick="showClassDetails(this)">
+                            <img src="images/Search_Icon.jpg" alt="View User" class="search-image-icon">
+                        </div>
+                    </div>
+            <?php
+                }
+            }
+            ?>
           </div>
         </div>
-      </div>
 
-      <!-- Join Classroom Overlay -->
+      </div> <!-- End Classroom Overlay -->
+
+
+      <!-- View Classroom Overlay -->
+      <div id="viewClassroomDetailsOverlay" class="create-overlay">
+
+
+        <div class="cd-content-wrapper">
+
+          <!-- Main Content Grid -->
+          <div class="cd-main-grid">
+
+            <!-- Left Column -->
+            <div class="cd-left-column">
+              <div id="cd-header-section">
+
+                <div class="cd-icon-wrapper">
+                  <img src="images/Class_Icon.jpg" alt="Course Icon" class="cd-class-icon">
+                </div>
+                <div id="cd-title-wrapper"> 
+                    <!-- Inject Here -->
+                </div>
+              </div>
+
+              <div id="cdDesc" class="cd-card">
+                
+                <div id="cd-description-container">
+                  <!-- Inject Here -->
+                </div>
+
+                <div id="cd-metadata">
+                  <!-- Inject Here -->
+                </div>
+
+              </div>
+              
+            </div> <!-- End Left column-->
+
+            <!-- Right Column -->
+            <div class="cd-right-column">
+
+              <!-- Instructors Section -->
+              <div id="cdInstructorList" class="cd-card">
+                <!-- Inject Here -->
+                
+              </div>
+
+              <!-- Students Section -->
+              <div id="cdStudentList"  class="cd-card" >
+                <!-- Inject Here -->
+              </div>
+
+              <!-- Modules Section -->
+              <div id="cdModuleList" class="cd-card">
+                <!-- Inject Here -->
+              </div>
+
+            </div><!-- End Right column-->
+
+          </div><!-- End Content-grid  -->
+
+          <!-- Footer Actions -->
+          <div class="cd-actions">
+            <div class="cd-actions-right">
+              <button></button>
+              <button class="cd-btn cd-btn-close" onclick="hideSubOverlay('viewClassroomDetailsOverlay','classroomOverlay')">Close</button>
+            </div>
+          </div>
+
+        </div><!-- End Content-wrapper  -->
+
+      </div> <!-- End viewClassroomOverlay  -->
+
+      <!-- Join Classroom -->
       <div id="joinOverlay" class="join-overlay">
-        <button class="close-btn" onclick="hideClassSubOverlay('joinOverlay')">×</button>
-        <div class="join-con">
+      <button class="close-btn" onclick="hideSubOverlay('joinOverlay','classroomOverlay')">×</button>
+        <div class = join-con>
+
           <div id="joinHeader">
             <div id="joinClassInfo">
               <div id="joinTitle">
@@ -666,15 +1267,16 @@
           </div>
 
           <div id="joinCode">
-            <input type="text" id="classCode" name="classCode" placeholder="Enter Class Code" required>
+            <input type="text" id="classCode" name="classCode"placeholder="Code" required>
           </div>
 
-          <div class="join-SC">
-            <button type="button" onclick="joinClassroom()">Join</button>
-            <button type="button" onclick="hideClassSubOverlay('joinOverlay')">Cancel</button>
+          <div class = join-SC>
+            <button type="button" onclick= "joinClassroom();">Join</button>
+            <button type="button" onclick="hideSubOverlay('joinOverlay','classroomOverlay')">Cancel</button>
           </div>
+
         </div>
-      </div>
+      </div> <!-- End Join Classroom Overlay -->
 
       <!-- Modules Overlay -->
       <div id="moduleOverlay" class="module-overlay" overlay-type ="module">
@@ -684,7 +1286,6 @@
         <div class="tabs">
           <div id="tabHeader">Owned</div>
           <div class="right-buttons">
-            <button onclick="toggleModuleCreation()">New Module</button>
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
               <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
@@ -700,34 +1301,36 @@
                 SELECT 
                     lm.langID, 
                     lm.moduleName, 
-                    u.username, 
-                    'Classroom'
+                    u.username,
+                    c.className
                 FROM classmodule cm 
                 JOIN classinstructor ci ON cm.classInstID = ci.classInstID
                 JOIN instructor i ON i.instID = ci.instID
                 JOIN users u ON u.userID = i.userID
+                JOIN classroom c ON ci.classroomID = c.classroomID
                 JOIN languagemodule lm ON lm.langID = cm.langID
                 WHERE i.instID = ?;
                 ";
 
                 $stmt = $conn->prepare($sql); 
-                $stmt->bind_param('s', $_SESSION['instID']);
+                $stmt->bind_param('s', $_SESSION['roleID']);
                 $stmt->execute();
                  
-                debug_console("InstructorID: ".$_SESSION['instID']);
+                debug_console("InstructorID: ".$_SESSION['roleID']);
 
                 $result = $stmt->get_result();
                 while($row = $result->fetch_assoc()){
               ?>
-                  <div class="module-card">
+                  <div class="module-card" 
+                  module-id = "<?php echo htmlspecialchars($row['langID'])?>">
                     <img src="images/Module_Icon.jpg" alt="Module Icon" class="module-icon">
                     <div class="module-info">
                     <div class="module-title"><?= htmlspecialchars($row['moduleName']) ?></div>
-                    <div class="module-creator">By <?= htmlspecialchars($row['username']) ?></div>
+                    <div class="module-creator">In <?= htmlspecialchars($row['className']) ?></div>
                     </div>
-                    <button>
+                    <Button id="viewModule" onclick="showViewModule(this)">
                       <img src="images/Search_Icon.jpg" alt="View Module" class="search-image-icon">
-                    </button>
+                    </Button>
                 </div>    
               <?php
                 }
@@ -737,22 +1340,54 @@
 
       </div><!-- End Module Overlay-->
 
-      <!-- Module Creation -->
-      
+
+
+      <!-- View Module Overlay -->
+      <div id="viewModuleOverlay" class="view-module-overlay" overlay-type = "view-module-overlay">
+        <div id="viewModuleCon">
+          <div id="viewModuleHeader">
+            <button class="close-btn" onclick="hideSubOverlay('viewModuleOverlay','moduleOverlay')">×</button>
+            <h2 style="color: #7b0000; margin-bottom: 20px;">View Module</h2>
+          </div>
+          <div id="viewModuleMain">
+                  <!-- I Edit ni siya sa adtong scipt sa java script i love jollibee -->
+          </div>
+          <div id="viewModuleSC" class="view-module-SC">
+            <button type="button" class="create-mod-btn" onclick="deleteModule(this)">Delete</button>
+            <button type="button" class="create-mod-btn" onclick="hideSubOverlay('viewModuleOverlay','moduleOverlay')">Close</button>
+          </div>
+        </div>
+      </div><!-- End View Module Overlay -->
+
+      <!-- View Lesson Overlay -->
+      <div id="viewLessonOverlay" class="view-lesson-overlay" overlay-type="view-lesson-overlay">
+        <div id="viewLessonCon">
+
+          <div id="viewLessonHeader">
+            <button class="close-btn" onclick="hideSubOverlay('viewLessonOverlay', 'viewModuleOverlay')">×</button>
+            <h2 style="color: #7b0000; margin-bottom: 20px;">View Lesson</h2>
+          </div>
+
+          <div id="viewLessonMain">
+            <div id="viewLessonInfo">
+                  <!-- Inject SQL-->
+            </div>
+
+            <div id="viewLessonSC" class="view-lesson-SC">
+                <button type="button" class="create-mod-btn" onclick="hideSubOverlay('viewModuleOverlay','moduleOverlay')">Close</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
     </div><!-- End Main Content-->
   </div><!-- End dashboard-container-->
 
 
 
 <script>
-  // Toggle logout dropdown
-  function toggleLogoutDropdown() {
-    const dropdown = document.getElementById('logoutDropdown');
-    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-  }
-
-  // Close dropdown when clicking outside
-  document.addEventListener('click', function(e) {
+  document.addEventListener('click', function (e) {
     const profileContainer = document.querySelector('.profile-container');
     const dropdown = document.getElementById('logoutDropdown');
     if (!profileContainer.contains(e.target)) {
@@ -760,43 +1395,114 @@
     }
   });
 
-  // Show overlay function
-  function showOverlay(targetId, backgroundId = null) {
-    const overlays = ['classroomOverlay', 'moduleOverlay', 'joinOverlay'];
-    const bg = document.getElementById('backgroundContent');
+  function toggleLogoutDropdown() {
+    const dropdown = document.getElementById('logoutDropdown');
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+  }
+  
+  // Search Funcs
+  function toggleSearch(label) {
+    // get container and input field
+    const container = label.closest('.search-container');
+    const input = container.querySelector('.search-input');
+    // get overlay-type
+    const overlay = label.closest('[overlay-type]');
+    const overlayType = overlay ? overlay.getAttribute('overlay-type') : null;
+    // check bool for expanded
+    const isOpen = input.style.width === '200px';
 
-    overlays.forEach(id => {
-      const overlay = document.getElementById(id);
-      const shouldShow = (id === targetId || (backgroundId && id === backgroundId));
-      overlay.classList.toggle('show', shouldShow);
+    // flex function inherit
+    const functionMap = {
+      "classroom": searchClassroom,
+      "module": searchModule
+    };
+
+    const flexSearch = functionMap[overlayType];
+
+    if (isOpen) {
+      if (input.value.trim()) {
+        flexSearch(input.value);
+      } else {
+        closeInput(input);
+      }
+    } else {
+      openInput(input);
+
+      // Handle outside click
+      document.addEventListener('click', function handleOutsideClick(e) {
+        if (!container.contains(e.target)) {
+          closeInput(input);
+          document.removeEventListener('click', handleOutsideClick);
+        }
+      });
+
+      // Enter key handler
+      const handleKey = function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          flexSearch(input.value);
+          input.removeEventListener('keydown', handleKey);
+        }
+      };
+      input.addEventListener('keydown', handleKey);
+
+      // Real-time filtering
+      input.addEventListener('input', function () {
+        flexSearch(input.value);
+      });
+    }
+  }
+
+    // Funcs
+  function searchClassroom(query) {
+    const activeTabElement = document.querySelector('#classroomOverlay .tab.active');
+    const cards = document.querySelectorAll('.classroom-card');
+    const searchValue = query.toLowerCase();
+
+    // Normalize tab name
+    let activeTab = activeTabElement ? activeTabElement.textContent.trim().toLowerCase() : 'all';
+    if (activeTab.endsWith('s') && activeTab !== 'all') {
+      activeTab = activeTab.slice(0, -1); // remove trailing 's' for matching
+    }
+
+    cards.forEach(card => {
+      const className = card.querySelector('.classroom-title').textContent.toLowerCase();
+      const type = card.getAttribute('class-type').toLowerCase();
+
+      const matchesSearch = className.includes(searchValue);
+      const matchesTab = (activeTab === 'all') || (role === activeTab);
+
+      card.style.display = (matchesSearch && matchesTab) ? 'flex' : 'none';
     });
-
-    bg.style.display = 'none';
   }
 
-  // Hide overlay function
-  function hideOverlay(targetId) {
-    const target = document.getElementById(targetId);
-    target.classList.remove('show');
+  function searchModule(query){
+    const cards = document.querySelectorAll('.module-card');
+    const searchValue = query.toLowerCase();
 
-    const anyOpen = document.querySelectorAll('.show').length > 0;
-    if (!anyOpen) {
-      document.getElementById('backgroundContent').style.display = 'flex';
-    }
+    cards.forEach(card => {
+      const moduleName = card.querySelector('.module-title').textContent.toLowerCase();
+      const matchesSearch = moduleName.includes(searchValue);
+      card.style.display = (matchesSearch) ? 'flex' : 'none';
+    });
+  }
+  
+  // input funcs
+  function openInput(input) {
+    input.style.width = '200px';
+    input.style.padding = '10px';
+    input.style.border = '1px solid #ccc';
+    input.style.borderRadius = '20px';
+    input.focus();
   }
 
-  // Hide sub-overlay function
-  function hideClassSubOverlay(targetId) {
-    const target = document.getElementById(targetId);
-    target.classList.remove('show');
-
-    const anyOpen = document.querySelectorAll('.show').length > 0;
-    if (!anyOpen) {
-      document.getElementById('classroomOverlay').classList.add('show');
-    }
+  function closeInput(input) {
+    input.style.width = '0';
+    input.style.padding = '0';
+    input.style.border = 'none';
+    input.value = '';
   }
 
-  // Set class filter function
   function setClassFilter(typeFilter) {
     const cards = document.querySelectorAll('.classroom-card');
     const tabs = document.querySelectorAll('#classroomOverlay .tab');
@@ -804,7 +1510,12 @@
 
     // Update tab styling
     tabs.forEach(tab => {
-      tab.classList.toggle('active', tab.textContent.trim().toLowerCase() === typeFilter);
+      if (tab.textContent.trim() === typeFilter) {
+        tab.classList.add('active');
+        tab.focus(); // This will apply the focus styling
+      } else {
+        tab.classList.remove('active');
+      }
     });
 
     // Clear any active search
@@ -815,129 +1526,532 @@
       }
     }
 
-    // Filter cards
-    cards.forEach(card => {
-      const cardType = card.getAttribute('class-type');
-      const shouldShow = typeFilter === 'all' || 
-                       (typeFilter === 'joinable' && cardType === 'joinable') ||
-                       (typeFilter === 'owned' && cardType === 'owned');
-      
-      card.style.display = shouldShow ? 'flex' : 'none';
-    });
+    // Filter cards based on typeFilter
+    if (typeFilter === 'all') {
+      cards.forEach(card => card.style.display = 'flex');
+    } else {
+      cards.forEach(card => {
+        const cardType = card.getAttribute('class-type');
+        card.style.display = (cardType === typeFilter) ? 'flex' : 'none';
+      });
+    }
   }
 
-  // Show join overlay function
+  function showOverlay(targetId, backgroundIds = null) {
+    const overlays = [
+    'classroomOverlay', 'moduleOverlay', 'joinOverlay',
+    'viewModuleOverlay', 'viewLessonOverlay', 'viewClassroomDetailsOverlay'];
+    const bg = document.getElementById('backgroundContent');
+
+    overlays.forEach(id => {
+      const overlay = document.getElementById(id); // gets element with corresponding name from overlay array
+
+      //console.log("Overlay ID: " + id); // Debug line para maipakita kung unsa na overlay ang ginaspecify
+
+      const shouldShow = (id === targetId || (Array.isArray(backgroundIds) && backgroundIds.includes(id)) || (backgroundIds === id));
+
+      //console.log("Should Show: " + shouldShow); // Debug line to demo ang boolean for showing per overlay 
+      overlay.classList.toggle('show', shouldShow);
+    });
+
+    bg.style.display = 'none';
+  }
+
+  function hideOverlay(targetId) {
+    const target = document.getElementById(targetId); // gets element with corresponding name 
+    
+    target.classList.remove('show');
+
+    // If no overlays are visible, show the background
+    const anyOpen = document.querySelectorAll('.show').length > 0;
+
+    if (!anyOpen) {
+      document.getElementById('backgroundContent').style.display = 'flex';
+    }
+
+  }
+
+  function hideSubOverlay(targetId,parent) {
+
+    const target = document.getElementById(targetId);
+
+    target.classList.remove('show');
+
+    const anyOpen = document.querySelectorAll('.show').length > 0;
+
+    if (!anyOpen) {
+      document.getElementById(parent).classList.add('show');
+    }
+
+  }
+
+// Show Classroom Details
+var selectedClassroomID = '';
+function showClassDetails(element) {
+  console.log("Show Classroom Details");
+  showOverlay('viewClassroomDetailsOverlay', 'classroomOverlay');
+
+  const classCard = element.closest('.classroom-card');
+  const classID = classCard.getAttribute('classroom-id');
+  selectedClassroomID = classID;
+  if (!classID) {
+    console.error("Error: Classroom ID not found.");
+    return;
+  }
+
+  // Fetch classroom details
+  console.log('Sending Fetch Request to studentFunctions.php');
+  fetch('studentFunctions.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'getClassroomDetails',
+      data: { classID: classID }
+    })
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to load classroom data.');
+      }
+
+      const { classroomDetails, instructors, students, modules } = data;
+      console.log("Classroom Details:", classroomDetails);
+      console.log("Instructors:", instructors);
+      console.log("Students:", students);
+      console.log("Modules:", modules);
+
+      // Generate HTML content - Updated to match PHP response structure
+      const headerContent = `
+        <div id="cdClassName">${classroomDetails.className}</div>
+        <div id="cdCreator">${classroomDetails.creatorName}</div>
+      `;
+      const descriptionContent = `
+        <h2 class="cd-section-title">Description:</h2>
+        <div id="cd-description-text">${classroomDetails.classDesc}</div>
+      `;
+      const metadataContent = `
+        <div class="cd-metadata-item">
+          <span class="cd-label">Created On:</span>
+          <span id="cd-created-date">${classroomDetails.dateCreated}</span>
+        </div>
+        <div class="cd-metadata-item">
+          <span class="cd-label">Code:</span>
+          <span id="cd-access-code">${classroomDetails.classCode}</span>
+        </div>
+      `;
+      
+      // Updated instructor content to match PHP response fields
+      const instructorContent = instructors.length > 0 ? `
+        <h2 class="cd-section-title">Instructors</h2>
+        <div id="cd-instructor-list">
+          ${instructors.map(instructor => `
+            <div class="cd-student-card">
+              <img src="images/Human_Icon.jpg" alt="Instructor" class="cd-list-icon">
+              <div class="cd-student-info">
+                <h3>${instructor.firstName} ${instructor.lastName}</h3>
+                <p>@${instructor.username}</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : `<p>No instructors available.</p>`;
+
+      // Updated student content to match PHP response fields
+      const studentContent = students.length > 0 ? `
+        <h2 class="cd-section-title">Students</h2>
+        <div id="cd-students-list">
+          ${students.map(student => `
+            <div class="cd-student-card">
+              <img src="images/Human_Icon.jpg" alt="Student" class="cd-list-icon">
+              <div class="cd-student-info">
+                <h3>${student.firstName} ${student.lastName}</h3>
+                <p>@${student.username}</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : `<p>No students available.</p>`;
+
+      // Updated module content to match PHP response fields and include progress
+      const moduleContent = modules.length > 0 ? `
+        <h2 class="cd-section-title">Modules</h2>
+        <div id="cd-module-list">
+          ${modules.map(module => `
+            <div class="cd-module-card">
+              <img src="images/Module_Icon.jpg" alt="Module Icon" class="cd-list-icon">
+              <div class="cd-module-info">
+                <h3>${module.moduleName}</h3>
+                <p>${module.moduleDesc || 'No description available'}</p>
+                <small>Created: ${module.dateCreated}</small>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : `<p>No modules available.</p>`;
+
+      // Update DOM elements
+      document.getElementById('cd-title-wrapper').innerHTML = headerContent;
+      document.getElementById('cd-description-container').innerHTML = descriptionContent;
+      document.getElementById('cd-metadata').innerHTML = metadataContent;
+      document.getElementById('cdInstructorList').innerHTML = instructorContent;
+      document.getElementById('cdStudentList').innerHTML = studentContent;
+      document.getElementById('cdModuleList').innerHTML = moduleContent;
+    })
+    .catch(error => {
+      console.error("Fetch error:", error);
+      document.getElementById('cd-title-wrapper').innerHTML = `<div class="error">Failed to load classroom details. Please try again later.</div>`;
+    });
+}
+
+  // -- Class Functions --
+  function notifyAndRedirect(message, redirectUrl) { // for redirection, if any in the future (only used for reload for now)
+            const successDiv = document.createElement('div');
+            successDiv.textContent = message;
+
+            successDiv.style.position = 'absolute';
+            successDiv.style.display = 'flex';
+            successDiv.style.margin = '20px auto';
+            successDiv.style.padding = '15px 25px';
+            successDiv.style.backgroundColor = '#d4edda';
+            successDiv.style.color = '#155724';
+            successDiv.style.border = '1px solid #c3e6cb';
+            successDiv.style.borderRadius = '8px';
+            successDiv.style.width = 'fit-content';
+            successDiv.style.fontFamily = 'Inter, sans-serif';
+            successDiv.style.fontSize = '16px';
+            successDiv.style.textAlign = 'center';
+            successDiv.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.1)';
+            successDiv.style.zIndex = '1000';
+            successDiv.style.left = '0';
+            successDiv.style.right = '0';
+            successDiv.style.top = '30px';
+            successDiv.style.justifyContent = 'center';
+
+            document.body.appendChild(successDiv);
+
+            if (redirectUrl === 'reload')
+                setTimeout(() => {
+                successDiv.remove();
+                window.location.reload();
+            }, 3000);
+            else
+                setTimeout(() => {
+                    successDiv.remove();
+                    window.location.href = redirectUrl;
+                }, 3000);
+        }
+
+
+/*
+  // Leaving
+  function leaveClass() {
+      // check if owner
+      const isOwner = checkOwner === 'true';
+      let confirmed = false;
+
+      if (isOwner) {
+          confirmed = confirm("Are you sure you want to leave this classroom? As the owner, leaving will permanently delete the classroom and all its contents.");
+      } else {
+          confirmed = confirm("Are you sure you want to leave this classroom?");
+      }
+
+      if (!confirmed) return;
+
+      fetch('', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+              leaveClassroom: true,
+              classID: selectedClassroomID,
+              role: "<?= $accountRole ?>",
+              owner: isOwner
+          })
+      })
+      .then(res => res.json())
+      .then(data => {
+          if (data.success) {
+              const message = isOwner 
+                  ? 'Classroom deleted successfully.' 
+                  : 'You have left the Classroom Successfully.';
+              // Redirect based on role
+              if (accountRole === 'Instructor') {
+                  notifyAndRedirect(message, 'Instructor.php');
+              } else if (accountRole === 'Student') {
+                  notifyAndRedirect(message, 'Student.php');
+              } else {
+                  alert('No account role detected. Please login again.');
+              }
+          } else {
+              alert('Failed to leave the classroom.');
+              console.error(data.error);
+          }
+      })
+      .catch(err => {
+          console.error('Error leaving classroom:', err);
+          alert('An error occurred while trying to leave the classroom.');
+      });
+  }
+*/
+
+  var name = "";
+  var desc = "";
+  var code = "";
+  var creator = "";
+  var classid = "";
+  
+  // Show Join Overlay
   function showJoinOverlay(element) {
+  
+    // Find the parent classroom-card element
     const classCard = element.closest('.classroom-card');
     if (!classCard) {
       console.error("Error: Classroom card not found.");
       return;
     }
 
-    // Get data attributes
-    const classroomData = {
-      name: classCard.getAttribute('classroom-name'),
-      desc: classCard.getAttribute('classroom-desc'),
-      code: classCard.getAttribute('classroom-code'),
-      creator: classCard.getAttribute('classroom-creator'),
-      id: classCard.getAttribute('classroom-id')
-    };
 
-    // Validate required data
-    if (!classroomData.id || !classroomData.code) {
-      console.error("Missing required classroom data");
-      alert("Error: Missing classroom information");
-      return;
-    }
+    // Get data attributes directly
+    name = classCard.getAttribute('classroom-name');
+    desc = classCard.getAttribute('classroom-desc');
+    code = classCard.getAttribute('classroom-code');
+    creator = classCard.getAttribute('classroom-creator');
+    classid = classCard.getAttribute('classroom-id');
 
-    // Update overlay fields
-    document.getElementById('joinName').textContent = classroomData.name || 'No name provided';
-    document.getElementById('joinDesc').textContent = classroomData.desc || 'No description provided';
-    document.getElementById('joinCreator').textContent = `Created by: ${classroomData.creator || 'Unknown'}`;
     
-    // Store data in global variable
-    window.currentJoinClassroom = {
-      id: classroomData.id,
-      code: classroomData.code
-    };
+    // Update overlay fields
+    document.getElementById('joinName').textContent = name;
+    document.getElementById('joinDesc').textContent = desc;
+    document.getElementById('joinCreator').textContent = creator;
 
     // Show the overlay
-    document.getElementById('joinOverlay').classList.add('show');
-    document.getElementById('classCode').value = '';
-    document.getElementById('classCode').focus();
+    showOverlay('joinOverlay', 'classroomOverlay');
   }
 
-  // Join classroom function
   function joinClassroom() {
-    if (!window.currentJoinClassroom) {
-      console.error("No classroom data available");
-      alert("Error: Classroom data missing");
-      return;
-    }
+    console.log("Join Classroom");
 
-    const inputCode = document.getElementById('classCode').value.trim();
-    const expectedCode = window.currentJoinClassroom.code;
-    const classId = window.currentJoinClassroom.id;
+    // Get the value of the input field #classCode
+    const inputCode = document.getElementById('classCode').value;
+    console.log(inputCode +" = "+code);
 
-    if (inputCode !== expectedCode) {
+    console.log(inputCode === code);
+    // Compare the input value with the variable `code`
+    if (inputCode !== code) {
       alert('The class code you entered is incorrect.');
-      return;
+      return; // Stop execution if the codes don't match
     }
 
-    // Prepare the data to send
     const data = {
-      classid: classId
+      name: name,
+      desc: desc,
+      code: code,
+      creator: creator,
+      classid: classid
     };
+
+    console.log(data);
 
     fetch('studentFunctions.php', {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         action: 'joinClassroom',
         data: data
       })
     })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json(); // Parse JSON response
+      })
+      .then(result => {
+        if (result.success) {
+          notifyAndRedirect('Classroom joined successfully!', 'reload');
+        } else {
+          alert('Failed to join classroom: ' + result.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred: ' + error.message);
+      });
+  }
+
+ // Show View Module
+  var selectedModuleID = "";
+
+  function showViewModule(element) {
+    console.log("View Module");
+    showOverlay('viewModuleOverlay', ['moduleOverlay']);
+
+    const moduleCard = element.closest('.module-card');
+    const moduleID = moduleCard.getAttribute('module-id');
+
+    selectedModuleID = moduleID;
+    console.log("Module ID: " + moduleID);
+
+    if (!moduleID) {
+      console.error("Error: Module ID not found.");
+      return;
+    }
+
+    console.log('Sending Fetch Request to student.php');
+    fetch('studentFunctions.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'getModuleDetails',
+        data: { moduleID: moduleID }
+      })
+    })
     .then(response => {
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error('Network response was not ok');
       }
-      return response.json();
+      return response.json(); 
     })
-    .then(result => {
-      if (result.success) {
-        alert('Classroom joined successfully!');
-        hideClassSubOverlay('joinOverlay');
-        location.reload(); // Refresh to show updated classroom list
-      } else {
-        alert('Failed to join classroom: ' + (result.message || 'Unknown error'));
-      }
+    .then(data => {
+
+      const { moduleName, moduleDesc, className, lessons: lessonArray } = data;
+
+      const htmlContent = `
+        <div id="viewModuleInfo">
+          <div id="viewModuleTitle">
+            <img src="images/Module_Icon.jpg" alt="Module Icon" class="view-module-icon">
+            <div id="viewModuleInfoText">
+              <div id="viewModuleTitle">${moduleName}</div>
+              <div id="viewModuleClass">${className}</div>
+            </div>
+          </div>
+
+          <div id="viewModuleDesc">
+            <div id="viewModuleDescText">${moduleDesc}</div>
+          </div>
+
+          <div id="lessonList">
+            <div id="lessonListTitle">Lessons</div>
+            <div class="list-wrapper">
+              <div class="dynamic-list">
+                ${lessonArray.map(lesson => `
+                  <div class="module-card" lesson-id="${lesson.lessID}">
+                    <img src="images/Module_Icon.jpg" alt="Module Icon" class="module-icon">
+                    <div class="module-info">
+                      <div class="module-title">${lesson.lessonName}</div>
+                      <div class="module-creator">In ${moduleName}</div>
+                    </div>
+                    <button class="view-lesson" onclick="showViewLesson(this)">
+                      <img src="images/Search_Icon.jpg" alt="View Lesson" class="search-image-icon">
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('viewModuleMain').innerHTML = htmlContent;
     })
     .catch(error => {
-      console.error('Error joining classroom:', error);
-      alert('An error occurred while joining the classroom. Please try again.');
+      console.error("Fetch error:", error);
+      document.getElementById('viewModuleMain').innerHTML = `<div class="error">Failed to load module details.</div>`;
     });
   }
 
-  // Show class details function
-  function showClassDetails(element) {
-    const classCard = element.closest('.classroom-card');
-    if (!classCard) {
-      console.error("Error: Classroom card not found.");
-      return;
-    }
+  
+  // Show View Lesson
+  function showViewLesson(element) {
+  console.log("View Lesson");
+  showOverlay('viewLessonOverlay', ['viewModuleOverlay','moduleOverlay']);
 
-    const classid = classCard.getAttribute('classroom-id');
-    if (!classid) {
-      console.error("Error: Classroom ID not found.");
-      return;
-    }
+  // Get the lesson ID from the clicked element
+  const lessonCard = element.closest('.module-card');
+  const lessonID = lessonCard.getAttribute('lesson-id');
 
-    window.location.href = `classroomDetails.php?classid=${encodeURIComponent(classid)}`;
+  console.log("Lesson ID: " + lessonID);
+
+  if (!lessonID) {
+    console.error("Error: Lesson ID not found.");
+    return;
   }
 
-  // Search functionality (keep your existing search functions)
+  // Fetch lesson details from the server
+  fetch('studentFunctions.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'getLessonDetails',
+      data: { lessonID: lessonID }
+    })
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json(); // Parse JSON response
+    })
+    .then(result => {
+      if (result.success) {
+        const lesson = result.data;
+
+        // Format the lesson details as HTML
+        const htmlContent = `
+          <div id="viewLessonTitle">
+                <img src="images/Module_Icon.jpg" alt="">
+                <div id="viewLessonName">${lesson.lessonName}</div>
+              </div>
+
+              <div id="viewLessonDesc">
+                <div id="viewLessonDescText">${lesson.lessonDesc}</div>
+              </div>
+
+              <div id="viewLessonWords">
+                <div id="viewLessonWordsTitle">Vocabulary</div>
+                <div id="viewLessonWordsList">
+                  <div class="list-wrapper">
+                    <table class="dynamic-table">
+                      <thead>
+                        <tr>
+                          <th>Word</th>
+                          <th>Meaning</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${lesson.vocabulary.map(word => `
+                          <tr>
+                            <td>${word.word}</td>
+                            <td>${word.meaning}</td>
+                          </tr>
+                        `).join('')}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+        `;
+
+        // Inject the HTML into the overlay
+        document.getElementById('viewLessonMain').innerHTML = htmlContent;
+      } else {
+        document.getElementById('viewLessonMain').innerHTML = `
+          <div class="error">Failed to load lesson details: ${result.message}</div>
+        `;
+      }
+    })
+    .catch(error => {
+      console.error("Fetch error:", error);
+      document.getElementById('viewLessonMain').innerHTML = `
+        <div class="error">An error occurred while fetching lesson details.</div>
+      `;
+    });
+  }
 </script>
 
 </body>
