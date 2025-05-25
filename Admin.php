@@ -1016,7 +1016,7 @@ if(isset($_POST["createPartner"])) {
 
   .editable-textarea {
     width: 100%;
-    height: 85%;
+    height: 90%;
     font-size: 16px;
     padding: 10px;
     border-radius: 4px;
@@ -1565,12 +1565,23 @@ if(isset($_POST["createPartner"])) {
     left: 50%;
     transform: translate(-50%, -50%);
     height: fit-content;
-    width: 40%;
+    width: 600px;
+    height: 450px ;
     background: rgba(241, 241, 241, 0.85);
     backdrop-filter: blur(5px);
     z-index: 20;
     padding: 20px;
     overflow-y: auto;
+  }
+
+  .editable-textarea-partners {
+    width: 100%;
+    height: 20%;
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    resize: vertical;
   }
 
   #viewPartnerHeader {
@@ -2208,7 +2219,6 @@ Module Name, Module Description{
       <div id="viewPartnerOverlay" class="view-partner-overlay">
         <div id="viewPartnerCon">
           <div id="viewPartnerHeader">
-            <button class="close-btn" onclick="closeOverlay('viewPartnerOverlay')">×</button>
             <h2 style="color: #7b0000; margin-bottom: 20px;">View Partner</h2>
           </div>
           <div id="viewPartnerMain">
@@ -3121,7 +3131,7 @@ Module Name, Module Description{
 
       // Replace with editable fields
       nameEl.outerHTML = `<input id="editPartnerName" type="text" value="${originalPartnerName}" class="editable-input">`;
-      descEl.outerHTML = `<textarea id="editPartnerDesc" class="editable-textarea">${originalPartnerDesc}</textarea>`;
+      descEl.outerHTML = `<textarea id="editPartnerDesc" class="editable-textarea-partners">${originalPartnerDesc}</textarea>`;
       contactEl.outerHTML = `<input id="editPartnerContact" type="text" value="${originalPartnerContact}" class="editable-input">`;
       emailEl.outerHTML = `<input id="editPartnerEmail" type="text" value="${originalPartnerEmail}" class="editable-input">`;
 
