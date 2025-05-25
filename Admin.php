@@ -2466,7 +2466,20 @@ Module Name, Module Description{
 
             document.body.appendChild(successDiv);
 
-            if (redirectUrl === 'reload')
+            const fadeOutAndRemove = () => {
+              successDiv.style.opacity = '0'; // trigger fade-out
+              setTimeout(() => successDiv.remove(), 1000); // remove after fade
+            };
+
+            if (redirectUrl === 'error' || redirectUrl === '' || redirectUrl == null){
+                // Fade out and stay on the same page when error
+                successDiv.style.backgroundColor = '#edd4d4';
+                successDiv.style.color = '#571515';
+                setTimeout(() => {
+                fadeOutAndRemove();
+            }, 3000);
+            }
+            else if (redirectUrl === 'reload' )
                 setTimeout(() => {
                 successDiv.remove();
                 window.location.reload();
@@ -2602,7 +2615,7 @@ Module Name, Module Description{
                 if (result.success) {
                     notifyAndRedirect('User deleted succesfully!', 'reload');
                 } else {
-                    alert('Deletion failed.');
+                    notifyAndRedirect('User deletion Failed. An error has occurred.', 'error');
                 }
             })
             .catch(error => {
@@ -2639,7 +2652,7 @@ Module Name, Module Description{
                 if (result.success) {
                     notifyAndRedirect('User deactivated succesfully!', 'reload');
                 } else {
-                    alert('Deletion failed.');
+                    notifyAndRedirect('User deactivation Failed. An error has occurred.', 'error');
                 }
             })
             .catch(error => {
@@ -2674,7 +2687,7 @@ Module Name, Module Description{
                 if (result.success) {
                     notifyAndRedirect('User activated succesfully!', 'reload');
                 } else {
-                    alert('Deletion failed.');
+                    notifyAndRedirect('User activation failed. An error has occured.', 'error');
                 }
             })
             .catch(error => {
@@ -2962,7 +2975,7 @@ Module Name, Module Description{
     if (result.success) {
       notifyAndRedirect('Module has been deleted succesfully!', 'reload');
     } else {
-      alert('Failed to delete module: ' + result.message);
+      notifyAndRedirect('Failed to delete module. An error has occured.', 'error');
     }
   })
   .catch(error => {
@@ -3197,7 +3210,7 @@ Module Name, Module Description{
           if (result.success) {
               notifyAndRedirect('Partner updated sucessfully!', 'reload');
           } else {
-              alert('Update failed.');
+              notifyAndRedirect('Partner update failed. An error has occured', 'error');
           }
       })
       .catch(error => {
@@ -3230,7 +3243,7 @@ Module Name, Module Description{
               if (result.success) {
                   notifyAndRedirect('Partner deleted succesfully!', 'reload');
               } else {
-                  alert('Deletion failed.');
+                  notifyAndRedirect('Partner deletion failed. An error has occured.', 'error');
               }
           })
           .catch(error => {
@@ -3323,7 +3336,7 @@ Module Name, Module Description{
           if (result.success) {
               notifyAndRedirect('Changes updated sucessfully!', 'reload');
           } else {
-              alert('Update failed.');
+              notifyAndRedirect('Updated changes failed. An error has occured.', 'error');
           }
       })
       .catch(error => {
@@ -3356,7 +3369,7 @@ Module Name, Module Description{
               if (result.success) {
                   notifyAndRedirect('Classroom deleted succesfully!', 'reload');
               } else {
-                  alert('Deletion failed.');
+                  notifyAndRedirect('Classroom deletion failed. An error has occured.', 'error');
               }
           })
           .catch(error => {
