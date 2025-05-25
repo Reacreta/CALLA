@@ -1573,7 +1573,7 @@ if(isset($_POST["createPartner"])) {
     left: 50%;
     transform: translate(-50%, -50%);
     height: fit-content;
-    width: 40%;
+    width: 30%;
     background: rgba(241, 241, 241, 0.85);
     backdrop-filter: blur(5px);
     z-index: 20;
@@ -1659,7 +1659,8 @@ if(isset($_POST["createPartner"])) {
   }
   #viewPartnerContactInfo{
     display: flex;
-    justify-content: space-between;
+    justify-content: left;
+    gap: 15px;
   }
 
   #viewPartnerContactTitle,
