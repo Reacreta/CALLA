@@ -1069,6 +1069,7 @@ if(isset($_POST["createPartner"])) {
     border-radius: 6px;
     background-color: #f8f8f8;
     margin-bottom: 10px;
+    width: 100%;
   }
 
   .cd-modulelist .module-card {
