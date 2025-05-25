@@ -550,8 +550,8 @@
       font-size: 20px;
     }
 
-    /* Classroom Details Overlay */
-  #create-overlay,/* Classroom Details Overlay */
+
+ /* Classroom Details Overlay */
   #viewClassroomDetailsOverlay {
     display: none;
     position: fixed;
@@ -559,7 +559,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     width: 60%;
-    height: 80%;
+    height: 90%;
     background: rgba(255, 255, 255, 0.95);
     border: 2px solid white;
     border-radius: 10px;
@@ -829,8 +829,22 @@
   }
 
   .cd-btn-close {
-    background: #ccc;
-    color: #333;
+    background: #8b0000;
+    color: white;
+  }
+
+  .cd-btn-leave {
+    background: #8b0000;
+    color: white;
+  }
+
+  .cd-btn-partner {
+    background-color: #28a745; /* Green */
+    color: white;
+  }
+
+  .cd-btn-partner:hover {
+    background-color: #218838;
   }
 
   /* Create Module Overlay */
@@ -1865,13 +1879,13 @@ Module Name, Module Description{
         if (checkOwner == 'true')
           document.getElementById('cd-actions').outerHTML = `
             <div id="cd-actions" class="cd-actions-right">
-              <button class="cd-btn cd-btn-delete" onclick="deleteClass()">Delete</button>
               <button class="cd-btn cd-btn-leave" onclick="leaveClass()">Leave</button>
               <button class="cd-btn cd-btn-close" onclick="hideSubOverlay('viewClassroomDetailsOverlay','classroomOverlay')">Close</button>
             </div>`;
         else
           document.getElementById('cd-actions').outerHTML = `
             <div id="cd-actions" class="cd-actions-right">
+              <button class="cd-btn cd-btn-partner" onclick="addPartnerModule()">Add Partner Module</button>
               <button class="cd-btn cd-btn-leave" onclick="leaveClass()">Leave</button>
               <button class="cd-btn cd-btn-close" onclick="hideSubOverlay('viewClassroomDetailsOverlay','classroomOverlay')">Close</button>
             </div>`; 

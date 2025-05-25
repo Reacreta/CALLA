@@ -849,7 +849,7 @@ if(isset($_POST["createPartner"])) {
     left: 50%;
     transform: translate(-50%, -50%);
     width: 60%;
-    height: 80%;
+    height: 90%;
     background: rgba(255, 255, 255, 0.95);
     border: 2px solid white;
     border-radius: 10px;
@@ -1028,7 +1028,7 @@ if(isset($_POST["createPartner"])) {
   .cd-instructorlist,
   .cd-studentlist,
   .cd-modulelist {
-    height: 150px;
+    height: 142px;
     width: 100%;
     overflow-y: auto;
     padding-right: 8px;
