@@ -1240,7 +1240,22 @@ if(isset($_POST["createPartner"])) {
   }
 
   /* View Module Overlay */
-
+  #viewModuleOverlay {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50%;
+    max-height: 80vh;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    padding: 25px;
+    overflow-y: auto;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+  }
     
   #viewModuleInfo{
     display: flex;
