@@ -1128,8 +1128,8 @@ if(isset($_POST["createPartner"])) {
   .create-module-overlay {
     display: none;
     position: fixed;
-    top: 40%;
-    left: 45%;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
 
     border: 2px solid white;
@@ -1315,8 +1315,9 @@ if(isset($_POST["createPartner"])) {
     border: 2px solid white;
     border-radius: 6px 6px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    top: 10%;
-    left: 20%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     height: fit-content;
     width: 50%;
     background: rgba(241, 241, 241, 0.85);
@@ -1481,8 +1482,9 @@ if(isset($_POST["createPartner"])) {
     border: 2px solid white;
     border-radius: 6px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    top: 10%;
-    left: 30%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     height: fit-content;
     width: fit-content;
     background: rgba(241, 241, 241, 0.85);
@@ -1557,8 +1559,9 @@ if(isset($_POST["createPartner"])) {
     border: 2px solid white;
     border-radius: 6px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    top: 10%;
-    left: 20%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     height: fit-content;
     width: 50%;
     background: rgba(241, 241, 241, 0.85);
