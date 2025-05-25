@@ -1127,7 +1127,7 @@ if(isset($_POST["createPartner"])) {
 
   .create-module-overlay {
     display: none;
-    position: absolute;
+    position: fixed;
     top: 40%;
     left: 45%;
     transform: translate(-50%, -50%);
@@ -1311,7 +1311,7 @@ if(isset($_POST["createPartner"])) {
   /* View Lesson Overlay */
   #viewLessonOverlay {
     display: none;
-    position: absolute;
+    position: fixed;
     border: 2px solid white;
     border-radius: 6px 6px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
@@ -1477,7 +1477,7 @@ if(isset($_POST["createPartner"])) {
 
   .create-overlay { 
     display: none;
-    position: absolute;
+    position: fixed;
     border: 2px solid white;
     border-radius: 6px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
@@ -1553,7 +1553,7 @@ if(isset($_POST["createPartner"])) {
 
   #viewPartnerOverlay {
     display: none;
-    position: absolute;
+    position: fixed;
     border: 2px solid white;
     border-radius: 6px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
@@ -1684,6 +1684,26 @@ if(isset($_POST["createPartner"])) {
     display: block;
   }
 
+  @media (max-width: 1100px) {
+      .nav-group, .sidebar {
+        width: fit-content;
+      }
+      .nav-btn{
+        width: fit-content;
+        background-color: none;
+      }
+      .nav-btn div {
+        display: none;
+      }
+
+      .cd-main-grid {
+        overflow-y: auto;
+        grid-template-columns: 1fr;
+        scrollbar-width: thin; /* Firefox */
+        scrollbar-color: #a00 #f0f0f0; /* Firefox */
+      }
+    }
+
   </style>
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
@@ -1705,22 +1725,22 @@ if(isset($_POST["createPartner"])) {
       <div class="nav-group">
       <!-- Users -->
       <button class="nav-btn" onclick="showOverlay('userOverlay')">
-        <img src="images/Human_Icon.jpg" class="User-icon" alt="User Icon"> Users
+        <img src="images/Human_Icon.jpg" class="User-icon" alt="User Icon"> <div>Users</div>
       </button>
       
       <!-- Classrooms -->
       <button class="nav-btn" onclick="showOverlay('classroomOverlay')">
-        <img src="images/Class_Icon.jpg" class="User-icon" alt="Classroom Icon"> Classrooms
+        <img src="images/Class_Icon.jpg" class="User-icon" alt="Classroom Icon"><div>Classrooms</div> 
       </button>
       
       <!-- Modules -->
       <button class="nav-btn" onclick="showOverlay('moduleOverlay')">
-        <img src="images/Module_Icon.jpg" class="User-icon" alt="Module Icon"> Modules
+        <img src="images/Module_Icon.jpg" class="User-icon" alt="Module Icon"><div>Modules</div> 
       </button>
       
       <!-- Partners -->
       <button class="nav-btn" onclick="showOverlay('partnersOverlay')">
-        <img src="images/Partners_Icon.jpg" class="User-icon" alt="Partners Icon"> Partners
+        <img src="images/Partners_Icon.jpg" class="User-icon" alt="Partners Icon"><div>Partners</div> 
       </button>
       </div>
     </div>
@@ -2400,7 +2420,7 @@ Module Name, Module Description{
             const successDiv = document.createElement('div');
             successDiv.textContent = message;
 
-            successDiv.style.position = 'absolute';
+            successDiv.style.position = 'fixed';
             successDiv.style.display = 'flex';
             successDiv.style.margin = '20px auto';
             successDiv.style.padding = '15px 25px';
