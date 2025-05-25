@@ -1212,7 +1212,7 @@
     <div class="profile-container" onclick="toggleLogoutDropdown()">
       <div class="profile-pic" style="background-image: url('images/profile.jpg');"></div>
       <div class="logout-dropdown" id="logoutDropdown">
-        <a href="logout.php">Logout</a>
+        <a onclick="notifyAndRedirect('You have been successfully logged out.', 'logout.php')">Logout</a>
       </div>
     </div>
   </div>
