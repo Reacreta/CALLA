@@ -1028,7 +1028,7 @@ if(isset($_POST["createPartner"])) {
   .cd-instructorlist,
   .cd-studentlist,
   .cd-modulelist {
-    height: 142px;
+    height: 150px;
     width: 100%;
     overflow-y: auto;
     padding-right: 8px;

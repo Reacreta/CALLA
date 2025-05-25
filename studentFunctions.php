@@ -61,7 +61,6 @@
         if ($action === 'getClassroomDetails') {
             $data = $input['data'] ?? [];
             $classroomID = $data['classID'] ?? null;
-            // Use a default student ID for testing when session isn't available
             $studentID = $_SESSION['roleID'] ?? 'TEST_STUDENT_ID';
 
             if (!$classroomID) {
@@ -80,7 +79,7 @@
                 if (!$stmt) {
                     throw new Exception('Failed to prepare classroom query: ' . $conn->error);
                 }
-                
+
                 $stmt->bind_param('s', $classroomID);
                 $stmt->execute();
                 $result = $stmt->get_result();
@@ -90,7 +89,7 @@
                     sendJsonResponse(false, 'Classroom not found');
                 }
 
-                // Fetch all instructors (including additional instructors from classinstructor table)
+                // Fetch all instructors (including additional instructors)
                 $sql = "SELECT DISTINCT u.firstName, u.lastName, u.username, u.email
                         FROM classinstructor ci 
                         JOIN instructor i ON ci.instID = i.instID 
@@ -106,7 +105,7 @@
                 if (!$stmt) {
                     throw new Exception('Failed to prepare instructors query: ' . $conn->error);
                 }
-                
+
                 $stmt->bind_param('ss', $classroomID, $classroomID);
                 $stmt->execute();
                 $result = $stmt->get_result();
@@ -115,19 +114,19 @@
                     $instructors[] = $row;
                 }
 
-                // Fetch fellow students (excluding current student)
+                // ✅ Fixed: Fetch ALL students INCLUDING the current one
                 $sql = "SELECT u.firstName, u.lastName, u.username
                         FROM enrolledstudent es 
                         JOIN student s ON es.studentID = s.studentID 
                         JOIN users u ON s.userID = u.userID 
-                        WHERE es.classroomID = ? AND es.studentID != ?
+                        WHERE es.classroomID = ?
                         ORDER BY u.firstName, u.lastName";
                 $stmt = $conn->prepare($sql);
                 if (!$stmt) {
                     throw new Exception('Failed to prepare students query: ' . $conn->error);
                 }
-                
-                $stmt->bind_param('ss', $classroomID, $studentID);
+
+                $stmt->bind_param('s', $classroomID);
                 $stmt->execute();
                 $result = $stmt->get_result();
                 $students = [];
@@ -146,14 +145,13 @@
                 if (!$stmt) {
                     throw new Exception('Failed to prepare modules query: ' . $conn->error);
                 }
-                
+
                 $stmt->bind_param('s', $classroomID);
                 $stmt->execute();
                 $result = $stmt->get_result();
                 $modules = [];
                 while ($row = $result->fetch_assoc()) {
-                    // Set default progress to 0 (removed progress checking)
-                    $row['progress'] = 0;
+                    $row['progress'] = 0; // Default progress
                     $modules[] = $row;
                 }
 

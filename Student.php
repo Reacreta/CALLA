@@ -519,33 +519,29 @@
       font-size: 20px;
     }
 
-    /* Classroom Details Overlay */
-  #create-overlay, #viewClassroomDetailsOverlay {
+  /* Classroom Details Overlay */
+  #viewClassroomDetailsOverlay {
     display: none;
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: auto;
-    height: fit-content;
-    background: rgba(241, 241, 241, 0.95);
+    width: 60%;
+    height: 90%;
+    background: rgba(255, 255, 255, 0.95);
     border: 2px solid white;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    z-index: 100;
+    z-index: 10;
     padding: 20px;
-    overflow-y: auto;
   }
 
-  #viewClassroomDetailsOverlay {
-    width: 60%;
-    height: 80%;
-  }
-
-  /* Content Wrapper */
   .cd-content-wrapper {
     height: 100%;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Optional for spacing between sections */
   }
 
   /* Header Section */
@@ -554,7 +550,6 @@
     align-items: center;
     gap: 20px;
     margin-bottom: 40px;
-    height: auto;
   }
 
   .cd-icon-wrapper {
@@ -573,12 +568,13 @@
     height: 50px;
   }
 
-  #cdClassName{
+  #cdClassName {
     font-size: 20px;
     font-weight: 600;
     color: #333;
   }
-  #cdCreator{
+
+  #cdCreator {
     font-size: 16px;
     color: #666;
   }
@@ -594,12 +590,27 @@
     font-size: 16px;
   }
 
+
   /* Main Grid */
   .cd-main-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1.5fr 1fr;
     gap: 30px;
-    height: 95%;
+    height: 100%;
+  }
+
+  /* Left Column */
+  .cd-left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Right Column - remove global scroll */
+  .cd-right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
 
   /* Card Styles */
@@ -610,6 +621,7 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 
+  /* Section Title */
   .cd-section-title {
     font-size: 18px;
     font-weight: 600;
@@ -620,12 +632,13 @@
   #cd-metadata {
     display: flex;
     gap: 20px;
-    margin: 20px 0;
+    margin: 15px 0;
     padding: 15px 0;
     border-top: 1px solid #eee;
     border-bottom: 1px solid #eee;
   }
 
+  
   .cd-metadata-item {
     color: #666;
   }
@@ -639,27 +652,110 @@
   #cd-description-container {
     background: #f8f8f8;
     border-radius: 6px;
+    padding: 10px;
+    position: relative;
+  }
+
+  #editBtn {
+    position: absolute;
+    top: 12px;
+    right: 10px;
+  }
+
+  .cd-edit-btn {
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    height: 100%;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    width: 130px; /* Set your desired width */
+    text-align: center;
+  }
+
+  .cd-edit-btn:hover {
+    background-color: #0056b3;
   }
 
   #cd-description-text {
     color: #555;
     line-height: 1.6;
+    margin-bottom: 20px;
   }
 
-  /* Student and Module Cards */
+  /* Editable inputs */
+  .editable-input {
+    width: 100%;
+    font-size: 18px;
+    padding: 6px 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+
+  .editable-textarea {
+    width: 100%;
+    height: 85%;
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    resize: vertical;
+  }
+
+  .cd-instructorlist,
+  .cd-studentlist,
+  .cd-modulelist {
+    height: 150px;
+    width: 100%;
+    overflow-y: auto;
+    padding-right: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: #a00 #f0f0f0;
+  }
+
+  .cd-instructorlist::-webkit-scrollbar,
+  .cd-studentlist::-webkit-scrollbar,
+  .cd-modulelist::-webkit-scrollbar {
+    width: 6px;
+  }
+  .cd-instructorlist::-webkit-scrollbar-track,
+  .cd-studentlist::-webkit-scrollbar-track,
+  .cd-modulelist::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  .cd-instructorlist::-webkit-scrollbar-thumb,
+  .cd-studentlist::-webkit-scrollbar-thumb,
+  .cd-modulelist::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+  }
+  .cd-instructorlist::-webkit-scrollbar-thumb:hover,
+  .cd-studentlist::-webkit-scrollbar-thumb:hover,
+  .cd-modulelist::-webkit-scrollbar-thumb:hover {
+    background: #999;
+  }
+
+ /* List Item Styles */
   .cd-student-card, .cd-module-card {
     display: flex;
     align-items: center;
     gap: 15px;
     padding: 12px;
+    justify-content: left;
     border-radius: 6px;
-    background: #f8f8f8;
+    background-color: #f8f8f8;
     margin-bottom: 10px;
+    width: 100%;
   }
 
-  .cd-right-column{
-    max-height: 720px;
-    overflow-y: scroll;
+  .cd-modulelist .module-card {
+    margin: 0;
+    padding: 0;
+    background: none;
   }
 
   .cd-list-icon {
@@ -679,10 +775,11 @@
     color: #666;
   }
 
-  /* Footer Actions */
+  /* Footer */
   .cd-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
+    padding-top: 10px;
   }
 
   .cd-actions-right {
@@ -691,8 +788,9 @@
   }
 
   .cd-btn {
-    padding: 8px 20px;
+    padding: 10px 25px;
     border-radius: 4px;
+    border: none; 
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -704,8 +802,8 @@
   }
 
   .cd-btn-close {
-    background: #ccc;
-    color: #333;
+    background: #8b0000;
+    color: white;
   }
 
   /* Create Module Overlay */
@@ -1647,7 +1745,6 @@
           <!-- Footer Actions -->
           <div class="cd-actions">
             <div class="cd-actions-right">
-              <button></button>
               <button class="cd-btn cd-btn-leave" onclick="leaveClass()">Leave</button>
               <button class="cd-btn cd-btn-close" onclick="hideSubOverlay('viewClassroomDetailsOverlay','classroomOverlay')">Close</button>
             </div>
