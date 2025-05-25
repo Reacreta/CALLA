@@ -201,6 +201,42 @@
             exit;
         }
 
+    if ($action === 'updatePartner') {
+            $partnerName = trim($input['partnerName']);
+            $partnerDesc = trim($input['partnerDesc']);
+            $partnerContact = trim($input['partnerContact']);
+            $partnerEmail = trim($input['partnerEmail']);
+            $partnerID = trim($input['partnerID']);
+
+            $sql = "UPDATE partner SET partnerName = ?, partnerDesc = ?, email = ?, contact = ? WHERE partnerID = ?";
+            $stmt = $conn->prepare($sql);
+            if ($stmt) {
+                $stmt->bind_param("sssss", $partnerName, $partnerDesc, $partnerEmail, $partnerContact, $partnerID);
+                $stmt->execute();
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false, 'error' => $conn->error]);
+            }
+            exit;
+        }
+
+    if ($action === 'deletePartner') {
+            $partnerID = trim($input['partnerID']);
+
+            $sql = "DELETE FROM partner WHERE partnerID = ?";
+            $stmt = $conn->prepare($sql);
+
+            if ($stmt) {
+                $stmt->bind_param("s", $partnerID);
+                $stmt->execute();
+                echo json_encode(['success' => true]);
+
+            } else {
+                echo json_encode(['success' => false, 'error' => $conn->error]);
+            }
+            exit;
+        }
+
     // -- End of Functions
 
 

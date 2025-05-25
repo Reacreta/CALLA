@@ -1718,7 +1718,7 @@ if(isset($_POST["createPartner"])) {
     <div class="profile-container" onclick="toggleLogoutDropdown()">
       <div class="profile-pic" style="background-image: url('images/profile.jpg');"></div>
       <div class="logout-dropdown" id="logoutDropdown">
-        <a href="logout.php">Logout</a>
+        <a onclick="notifyAndRedirect('You have been successfully logged out.', 'logout.php')">Logout</a>
       </div>
     </div>
   </div>
@@ -2211,6 +2211,8 @@ Module Name, Module Description{
             </div>
 
             <div id="viewPartnerSC" class="view-partner-SC">
+                <div id="editPartnerBtn"><button class="cd-edit-btn" onClick="editPartner()">Edit Details</button></div>
+                <button class="cd-btn cd-btn-delete" onclick="deletePartner()">Delete</button>
                 <button type="button" class="create-mod-btn" onclick="closeOverlay('viewPartnerOverlay')">Close</button>
             </div>
           </div>
@@ -2929,7 +2931,7 @@ Module Name, Module Description{
   })
   .then(result => {
     if (result.success) {
-      location.reload(); // Optionally refresh the page
+      notifyAndRedirect('Module has been deleted succesfully!', 'reload');
     } else {
       alert('Failed to delete module: ' + result.message);
     }
@@ -3027,12 +3029,17 @@ Module Name, Module Description{
   });
   }
 
+  // -- Partner Functions --
+  var selectedPartner = '';
   function showViewPartner(element){
     showOverlay('viewPartnerOverlay', ['partnersOverlay']);
 
     // Get the lesson ID from the clicked element
     const partnerCard = element.closest('.partners-card');
     const partnerID = partnerCard.getAttribute('partner-id');
+
+    selectedPartner = partnerID;
+
     console.log("Partner ID: " + partnerID);
     fetch('adminFunctions.php', {
       method: 'POST',
@@ -3077,6 +3084,132 @@ Module Name, Module Description{
 
   }
 
+  let originalPartnerName = '';
+  let originalPartnerDesc = '';
+  let originalPartnerContact = '';
+  let originalPartnerEmail = '';
+
+  function editPartner() {
+      const nameEl = document.getElementById('viewPartnerName');
+      const descEl = document.getElementById('viewPartnerDescText');
+      const contactEl = document.getElementById('viewPartnerContactText');
+      const emailEl = document.getElementById('viewPartnerEmailText');
+      const editBtn = document.getElementById('editBtn');
+      const deleteBtn = document.getElementById('deleteBtn');
+      const leaveBtn = document.getElementById('leaveBtn');
+
+      // Store original values
+      originalPartnerName = nameEl.innerText;
+      originalPartnerDesc = descEl.innerText;
+      originalPartnerContact = contactEl.innerText;
+      originalPartnerEmail = emailEl.innerText;
+
+
+      // Replace with editable fields
+      nameEl.outerHTML = `<input id="editPartnerName" type="text" value="${originalPartnerName}" class="editable-input">`;
+      descEl.outerHTML = `<textarea id="editPartnerDesc" class="editable-textarea">${originalPartnerDesc}</textarea>`;
+      contactEl.outerHTML = `<input id="editPartnerContact" type="text" value="${originalPartnerContact}" class="editable-input">`;
+      emailEl.outerHTML = `<input id="editPartnerEmail" type="text" value="${originalPartnerEmail}" class="editable-input">`;
+
+      // Reveal Save and swap Edit to Cancel
+      document.getElementById('editPartnerBtn').outerHTML = `
+        <div id="editPartnerBtn" style="display: flex; gap: 10px;">
+        <button class="cd-edit-btn" onClick="savePartnerEdit()">Save</button>
+        <button class="cd-edit-btn" onClick="cancelPartnerEdit()">Cancel</button>
+        </div>
+      `;
+  }
+
+  function cancelPartnerEdit() {
+      // Revert back to original content
+      document.getElementById('editPartnerName').outerHTML = `<div id="viewPartnerName">${originalPartnerName}</div>`;
+      document.getElementById('editPartnerDesc').outerHTML = `<div id="viewPartnerDescText">${originalPartnerDesc}</div>`;
+      document.getElementById('editPartnerContact').outerHTML = `<div id="viewPartnerContactText">${originalPartnerContact}</div>`;
+      document.getElementById('editPartnerEmail').outerHTML = `<div id="viewPartnerEmailText">${originalPartnerEmail}</div>`;
+
+      document.getElementById('editPartnerBtn').outerHTML = `<div id="editPartnerBtn"><button class="cd-edit-btn" onClick="editPartner()">Edit Details</button></div>`;
+
+  }
+
+  function savePartnerEdit() {
+      const partnerName = document.getElementById('editPartnerName').value;
+      const partnerDesc = document.getElementById('editPartnerDesc').value;
+      const partnerContact = document.getElementById('editPartnerContact').value;
+      const partnerEmail = document.getElementById('editPartnerEmail').value;
+
+      if (partnerName.trim() === '' || partnerDesc.trim() === '' || partnerContact.trim() === '' || partnerEmail.trim() === '') {
+          alert('Please fill in all the boxes.');
+          return;
+      }
+
+      fetch('adminFunctions.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+          ,
+          body: JSON.stringify({
+              action: 'updatePartner',
+              partnerName: partnerName,
+              partnerDesc: partnerDesc,
+              partnerContact: partnerContact,
+              partnerEmail: partnerEmail,
+              partnerID: selectedPartner
+          })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json(); // Parse JSON response
+      })
+      .then(result => {
+          if (result.success) {
+              notifyAndRedirect('Partner updated sucessfully!', 'reload');
+          } else {
+              alert('Update failed.');
+          }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred: ' + error.message);
+      });
+  }
+
+  // Deletion
+  function deletePartner() {
+      const confirmed = confirm("Are you sure you want to delete this partner?");
+      if (confirmed) {
+          // Add classroom deletion process here
+          fetch('adminFunctions.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+              ,
+              body: JSON.stringify({
+                  action: 'deletePartner',
+                  partnerID: selectedPartner
+              })
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json(); // Parse JSON response
+          })
+          .then(result => {
+              if (result.success) {
+                  notifyAndRedirect('Partner deleted succesfully!', 'reload');
+              } else {
+                  alert('Deletion failed.');
+              }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred: ' + error.message);
+          });
+
+      }
+      else return;
+  }
+
   // -- Class Functions --
 
   // Editing
@@ -3102,7 +3235,7 @@ Module Name, Module Description{
       document.getElementById('editBtn').outerHTML = `
         <div id="editBtn" style="display: flex; gap: 10px;">
         <button class="cd-edit-btn" onClick="saveEdit()">Save</button>
-          <button class="cd-edit-btn" onClick="cancelEdit()">Cancel</button>
+        <button class="cd-edit-btn" onClick="cancelEdit()">Cancel</button>
         </div>
       `;
   }
