@@ -319,7 +319,7 @@
           $fileContent = file_get_contents($file['tmp_name']);
 
           // Loop, parse and insert modules
-          $modulePattern = '/^(.*?),\s*(.*?)\s*{(.*)}$/s';
+          $modulePattern = '/(.*?),\s*(.*?)\s*{(.*)}/s';
           if (preg_match($modulePattern, $fileContent, $moduleMatches)) {
             $moduleName = trim($moduleMatches[1]);
             $moduleDesc = trim($moduleMatches[2]);
