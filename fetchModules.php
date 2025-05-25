@@ -22,28 +22,27 @@ if ($type === 'Partner') {
             JOIN languagemodule lm ON lm.langID = cm.langID
             ORDER BY lm.moduleName ASC";
 } else {
-    $sql = "
-      SELECT 
-        p.partnerName AS 'uploader' , 
-        lm.moduleName, 
-        lm.langID 
-      FROM partnermodule pm 
-      JOIN partner p ON p.partnerID = pm.partnerID 
-      JOIN languagemodule lm on lm.langID = pm.langID
+    $sql = "SELECT 
+              p.partnerName AS 'uploader' , 
+              lm.moduleName, 
+              lm.langID 
+            FROM partnermodule pm 
+            JOIN partner p ON p.partnerID = pm.partnerID 
+            JOIN languagemodule lm on lm.langID = pm.langID
 
-      UNION
+            UNION
 
-      SELECT 
-        u.username AS 'uploader',
-        lm.moduleName, 
-        lm.langID 
-      FROM classmodule cm 
-      JOIN classinstructor ci ON cm.classInstID = ci.classInstID
-      JOIN instructor i ON i.instID = ci.instID
-      JOIN users u ON u.userID = i.userID
-      JOIN languagemodule lm ON lm.langID = cm.langID
-      ORDER BY moduleName ASC
-    ";
+            SELECT 
+              u.username AS 'uploader',
+              lm.moduleName, 
+              lm.langID 
+            FROM classmodule cm 
+            JOIN classinstructor ci ON cm.classInstID = ci.classInstID
+            JOIN instructor i ON i.instID = ci.instID
+            JOIN users u ON u.userID = i.userID
+            JOIN languagemodule lm ON lm.langID = cm.langID
+            ORDER BY moduleName ASC
+          ";
 }
 
 $result = $conn->query($sql);

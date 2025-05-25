@@ -854,7 +854,7 @@ if(isset($_POST["createPartner"])) {
     border: 2px solid white;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    z-index: 100;
+    z-index: 10;
     padding: 20px;
   }
 
@@ -1064,9 +1064,16 @@ if(isset($_POST["createPartner"])) {
     align-items: center;
     gap: 15px;
     padding: 12px;
+    justify-content: left;
     border-radius: 6px;
-    background: #f8f8f8;
+    background-color: #f8f8f8;
     margin-bottom: 10px;
+  }
+
+  .cd-modulelist .module-card {
+    margin: 0;
+    padding: 0;
+    background: none;
   }
 
   .cd-list-icon {
@@ -1255,7 +1262,7 @@ if(isset($_POST["createPartner"])) {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
     padding: 25px;
     overflow-y: auto;
-    z-index: 10;
+    z-index: 15;
     backdrop-filter: blur(5px);
   }
     
@@ -1833,7 +1840,7 @@ if(isset($_POST["createPartner"])) {
         <div class="user-details-content">
           <div class="user-profile-section">
             <div class="user-profile-header">
-                <img src="images/Human_Icon.jpg" alt="User Photo" class="user-profile-img" />
+              <img src="images/Human_Icon.jpg" alt="User Photo" class="user-profile-img" />
               <div class="user-profile-info">
                 <div class="user-header-flex">
                   <div>
@@ -2026,7 +2033,7 @@ if(isset($_POST["createPartner"])) {
           <button class="tab" onclick="loadModules('Classroom', this)">Classroom</button>
           <div class="right-buttons">
             <div class="search-container">
-              <button onclick="showOverlay('createModuleOverlay','moduleOverlay')" class="SearchButton">New Partner Module</button>
+              <button onclick="showSubOverlay('createModuleOverlay')" class="SearchButton">New Partner Module</button>
               <input type="text" placeholder="Search..." class="search-input">
               <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
             </div>
@@ -2131,7 +2138,7 @@ Module Name, Module Description{
         <h2 style="color: #7b0000; margin-bottom: 20px;">Partners</h2>
         
         <div class="tabs">
-          <button class="NewP" onclick="showOverlay('createPartnersOverlay','partnersOverlay')">Add New</button>
+          <button class="NewP" onclick="showSubOverlay('createPartnersOverlay')">Add New</button>
           <div class="right-buttons">
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
@@ -2275,6 +2282,11 @@ Module Name, Module Description{
       overlay.style.display = shouldShow ? 'block' : 'none';
     });
     bg.style.display = 'none';
+  }
+
+  function showSubOverlay ($subOverlay){
+    const subOverlay = document.getElementById($subOverlay);
+    subOverlay.style.display = 'block';
   }
 
   function closeOverlay (targetID) {
@@ -2529,7 +2541,7 @@ Module Name, Module Description{
   let active = 1;
   function showUserDetails(element) {
     const userCard = element.closest('.user-card');
-    showOverlay('userDetailsOverlay', ['userOverlay']);
+    showSubOverlay('userDetailsOverlay');
 
     // Get data attributes directly
     const name = userCard.dataset.name;
@@ -2675,7 +2687,7 @@ Module Name, Module Description{
     // checkuserlogs
     function checkUserLogs() {
     console.log("Fetch Activity Logs");
-    showOverlay('userChecklogsOverlay', ['userDetailsOverlay', 'userOverlay']);
+    showSubOverlay('userChecklogsOverlay');
 
     fetch('adminFunctions.php', {
       method: 'POST',
@@ -2713,7 +2725,7 @@ Module Name, Module Description{
     var selectedClassroomID = '';
     function showClassDetails(element) {
     console.log("Show Classroom Details");
-    showOverlay('viewClassroomDetailsOverlay', 'classroomOverlay');
+    showSubOverlay('viewClassroomDetailsOverlay');
 
     const classCard = element.closest('.classroom-item');
     const classID = classCard.getAttribute('classroom-id');
@@ -2792,7 +2804,7 @@ Module Name, Module Description{
             ${students.map(student => `
               <div class="cd-student-card">
                 <img src="images/Human_Icon.jpg" alt="Student" class="cd-list-icon">
-                <div class="cd-student-info">
+                <div class="cd-student-info" onClick="showUserDetails(this)">
                   <h3>${student.username}</h3>
                   <p>${student.userID}</p>
                 </div>
@@ -2805,11 +2817,13 @@ Module Name, Module Description{
           <div class="cd-section-title">Modules <a href="#">View All</a></div>
           <div class="cd-modulelist">
             ${modules.map(module => `
-              <div class="cd-module-card">
-                <img src="images/Module_Icon.jpg" alt="Module Icon" class="cd-list-icon">
-                <div class="cd-module-info">
-                  <h3>${module.moduleName}</h3>
-                  <p>${module.username}</p>
+              <div class="module-card" module-id="${module.langID}" onclick="showViewModule(this, ['classroomOverlay', 'viewClassroomDetailsOverlay'])">
+                <div class="cd-module-card">
+                  <img src="images/Module_Icon.jpg" alt="Module Icon" class="cd-list-icon">
+                  <div class="cd-module-info">
+                    <h3>${module.moduleName}</h3>
+                    <p>${module.username}</p>
+                  </div>
                 </div>
               </div>
             `).join('')}
@@ -2834,9 +2848,9 @@ Module Name, Module Description{
   var selectedModuleID = "";
   var selectedModuleType = "";
 
-  function showViewModule(element) {
+  function showViewModule(element, $current) {
   console.log("View Module");
-  showOverlay('viewModuleOverlay',['moduleOverlay']);
+  showSubOverlay('viewModuleOverlay');
 
   const moduleCard = element.closest('.module-card');
   const moduleID = moduleCard.getAttribute('module-id');
@@ -2895,7 +2909,7 @@ Module Name, Module Description{
                     <div class="module-title">${lesson.lessonName}</div>
                     <div class="module-creator">In ${moduleName}</div>
                   </div>
-                  <button class="view-lesson" onclick="showViewLesson(this)">
+                  <button class="view-lesson" onclick="showViewLesson(this, ['viewModuleOverlay','moduleOverlay'])">
                     <img src="images/Search_Icon.jpg" alt="View Lesson" class="search-image-icon">
                   </button>
                 </div>
@@ -2958,7 +2972,7 @@ Module Name, Module Description{
   // Show View Lesson
   function showViewLesson(element) {
   console.log("View Lesson");
-  showOverlay('viewLessonOverlay', ['viewModuleOverlay','moduleOverlay']);
+  showSubOverlay('viewLessonOverlay');
 
   // Get the lesson ID from the clicked element
   const lessonCard = element.closest('.module-card');
