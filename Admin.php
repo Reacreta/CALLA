@@ -1017,7 +1017,7 @@ if(isset($_POST["createPartner"])) {
 
   .editable-textarea {
     width: 100%;
-    height: 90%;
+    height: 85%;
     font-size: 16px;
     padding: 10px;
     border-radius: 4px;
@@ -1573,23 +1573,12 @@ if(isset($_POST["createPartner"])) {
     left: 50%;
     transform: translate(-50%, -50%);
     height: fit-content;
-    width: 600px;
-    height: 450px ;
+    width: 30%;
     background: rgba(241, 241, 241, 0.85);
     backdrop-filter: blur(5px);
     z-index: 20;
     padding: 20px;
     overflow-y: auto;
-  }
-
-  .editable-textarea-partners {
-    width: 100%;
-    height: 20%;
-    font-size: 16px;
-    padding: 10px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    resize: vertical;
   }
 
   #viewPartnerHeader {
@@ -1670,7 +1659,8 @@ if(isset($_POST["createPartner"])) {
   }
   #viewPartnerContactInfo{
     display: flex;
-    justify-content: space-between;
+    justify-content: left;
+    gap: 15px;
   }
 
   #viewPartnerContactTitle,
@@ -2227,6 +2217,7 @@ Module Name, Module Description{
       <div id="viewPartnerOverlay" class="view-partner-overlay">
         <div id="viewPartnerCon">
           <div id="viewPartnerHeader">
+            <button class="close-btn" onclick="closeOverlay('viewPartnerOverlay')">×</button>
             <h2 style="color: #7b0000; margin-bottom: 20px;">View Partner</h2>
           </div>
           <div id="viewPartnerMain">
@@ -2237,7 +2228,7 @@ Module Name, Module Description{
             <div id="viewPartnerSC" class="view-partner-SC">
                 <div id="editPartnerBtn"><button class="cd-edit-btn" onClick="editPartner()">Edit Details</button></div>
                 <button class="cd-btn cd-btn-delete" onclick="deletePartner()">Delete</button>
-                <button type="button" class="create-mod-btn" onclick="closeOverlay('viewPartnerOverlay')">Close</button>
+                <button class="close-btn" onclick="closePartnerModal()">×</button>
             </div>
           </div>
 
@@ -3146,7 +3137,7 @@ Module Name, Module Description{
 
       // Replace with editable fields
       nameEl.outerHTML = `<input id="editPartnerName" type="text" value="${originalPartnerName}" class="editable-input">`;
-      descEl.outerHTML = `<textarea id="editPartnerDesc" class="editable-textarea-partners">${originalPartnerDesc}</textarea>`;
+      descEl.outerHTML = `<textarea id="editPartnerDesc" class="editable-textarea">${originalPartnerDesc}</textarea>`;
       contactEl.outerHTML = `<input id="editPartnerContact" type="text" value="${originalPartnerContact}" class="editable-input">`;
       emailEl.outerHTML = `<input id="editPartnerEmail" type="text" value="${originalPartnerEmail}" class="editable-input">`;
 
@@ -3279,6 +3270,17 @@ Module Name, Module Description{
         <button class="cd-edit-btn" onClick="cancelEdit()">Cancel</button>
         </div>
       `;
+  }
+
+    function closePartnerModal() {
+      // Cancel edit mode if it's active
+      const editInput = document.getElementById('editPartnerName');
+      if (editInput) {
+          cancelPartnerEdit();
+      }
+
+      // Then hide the modal
+      document.getElementById('viewPartnerOverlay').style.display = 'none';
   }
 
   function cancelEdit() {
