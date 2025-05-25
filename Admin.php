@@ -1971,7 +1971,7 @@ if(isset($_POST["createPartner"])) {
 
       </div> <!-- End viewClassroomOverlay  -->
 
-      <!-- Modules Overlay -->
+      <!-- Modules Overlay Main -->
       <div id="moduleOverlay" class="user-overlay">
         <button class="close-btn" onclick="hideOverlay('moduleOverlay')">×</button>
         <h2 style="color: #7b0000; margin-bottom: 20px;">Modules</h2>
@@ -2035,7 +2035,7 @@ Module Name, Module Description{
 
             <div class = create-module-SC>
               <button type="submit" class="create-mod-btn" name="upload">Upload</button>
-              <button type="button" class="create-mod-btn" onclick="closeOverlay('createModuleOverlay','moduleOverlay')">Cancel</button>
+              <button type="button" class="create-mod-btn" onclick="closeOverlay('createModuleOverlay')">Cancel</button>
             </div>
           </form>
         </div>
@@ -2063,7 +2063,7 @@ Module Name, Module Description{
         <div id="viewLessonCon">
 
           <div id="viewLessonHeader">
-            <button class="close-btn" onclick="hideSubOverlay('viewLessonOverlay', 'viewModuleOverlay')">×</button>
+            <button class="close-btn" onclick="closeOverlay('viewLessonOverlay')">×</button>
             <h2 style="color: #7b0000; margin-bottom: 20px;">View Lesson</h2>
           </div>
 
@@ -2073,14 +2073,14 @@ Module Name, Module Description{
             </div>
 
             <div id="viewLessonSC" class="view-lesson-SC">
-                <button type="button" class="create-mod-btn" onclick="hideSubOverlay('viewModuleOverlay','moduleOverlay')">Close</button>
+                <button type="button" class="create-mod-btn" onclick="closeOverlay('viewModuleOverlay')">Close</button>
             </div>
           </div>
 
         </div>
       </div>
         
-        <!-- Partners Overlay -->
+        <!-- Partners Overlay Main -->
       <div id="partnersOverlay" class="user-overlay">
         <button class="close-btn" onclick="hideOverlay('partnersOverlay')">x</button>
         <h2 style="color: #7b0000; margin-bottom: 20px;">Partners</h2>
