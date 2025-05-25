@@ -236,65 +236,68 @@
             }
         }
 
-        if ($action === 'getLessonDetails') {
-            $data = $input['data'] ?? [];
-            $lessonID = $data['lessonID'] ?? null;
-            // Use a default student ID for testing when session isn't available
-            $studentID = $_SESSION['roleID'] ?? 'TEST_STUDENT_ID';
+    // In studentFunctions.php, modify the getLessonDetails section
+    if ($action === 'getLessonDetails') {
+        $data = $input['data'] ?? [];
+        $lessonID = $data['lessonID'] ?? null;
 
-            if (!$lessonID) {
-                sendJsonResponse(false, 'Lesson ID is required');
+        if (!$lessonID) {
+            sendJsonResponse(false, 'Lesson ID is required');
+        }
+
+        try {
+            // Fetch lesson details
+            $sql = "SELECT l.lessID, l.lessonName, l.lessonDesc, l.dateCreated, 
+                        lm.moduleName, lm.langID
+                    FROM lesson l
+                    JOIN languagemodule lm ON l.langID = lm.langID
+                    WHERE l.lessID = ?";
+            $stmt = $conn->prepare($sql);
+            if (!$stmt) {
+                throw new Exception('Failed to prepare lesson query: ' . $conn->error);
+            }
+            
+            $stmt->bind_param('s', $lessonID);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $lesson = $result->fetch_assoc();
+            
+            if (!$lesson) {
+                sendJsonResponse(false, 'Lesson not found');
             }
 
-            try {
-                // Fetch lesson details without access validation
-                $sql = "SELECT lessonName, lessonDesc, dateCreated FROM lesson WHERE lessID = ?";
-                $stmt = $conn->prepare($sql);
-                if (!$stmt) {
-                    throw new Exception('Failed to prepare lesson query: ' . $conn->error);
-                }
-                
-                $stmt->bind_param('s', $lessonID);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                
-                $lesson = $result->fetch_assoc();
-                
-                if (!$lesson) {
-                    sendJsonResponse(false, 'Lesson not found');
-                }
+            // Fetch vocabulary for the lesson
+            $sql = "SELECT wordID, word, meaning FROM vocabulary WHERE lessID = ? ORDER BY word ASC";
+            $stmt = $conn->prepare($sql);
+            if (!$stmt) {
+                throw new Exception('Failed to prepare vocabulary query: ' . $conn->error);
+            }
+            
+            $stmt->bind_param('s', $lessonID);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-                // Fetch vocabulary for the lesson
-                $sql = "SELECT wordID, word, meaning FROM vocabulary WHERE lessID = ? ORDER BY word ASC";
-                $stmt = $conn->prepare($sql);
-                if (!$stmt) {
-                    throw new Exception('Failed to prepare vocabulary query: ' . $conn->error);
-                }
-                
-                $stmt->bind_param('s', $lessonID);
-                $stmt->execute();
-                $result = $stmt->get_result();
+            $vocabulary = [];
+            while ($row = $result->fetch_assoc()) {
+                $vocabulary[] = $row;
+            }
 
-                $vocabulary = [];
-                while ($row = $result->fetch_assoc()) {
-                    $vocabulary[] = $row;
-                }
-
-                sendJsonResponse(true, 'Lesson details retrieved successfully', [
+            sendJsonResponse(true, 'Lesson details retrieved successfully', [
+                'success' => true,
+                'lesson' => [
                     'lessonName' => $lesson['lessonName'],
                     'lessonDesc' => $lesson['lessonDesc'],
                     'dateCreated' => $lesson['dateCreated'],
-                    'vocabulary' => $vocabulary
-                ]);
+                    'moduleName' => $lesson['moduleName']
+                ],
+                'vocabulary' => $vocabulary
+            ]);
 
-            } catch (Exception $e) {
-                error_log("Error in getLessonDetails: " . $e->getMessage());
-                sendJsonResponse(false, 'An error occurred while retrieving lesson details');
-            }
+        } catch (Exception $e) {
+            error_log("Error in getLessonDetails: " . $e->getMessage());
+            sendJsonResponse(false, 'An error occurred while retrieving lesson details: ' . $e->getMessage());
         }
-
-        // If no action matched
-        sendJsonResponse(false, 'Invalid action specified');
     }
 
     // Handle GET requests for basic data retrieval
@@ -302,4 +305,5 @@
         $action = $_GET['action'] ?? null;
         
     }
+}
 ?>
