@@ -239,7 +239,6 @@
 
     // -- End of Functions
 
-
     if ($action === 'getModuleDetails') {
       $data = $input['data'];
       $moduleID = $data['moduleID'] ?? null;
