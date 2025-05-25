@@ -232,6 +232,8 @@
       $stmt->execute();
       $result = $stmt->get_result();
       $row = $result->fetch_assoc();
+
+      $moduleType = 'classroom';
       if (!$row) { // check if naa siya sa partnermodules
             $sql = "SELECT
                         lm.langID, 
@@ -248,8 +250,10 @@
             $stmt->execute();
             $result = $stmt->get_result();
             $row = $result->fetch_assoc();
+
+            $moduleType = 'partner';
       }
-      error_log("Module Details: " . print_r($row, true)); // Debugging line
+    
 
       $moduleName = $row['moduleName'];
       $moduleDesc = $row['moduleDesc'];
@@ -270,28 +274,45 @@
   
       // Return module details and lessons as JSON
       echo json_encode([
-          'success' => true,
-          'moduleName' => $moduleName,
-          'moduleDesc' => $moduleDesc,
-          'className' => $className,
-          'creator' => $creator,
-          'lessons' => $lessons
+            'success' => true,
+            'moduleName' => $moduleName,
+            'moduleDesc' => $moduleDesc,
+            'className' => $className,
+            'creator' => $creator,
+            'lessons' => $lessons,
+            'moduleType' => $moduleType
       ]);
       exit;
   }
 
   if($action === 'deleteModule'){
-      $data = $input['data'];
-      $moduleID = $data['moduleID'] ?? null;
-
-      $sql = "DELETE FROM classmodule WHERE langID = ?;";
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param('s', $moduleID);
-      if($stmt->execute()){
-          echo json_encode(['success' => true]);
-      }else{
-          echo json_encode(['success' => false, 'message' => 'SQL execution error: ' . $stmt->error]);
-      }
+    $data = $input['data'];
+    $moduleID = $data['moduleID'] ?? null;
+    $moduleType = $data['moduleType'] ?? null;
+    if (!$moduleID) {
+        echo json_encode(['success' => false, 'message' => 'Missing required fields.']);
+        exit; // Stop further execution
+    }
+    if($moduleType === 'partner'){
+        $sql = "DELETE FROM partnermodule WHERE langID = ?;";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('s', $moduleID);
+        if($stmt->execute()){
+            echo json_encode(['success' => true]);
+        }else{
+            echo json_encode(['success' => false, 'message' => 'SQL execution error: ' . $stmt->error]);
+        }
+    }
+    if($moduleType === 'classroom'){
+        $sql = "DELETE FROM classmodule WHERE langID = ?;";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('s', $moduleID);
+        if($stmt->execute()){
+            echo json_encode(['success' => true]);
+        }else{
+            echo json_encode(['success' => false, 'message' => 'SQL execution error: ' . $stmt->error]);
+        }
+    }
   }
 
   if ($action === 'getLessonDetails') {

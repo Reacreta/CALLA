@@ -2824,6 +2824,7 @@ Module Name, Module Description{
 
   // Show View Module
   var selectedModuleID = "";
+  var selectedModuleType = "";
 
   function showViewModule(element) {
   console.log("View Module");
@@ -2857,7 +2858,9 @@ Module Name, Module Description{
   })
   .then(data => {
 
-    const { moduleName, moduleDesc, className, lessons: lessonArray } = data;
+    const { moduleName, moduleDesc, className, lessons: lessonArray, moduleType } = data;
+
+    selectedModuleType = moduleType;
 
     const htmlContent = `
       <div id="viewModuleInfo">
@@ -2904,40 +2907,44 @@ Module Name, Module Description{
   }
 
   function deleteModule(element) {
-  console.log("Delete Module");
-  const moduleCard = element.closest('.module-card');
-  const moduleID = selectedModuleID;
+    console.log("Delete Module");
+    const moduleCard = element.closest('.module-card');
+    const moduleID = selectedModuleID;
+    const moduleType = selectedModuleType;
 
-  if (!moduleID) {
-    console.error("Error: Module ID not found.");
-    return;
-  }
+    if (!moduleID) {
+      console.error("Error: Module ID not found.");
+      return;
+    }
 
-  fetch('adminFunctions.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'deleteModule',
-      data: { moduleID: moduleID }
+    fetch('adminFunctions.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'deleteModule',
+        data: { 
+          moduleID: moduleID, 
+          moduleType: moduleType
+        }
+      })
     })
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return response.json();
-  })
-  .then(result => {
-    if (result.success) {
-      location.reload(); // Optionally refresh the page
-    } else {
-      alert('Failed to delete module: ' + result.message);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('An error occurred: ' + error.message);
-  });
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(result => {
+      if (result.success) {
+        location.reload(); // Optionally refresh the page
+      } else {
+        alert('Failed to delete module: ' + result.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('An error occurred: ' + error.message);
+    });
   }
 
   // Show View Lesson
