@@ -19,7 +19,7 @@ if (!empty($search)) {
 }
 
 // Filtered user fetch
-$sql = "SELECT * FROM users WHERE $where_clause";
+$sql = "SELECT * FROM users WHERE $where_clause ORDER BY username ASC";
 $result = $conn->query($sql);
 
 
@@ -171,6 +171,14 @@ if(isset($_POST["createPartner"])) {
     background-image: var(--gradient);
     background-size: 300% 100%;
     animation: grad-anim 10s infinite alternate;
+  }
+
+  button {
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    outline: none;
   }
 
   .header {
@@ -479,6 +487,7 @@ if(isset($_POST["createPartner"])) {
     object-fit: cover;
     transition: transform 0.2s;
     border: none;
+    outline: none !important;
   }
 
   .search-image-icon:hover {
@@ -1107,22 +1116,33 @@ if(isset($_POST["createPartner"])) {
   }
 
     /* Create Module Overlay */
-  .create-module-overlay{
+  .view-lesson {
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .create-module-overlay {
     display: none;
     position: absolute;
+    top: 40%;
+    left: 45%;
+    transform: translate(-50%, -50%);
+
     border: 2px solid white;
-    border-radius: 6px 6px;
+    border-radius: 6px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    top: 10%;
-    left: 20%;
     height: fit-content;
     width: 50%;
-    background: rgba(241, 241, 241, 0.85);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(5px);
     z-index: 20;
     padding: 20px;
     overflow-y: auto;
-  }
+}
 
   #cdDesc.cd-card{
     height: 70%;
@@ -1168,11 +1188,38 @@ if(isset($_POST["createPartner"])) {
     border: lightgray 1px solid;
     border-radius: 10px;
   }
+
+  #partnerIDField,
+  #files {
+    padding: 10px 14px;
+    border: lightgray 1px solid;
+    border-radius: 10px;
+    width: 100%;          /* Makes it fill the .create-module-con */
+    box-sizing: border-box;
+    font-size: 12px;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  #files::-webkit-file-upload-button,
+  #files::file-selector-button {
+    background-color: #7b0000;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  #files:hover::file-selector-button,
+  #files:hover::-webkit-file-upload-button {
+    background-color: #5e0000;
+  }
   
   .create-mod-btn{
-    background: #e6e6e6;
+    background-color: #7b0000;
     border: none;
-    color: #7b0000;
+    color: white;
     font-weight: bold;
     cursor: pointer;
     padding: 10px 10px;
@@ -1193,22 +1240,7 @@ if(isset($_POST["createPartner"])) {
   }
 
   /* View Module Overlay */
-  #viewModuleOverlay{
-    display: none;
-    position: absolute;
-    border: 2px solid white;
-    border-radius: 6px 6px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    top: 10%;
-    left: 20%;
-    height: fit-content;
-    width: 50%;
-    background: rgba(241, 241, 241, 0.85);
-    backdrop-filter: blur(5px);
-    z-index: 20;
-    padding: 20px;
-    overflow-y: auto;
-  }
+
     
   #viewModuleInfo{
     display: flex;
@@ -1824,48 +1856,50 @@ if(isset($_POST["createPartner"])) {
         </div>
       </div>              
 
-          <!-- Classroom Overlay -->
-        <div id="classroomOverlay" class="user-overlay">
-          <button class="close-btn" onclick="hideOverlay('classroomOverlay')">×</button>
-          <h2 style="color: #7b0000; margin-bottom: 20px;">Classrooms</h2>
+      <!-- Classroom Overlay -->
+      <div id="classroomOverlay" class="user-overlay">
+        <button class="close-btn" onclick="hideOverlay('classroomOverlay')">×</button>
+        <h2 style="color: #7b0000; margin-bottom: 20px;">Classrooms</h2>
 
-          <div class="tabs">
-            <div class="right-buttons">
-              <div class="search-container">
-                <input type="text" placeholder="Search..." class="search-input">
-                <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
-              </div>
+        <div class="tabs">
+          <div class="right-buttons">
+            <div class="search-container">
+              <input type="text" placeholder="Search..." class="search-input">
+              <label class="SearchButton" onclick="toggleSearch(this, searchClassrooms)">Search</label>
             </div>
           </div>
+        </div>
           
-          <!-- Main Classroom List (default view) -->
-          <div id="classroomListView" class="list-wrapper">
-            <div class="dynamic-list">
-              <?php
-                $sql = "SELECT classroom.className, users.username, classroom.classroomID 
-                        FROM classroom 
-                        JOIN instructor ON classroom.instID = instructor.instID 
-                        JOIN users ON instructor.userID = users.userID;";
-                $result = $conn->query($sql);
+        <!-- Main Classroom List (default view) -->
+        <div id="classroomListView" class="list-wrapper">
+          <div class="dynamic-list">
+            <?php
+              $sql = "SELECT classroom.className, users.username, classroom.classroomID 
+                      FROM classroom 
+                      JOIN instructor ON classroom.instID = instructor.instID 
+                      JOIN users ON instructor.userID = users.userID
+                       ORDER BY classroom.className ASC";
 
-                while ($row = $result->fetch_assoc()) {
-                  $className = htmlspecialchars($row['className']);
-                  $creatorName = htmlspecialchars($row['username']);
-                  $classroomID = htmlspecialchars($row['classroomID']);
-              ?>
-                <div class="classroom-item" classroom-id="<?php echo $classroomID; ?>">
-                  <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
-                  <div class="classroom-info">
-                    <div class="classroom-title"><?php echo $className; ?></div>
-                    <div class="classroom-creator"><?php echo $creatorName; ?></div>
-                  </div>
-                  <button class="search-icon-link" onclick="showClassDetails(this)">
-                    <img src="images/Search_Icon.jpg" alt="View Classroom" class="search-image-icon">
-                  </button>
+              $result = $conn->query($sql);
+
+              while ($row = $result->fetch_assoc()) {
+                $className = htmlspecialchars($row['className']);
+                $creatorName = htmlspecialchars($row['username']);
+                $classroomID = htmlspecialchars($row['classroomID']);
+            ?>
+              <div class="classroom-item" classroom-id="<?php echo $classroomID; ?>">
+                <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
+                <div class="classroom-info">
+                  <div class="classroom-title"><?php echo $className; ?></div>
+                  <div class="classroom-creator"><?php echo $creatorName; ?></div>
                 </div>
-              <?php } ?>
-            </div>
+                <button class="search-icon-link" onclick="showClassDetails(this)">
+                  <img src="images/Search_Icon.jpg" alt="View Classroom" class="search-image-icon">
+                </button>
+              </div>
+            <?php } ?>
           </div>
+        </div>
       </div>
 
       <!-- View Classroom Overlay -->
@@ -1966,7 +2000,6 @@ if(isset($_POST["createPartner"])) {
       <!-- Module Creation -->
       <div id="createModuleOverlay" class="create-module-overlay" overlay-type ="create-module">
         <div id="createModuleMain">
-          <button class="close-btn" onclick="hideSubOverlay('createModuleOverlay','moduleOverlay')">×</button>
           <h2 style="color: #7b0000; margin-bottom: 20px;">Upload a Module</h2>
           <div id="template">
             <h3 style="color: #7b0000; margin-bottom: 10px;">Template:</h3>
@@ -2002,7 +2035,7 @@ Module Name, Module Description{
 
             <div class = create-module-SC>
               <button type="submit" class="create-mod-btn" name="upload">Upload</button>
-              <button type="button" class="create-mod-btn" onclick="hideSubOverlay('createModuleOverlay','moduleOverlay')">Cancel</button>
+              <button type="button" class="create-mod-btn" onclick="closeOverlay('createModuleOverlay','moduleOverlay')">Cancel</button>
             </div>
           </form>
         </div>
@@ -2221,14 +2254,14 @@ Module Name, Module Description{
     }
   }
 
-  function toggleSearch(label) {
+  function toggleSearch(label, searchFn = searchUsers) {
     const container = label.closest('.search-container');
     const input = container.querySelector('.search-input');
     const isOpen = input.style.width === '200px';
 
     if (isOpen) {
       if (input.value.trim()) {
-        searchUsers(input.value);
+        searchFn(input.value);
       } else {
         closeInput(input);
       }
@@ -2247,7 +2280,7 @@ Module Name, Module Description{
       const handleKey = function(e) {
         if (e.key === 'Enter') {
           e.preventDefault();
-          searchUsers(input.value);
+          searchFn(input.value);
           input.removeEventListener('keydown', handleKey);
         }
       };
@@ -2255,7 +2288,7 @@ Module Name, Module Description{
 
       // Real-time filtering
       input.addEventListener('input', function () {
-        searchUsers(input.value);
+        searchFn(input.value);
       });
     }
   }
@@ -2279,6 +2312,19 @@ Module Name, Module Description{
       const matchesTab = (activeTab === 'all') || (role === activeTab);
 
       card.style.display = (matchesSearch && matchesTab) ? 'flex' : 'none';
+    });
+  }
+
+  function searchClassrooms(query) {
+    const classroomCards = document.querySelectorAll('#classroomListView .classroom-item');
+    const searchValue = query.toLowerCase();
+
+    classroomCards.forEach(card => {
+      const className = card.querySelector('.classroom-title').textContent.toLowerCase();
+      const creator = card.querySelector('.classroom-creator').textContent.toLowerCase();
+
+      const matches = className.includes(searchValue) || creator.includes(searchValue);
+      card.style.display = matches ? 'flex' : 'none';
     });
   }
 
