@@ -2015,6 +2015,7 @@ if(isset($_POST["createPartner"])) {
       <!-- Module Creation -->
       <div id="createModuleOverlay" class="create-module-overlay" overlay-type ="create-module">
         <div id="createModuleMain">
+          <button class="close-btn" onclick="closeOverlay('createModuleOverlay')">×</button>
           <h2 style="color: #7b0000; margin-bottom: 20px;">Upload a Module</h2>
           <div id="template">
             <h3 style="color: #7b0000; margin-bottom: 10px;">Template:</h3>
