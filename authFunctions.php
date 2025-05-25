@@ -96,7 +96,6 @@
                 window.location.href = 'index.php';
             }, 3000);
         </script>";
-            exit();
         }
         else {
             if ($url == 'Admin.php' || $url == 'Instructor.php' || $url == 'Student.php') { // if logging in
