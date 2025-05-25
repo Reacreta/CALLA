@@ -1316,9 +1316,9 @@ if(isset($_POST["createPartner"])) {
     border-radius: 6px 6px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     top: 10%;
-    left: 20%;
+    left: 14%;
     height: fit-content;
-    width: 50%;
+    width: 57%;
     background: rgba(241, 241, 241, 0.85);
     backdrop-filter: blur(5px);
     z-index: 20;
