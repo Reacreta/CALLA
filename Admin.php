@@ -1253,7 +1253,7 @@ if(isset($_POST["createPartner"])) {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
     padding: 25px;
     overflow-y: auto;
-    z-index: 100;
+    z-index: 10;
     backdrop-filter: blur(5px);
   }
     

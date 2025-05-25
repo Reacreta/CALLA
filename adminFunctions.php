@@ -213,7 +213,7 @@
           exit;
       }
   
-      // Fetch module details
+      // Check if naa siya sa classmodules
       $sql = "SELECT 
                   lm.langID, 
                   lm.moduleName, 
@@ -232,15 +232,28 @@
       $stmt->execute();
       $result = $stmt->get_result();
       $row = $result->fetch_assoc();
-  
-      if (!$row) {
-          echo json_encode(['success' => false, 'message' => 'Module not found.']);
-          exit;
+      if (!$row) { // check if naa siya sa partnermodules
+            $sql = "SELECT
+                        lm.langID, 
+                        lm.moduleName, 
+                        lm.moduleDesc,
+                        p.partnerName AS creator,
+                        p.partnerID
+                    FROM partnermodule pm 
+                    JOIN partner p ON p.partnerID = pm.partnerID 
+                    JOIN languagemodule lm ON lm.langID = pm.langID
+                    WHERE lm.langID = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('s', $moduleID);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
       }
-  
+      error_log("Module Details: " . print_r($row, true)); // Debugging line
+
       $moduleName = $row['moduleName'];
       $moduleDesc = $row['moduleDesc'];
-      $className = $row['className'];
+      $className = $row['className'] ?? $row['creator'];
       $creator = $row['creator'];
   
       // Fetch lessons for the module
