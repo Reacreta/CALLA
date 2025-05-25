@@ -986,6 +986,7 @@ if(isset($_POST["createPartner"])) {
     padding: 6px 12px;
     font-size: 14px;
     border-radius: 4px;
+    height: 100%;
     background-color: #007bff;
     color: white;
     border: none;
