@@ -1563,7 +1563,7 @@ if(isset($_POST["createPartner"])) {
     left: 50%;
     transform: translate(-50%, -50%);
     height: fit-content;
-    width: 50%;
+    width: 40%;
     background: rgba(241, 241, 241, 0.85);
     backdrop-filter: blur(5px);
     z-index: 20;
@@ -1646,6 +1646,10 @@ if(isset($_POST["createPartner"])) {
     display: flex;
     flex-direction: column;
     gap: 5px;
+  }
+  #viewPartnerContactInfo{
+    display: flex;
+    justify-content: space-between;
   }
 
   #viewPartnerContactTitle,
@@ -3075,15 +3079,16 @@ Module Name, Module Description{
         <div id="viewPartnerDesc">
           <div id="viewPartnerDescText">${partnerDetails.partnerDesc}</div>
         </div>
+        <div id="viewPartnerContactInfo">
+          <div id="viewPartnerContact">
+            <div id="viewPartnerContactTitle">Contact</div>
+            <div id="viewPartnerContactText">${partnerDetails.contact}</div>
+          </div>
 
-        <div id="viewPartnerContact">
-          <div id="viewPartnerContactTitle">Contact</div>
-          <div id="viewPartnerContactText">${partnerDetails.contact}</div>
-        </div>
-
-        <div id="viewPartnerEmail">
-          <div id="viewPartnerEmailTitle">Email</div>
-          <div id="viewPartnerEmailText">${partnerDetails.email}</div>
+          <div id="viewPartnerEmail">
+            <div id="viewPartnerEmailTitle">Email</div>
+            <div id="viewPartnerEmailText">${partnerDetails.email}</div>
+          </div>
         </div>
       `;
       document.getElementById('viewPartnerInfo').innerHTML = htmlContent;
