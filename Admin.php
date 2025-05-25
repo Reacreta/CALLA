@@ -1300,7 +1300,7 @@ if(isset($_POST["createPartner"])) {
   #lessonList .list-wrapper{
     height: 260px;
   }
-
+ 
   #lessonListTitle{
     font-size: 20px;
     font-weight: bold;
@@ -1316,9 +1316,9 @@ if(isset($_POST["createPartner"])) {
     border-radius: 6px 6px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     top: 10%;
-    left: 14%;
+    left: 20%;
     height: fit-content;
-    width: 57%;
+    width: 50%;
     background: rgba(241, 241, 241, 0.85);
     backdrop-filter: blur(5px);
     z-index: 20;
@@ -1731,7 +1731,7 @@ if(isset($_POST["createPartner"])) {
           Welcome Admin, <?php echo $_SESSION['username']?>!
       </div>
 
-      <div id="userOverlay" class="user-overlay">
+      <div id="userOverlay" class="user-overlay" overlay-type="user">
           <button class="close-btn" onclick="hideOverlay('userOverlay')">×</button>
           <h2 style="color: #7b0000; margin-bottom: 20px;">Users</h2>
 
@@ -1872,7 +1872,7 @@ if(isset($_POST["createPartner"])) {
       </div>              
 
       <!-- Classroom Overlay -->
-      <div id="classroomOverlay" class="user-overlay">
+      <div id="classroomOverlay" class="user-overlay" overlay-type="classroom">
         <button class="close-btn" onclick="hideOverlay('classroomOverlay')">×</button>
         <h2 style="color: #7b0000; margin-bottom: 20px;">Classrooms</h2>
 
@@ -1880,7 +1880,7 @@ if(isset($_POST["createPartner"])) {
           <div class="right-buttons">
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
-              <label class="SearchButton" onclick="toggleSearch(this, searchClassrooms)">Search</label>
+              <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
             </div>
           </div>
         </div>
@@ -1902,7 +1902,7 @@ if(isset($_POST["createPartner"])) {
                 $creatorName = htmlspecialchars($row['username']);
                 $classroomID = htmlspecialchars($row['classroomID']);
             ?>
-              <div class="classroom-item" classroom-id="<?php echo $classroomID; ?>">
+              <div class="classroom-item" classroom-id="<?php echo $classroomID;?>" data-classID="<?php echo $classroomID; ?>">
                 <img src="images/Class_Icon.jpg" alt="Class Icon" class="classroom-icon">
                 <div class="classroom-info">
                   <div class="classroom-title"><?php echo $className; ?></div>
@@ -1987,7 +1987,7 @@ if(isset($_POST["createPartner"])) {
       </div> <!-- End viewClassroomOverlay  -->
 
       <!-- Modules Overlay Main -->
-      <div id="moduleOverlay" class="user-overlay">
+      <div id="moduleOverlay" class="user-overlay" overlay-type="module">
         <button class="close-btn" onclick="hideOverlay('moduleOverlay')">×</button>
         <h2 style="color: #7b0000; margin-bottom: 20px;">Modules</h2>
 
@@ -2013,7 +2013,7 @@ if(isset($_POST["createPartner"])) {
       </div>
 
       <!-- Module Creation -->
-      <div id="createModuleOverlay" class="create-module-overlay" overlay-type ="create-module">
+      <div id="createModuleOverlay" class="create-module-overlay">
         <div id="createModuleMain">
           <button class="close-btn" onclick="closeOverlay('createModuleOverlay')">×</button>
           <h2 style="color: #7b0000; margin-bottom: 20px;">Upload a Module</h2>
@@ -2058,7 +2058,7 @@ Module Name, Module Description{
       </div><!-- End Module Creation -->
 
       <!-- View Module Overlay -->
-      <div id="viewModuleOverlay" class="view-module-overlay" overlay-type = "view-module-overlay">
+      <div id="viewModuleOverlay" class="view-module-overlay">
         <div id="viewModuleCon">
           <div id="viewModuleHeader">
             <button class="close-btn" onclick="closeOverlay('viewModuleOverlay')">×</button>
@@ -2075,7 +2075,7 @@ Module Name, Module Description{
       </div><!-- End View Module Overlay -->
 
       <!-- View Lesson Overlay -->
-      <div id="viewLessonOverlay" class="view-lesson-overlay" overlay-type="view-lesson-overlay">
+      <div id="viewLessonOverlay" class="view-lesson-overlay" >
         <div id="viewLessonCon">
 
           <div id="viewLessonHeader">
@@ -2097,7 +2097,7 @@ Module Name, Module Description{
       </div>
         
         <!-- Partners Overlay Main -->
-      <div id="partnersOverlay" class="user-overlay">
+      <div id="partnersOverlay" class="user-overlay" overlay-type="partners">
         <button class="close-btn" onclick="hideOverlay('partnersOverlay')">x</button>
         <h2 style="color: #7b0000; margin-bottom: 20px;">Partners</h2>
         
@@ -2270,14 +2270,30 @@ Module Name, Module Description{
     }
   }
 
-  function toggleSearch(label, searchFn = searchUsers) {
+  // Search Funcs
+  function toggleSearch(label) {
+    // get container and input field
     const container = label.closest('.search-container');
     const input = container.querySelector('.search-input');
+    // get overlay-type
+    const overlay = label.closest('[overlay-type]');
+    const overlayType = overlay ? overlay.getAttribute('overlay-type') : null;
+    // check bool for expanded
     const isOpen = input.style.width === '200px';
 
+    // flex function inherit
+    const functionMap = {
+      "user": searchUser,
+      "classroom": searchClassroom,
+      "module": searchModule,
+      "partners": searchPartners
+    };
+
+    const flexSearch = functionMap[overlayType];
+    console.log("Overlay Type: " + overlayType); // Debug line to show which overlay type is being searched
     if (isOpen) {
       if (input.value.trim()) {
-        searchFn(input.value);
+        flexSearch(input.value);
       } else {
         closeInput(input);
       }
@@ -2296,7 +2312,7 @@ Module Name, Module Description{
       const handleKey = function(e) {
         if (e.key === 'Enter') {
           e.preventDefault();
-          searchFn(input.value);
+          flexSearch(input.value);
           input.removeEventListener('keydown', handleKey);
         }
       };
@@ -2304,43 +2320,64 @@ Module Name, Module Description{
 
       // Real-time filtering
       input.addEventListener('input', function () {
-        searchFn(input.value);
+        flexSearch(input.value);
       });
     }
   }
 
-  function searchUsers(query) {
-    const activeTabElement = document.querySelector('#userOverlay .tab.active');
+    // Funcs
+  function searchUser(query) {
     const cards = document.querySelectorAll('.user-card');
-    const searchValue = query.toLowerCase();
+    const searchQuery = query.toLowerCase();
 
-    // Normalize tab name (e.g. "Students" -> "student")
-    let activeTab = activeTabElement ? activeTabElement.textContent.trim().toLowerCase() : 'all';
-    if (activeTab.endsWith('s') && activeTab !== 'all') {
-      activeTab = activeTab.slice(0, -1); // remove trailing 's' for matching
-    }
+    cards.forEach(card =>{
+      // Values to check
+      const username = card.dataset.name.toLowerCase(); 
+      const email = card.dataset.email.toLowerCase(); 
+
+      // check ni siya if ga match
+      const matchesQuery = username.includes(searchQuery) || email.includes(searchQuery);
+      
+      // display if match
+      card.style.display = matchesQuery ? 'flex' : 'none';
+    });
+  }
+  
+  function searchClassroom(query) {
+    const cards = document.querySelectorAll('.classroom-item');
+    const searchValue = query.toLowerCase();
+    const searchID = query;
 
     cards.forEach(card => {
-      const username = card.querySelector('.user-info strong').textContent.toLowerCase();
-      const role = card.getAttribute('data-role').toLowerCase(); // e.g., "student" or "instructor"
+      const className = card.querySelector('.classroom-title').textContent.toLowerCase();
+      const creatorName = card.querySelector('.classroom-creator').textContent.toLowerCase();
 
-      const matchesSearch = username.includes(searchValue);
-      const matchesTab = (activeTab === 'all') || (role === activeTab);
-
-      card.style.display = (matchesSearch && matchesTab) ? 'flex' : 'none';
+      const matchesSearch = className.includes(searchValue) || creatorName.includes(searchValue);
+      card.style.display = matchesSearch ? 'flex' : 'none';
     });
   }
 
-  function searchClassrooms(query) {
-    const classroomCards = document.querySelectorAll('#classroomListView .classroom-item');
+  function searchModule(query) {
+    const cards = document.querySelectorAll('.module-card');
     const searchValue = query.toLowerCase();
 
-    classroomCards.forEach(card => {
-      const className = card.querySelector('.classroom-title').textContent.toLowerCase();
-      const creator = card.querySelector('.classroom-creator').textContent.toLowerCase();
+    cards.forEach(card => {
+      const moduleName = card.querySelector('.module-title').textContent.toLowerCase();
+      const moduleCreator = card.querySelector('.module-creator').textContent.toLowerCase();
+      const matchesSearch = moduleName.includes(searchValue) || moduleCreator.includes(searchValue);
+      card.style.display = matchesSearch ? 'flex' : 'none';
+    });
+  }
+  
+  function searchPartners(query) {
+    const cards = document.querySelectorAll('.partners-card');
+    const searchValue = query.toLowerCase();
 
-      const matches = className.includes(searchValue) || creator.includes(searchValue);
-      card.style.display = matches ? 'flex' : 'none';
+    cards.forEach(card => {
+      const partnerName = card.querySelector('.partners-title').textContent.toLowerCase();
+      const partnerEmail = card.querySelector('.partners-role').textContent.toLowerCase();
+      const matchesSearch = partnerName.includes(searchValue) || partnerEmail.includes(searchValue);
+      card.style.display = (matchesSearch) ? 'flex' : 'none';
     });
   }
 
@@ -2495,155 +2532,155 @@ Module Name, Module Description{
 
   // -- User Functions -- 
   
-  // Delete User
+    // Delete User
 
-  function deleteUser() {
-      const confirmed = confirm("Are you sure you want to delete this user?");
-      if (confirmed) {
-          // Add user deletion process here
-          fetch('adminFunctions.php', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' }
-              ,
-              body: JSON.stringify({
-                  action: 'deleteUser',
-                  userID: selectedUser
-              })
-          })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
-            return response.json(); // Parse JSON response
-          })
-          .then(result => {
-              if (result.success) {
-                  notifyAndRedirect('User deleted succesfully!', 'reload');
-              } else {
-                  alert('Deletion failed.');
+    function deleteUser() {
+        const confirmed = confirm("Are you sure you want to delete this user?");
+        if (confirmed) {
+            // Add user deletion process here
+            fetch('adminFunctions.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+                ,
+                body: JSON.stringify({
+                    action: 'deleteUser',
+                    userID: selectedUser
+                })
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
               }
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred: ' + error.message);
-          });
+              return response.json(); // Parse JSON response
+            })
+            .then(result => {
+                if (result.success) {
+                    notifyAndRedirect('User deleted succesfully!', 'reload');
+                } else {
+                    alert('Deletion failed.');
+                }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred: ' + error.message);
+            });
 
-      }
-      else return;
-  }
+        }
+        else return;
+    }
 
-  // Deactivate User
-  // <button class="action-btn deactivate-btn" onclick="deactivateUser()">Deactivate</button>
-  function deactivateUser() {
-      const confirmed = confirm("Are you sure you want to deactivate this user?");
-      if (confirmed) {
-          // Add user deactivation process here
-          fetch('adminFunctions.php', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' }
-              ,
-              body: JSON.stringify({
-                  action: 'deactivateUser',
-                  userID: selectedUser
-              })
-          })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
-            return response.json(); // Parse JSON response
-          })
-          .then(result => {
-              if (result.success) {
-                  notifyAndRedirect('User deactivated succesfully!', 'reload');
-              } else {
-                  alert('Deletion failed.');
+    // Deactivate User
+    // <button class="action-btn deactivate-btn" onclick="deactivateUser()">Deactivate</button>
+    function deactivateUser() {
+        const confirmed = confirm("Are you sure you want to deactivate this user?");
+        if (confirmed) {
+            // Add user deactivation process here
+            fetch('adminFunctions.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+                ,
+                body: JSON.stringify({
+                    action: 'deactivateUser',
+                    userID: selectedUser
+                })
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
               }
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred: ' + error.message);
-          });
+              return response.json(); // Parse JSON response
+            })
+            .then(result => {
+                if (result.success) {
+                    notifyAndRedirect('User deactivated succesfully!', 'reload');
+                } else {
+                    alert('Deletion failed.');
+                }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred: ' + error.message);
+            });
 
-      }
-      else return;
-  }
-  
-  function activateUser() {
-      const confirmed = confirm("Are you sure you want to activate this user?");
-      if (confirmed) {
-          // Add user reactivation process here
-          fetch('adminFunctions.php', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' }
-              ,
-              body: JSON.stringify({
-                  action: 'activateUser',
-                  userID: selectedUser
-              })
-          })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
-            return response.json(); // Parse JSON response
-          })
-          .then(result => {
-              if (result.success) {
-                  notifyAndRedirect('User activated succesfully!', 'reload');
-              } else {
-                  alert('Deletion failed.');
+        }
+        else return;
+    }
+    
+    function activateUser() {
+        const confirmed = confirm("Are you sure you want to activate this user?");
+        if (confirmed) {
+            // Add user reactivation process here
+            fetch('adminFunctions.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+                ,
+                body: JSON.stringify({
+                    action: 'activateUser',
+                    userID: selectedUser
+                })
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
               }
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred: ' + error.message);
-          });
+              return response.json(); // Parse JSON response
+            })
+            .then(result => {
+                if (result.success) {
+                    notifyAndRedirect('User activated succesfully!', 'reload');
+                } else {
+                    alert('Deletion failed.');
+                }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred: ' + error.message);
+            });
 
-      }
-      else return;
-  }
+        }
+        else return;
+    }
 
-  // checkuserlogs
-  function checkUserLogs() {
-  console.log("Fetch Activity Logs");
-  showOverlay('userChecklogsOverlay', ['userDetailsOverlay', 'userOverlay']);
+    // checkuserlogs
+    function checkUserLogs() {
+    console.log("Fetch Activity Logs");
+    showOverlay('userChecklogsOverlay', ['userDetailsOverlay', 'userOverlay']);
 
-  fetch('adminFunctions.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'getActivityLogs',
-      data: { selectedUser: selectedUser }
+    fetch('adminFunctions.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'getActivityLogs',
+        data: { selectedUser: selectedUser }
+      })
     })
-  })
-  .then(response => {
-    console.log("Raw response:", response);
-    return response.json();
-  })
-  .then(data => {
-    console.log("Parsed data:", data);
-    const { logs } = data;
-    console.log("Logs: ", logs);
+    .then(response => {
+      console.log("Raw response:", response);
+      return response.json();
+    })
+    .then(data => {
+      console.log("Parsed data:", data);
+      const { logs } = data;
+      console.log("Logs: ", logs);
 
-    const htmlContent = logs.map(log => `
-      <div class="user-col">${log.username + " - " + log.userID}</div>
-      <div class="action-col">${log.action}</div>
-      <div class="date-col">${log.dateTimeCreated}</div>
-    `).join('');
+      const htmlContent = logs.map(log => `
+        <div class="user-col">${log.username + " - " + log.userID}</div>
+        <div class="action-col">${log.action}</div>
+        <div class="date-col">${log.dateTimeCreated}</div>
+      `).join('');
 
-    document.getElementById('log-entry').innerHTML = htmlContent;
-  })
-  .catch(error => {
-    console.error("Fetch error:", error);
-    document.getElementById('log-entry').innerHTML = `
-      <div class="error">An error occurred while fetching lesson details.</div>
-    `;
-  });
-}
+      document.getElementById('log-entry').innerHTML = htmlContent;
+    })
+    .catch(error => {
+      console.error("Fetch error:", error);
+      document.getElementById('log-entry').innerHTML = `
+        <div class="error">An error occurred while fetching lesson details.</div>
+      `;
+    });
+  }
 
-  var selectedClassroomID = '';
-  function showClassDetails(element) {
+    var selectedClassroomID = '';
+    function showClassDetails(element) {
     console.log("Show Classroom Details");
     showOverlay('viewClassroomDetailsOverlay', 'classroomOverlay');
 

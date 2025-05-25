@@ -1404,7 +1404,7 @@
       </div><!-- End Module Overlay-->
 
       <!-- Module Creation -->
-      <div id="createModuleOverlay" class="create-module-overlay" overlay-type ="create-module">
+      <div id="createModuleOverlay" class="create-module-overlay">
         <div id="createModuleMain">
           <button class="close-btn" onclick="hideSubOverlay('createModuleOverlay','moduleOverlay')">×</button>
           <h2 style="color: #7b0000; margin-bottom: 20px;">Upload a Module</h2>
@@ -1455,7 +1455,7 @@ Module Name, Module Description{
 
 
       <!-- View Module Overlay -->
-      <div id="viewModuleOverlay" class="view-module-overlay" overlay-type = "view-module-overlay">
+      <div id="viewModuleOverlay" class="view-module-overlay">
         <div id="viewModuleCon">
           <div id="viewModuleHeader">
             <button class="close-btn" onclick="hideSubOverlay('viewModuleOverlay','moduleOverlay')">×</button>
@@ -1472,7 +1472,7 @@ Module Name, Module Description{
       </div><!-- End View Module Overlay -->
 
       <!-- View Lesson Overlay -->
-      <div id="viewLessonOverlay" class="view-lesson-overlay" overlay-type="view-lesson-overlay">
+      <div id="viewLessonOverlay" class="view-lesson-overlay">
         <div id="viewLessonCon">
 
           <div id="viewLessonHeader">
@@ -1571,7 +1571,6 @@ Module Name, Module Description{
     const cards = document.querySelectorAll('.classroom-card');
     const searchValue = query.toLowerCase();
 
-    // Normalize tab name
     let activeTab = activeTabElement ? activeTabElement.textContent.trim().toLowerCase() : 'all';
     if (activeTab.endsWith('s') && activeTab !== 'all') {
       activeTab = activeTab.slice(0, -1); // remove trailing 's' for matching
