@@ -1585,7 +1585,7 @@ if(isset($_POST["createPartner"])) {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
   }
 
   #viewPartnerHeader h2 {
@@ -2819,7 +2819,7 @@ Module Name, Module Description{
           <div class="cd-section-title">Modules</div>
           <div class="cd-modulelist">
             ${modules.map(module => `
-              <div class="module-card" module-id="${module.langID}" onclick="showViewModule(this, ['classroomOverlay', 'viewClassroomDetailsOverlay'])">
+              <div class="module-card" module-id="${module.langID}" onclick="showViewModule(this)">
                 <div class="cd-module-card">
                   <img src="images/Module_Icon.jpg" alt="Module Icon" class="cd-list-icon">
                   <div class="cd-module-info">
@@ -2850,7 +2850,7 @@ Module Name, Module Description{
   var selectedModuleID = "";
   var selectedModuleType = "";
 
-  function showViewModule(element, $current) {
+  function showViewModule(element) {
   console.log("View Module");
   showSubOverlay('viewModuleOverlay');
 

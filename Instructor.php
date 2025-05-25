@@ -564,7 +564,7 @@
     border: 2px solid white;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    z-index: 100;
+    z-index: 10;
     padding: 20px;
   }
 
@@ -779,6 +779,12 @@
     margin-bottom: 10px;
   }
 
+  .cd-modulelist .module-card {
+    margin: 0;
+    padding: 0;
+    background: none;
+  }
+
   .cd-list-icon {
     width: 50px;
     height: 50px;
@@ -928,7 +934,7 @@
       width: 50%;
       background: rgba(241, 241, 241, 0.85);
       backdrop-filter: blur(5px);
-      z-index: 20;
+      z-index: 15;
       padding: 20px;
       overflow-y: auto;
     }
@@ -1245,7 +1251,7 @@
           </div>
 
           <div class="right-buttons">
-            <button class="SearchButton" onclick="showOverlay('createOverlay','classroomOverlay')">Create Classroom</button>
+            <button class="SearchButton" onclick="showSubOverlay('createOverlay')">Create Classroom</button>
             <div class="search-container">
               <input type="text" placeholder="Search..." class="search-input">
               <label class="SearchButton" onclick="toggleSearch(this)">Search</label>
@@ -1797,6 +1803,11 @@ Module Name, Module Description{
 
   }
 
+  function showSubOverlay ($subOverlay){
+    const subOverlay = document.getElementById($subOverlay);
+    subOverlay.classList.add('show');
+  }
+
   function hideSubOverlay(targetId,parent) {
 
     const target = document.getElementById(targetId);
@@ -1815,7 +1826,7 @@ Module Name, Module Description{
   var selectedClassroomID = '';
   function showClassDetails(element) {
     console.log("Show Classroom Details");
-    showOverlay('viewClassroomDetailsOverlay', 'classroomOverlay');
+    showSubOverlay('viewClassroomDetailsOverlay');
 
     const classCard = element.closest('.classroom-card');
     const classID = classCard.getAttribute('classroom-id');
@@ -1904,14 +1915,16 @@ Module Name, Module Description{
         ` : `<p>No students available.</p>`;
 
         const moduleContent = modules.length > 0 ? `
-          <h2 class="cd-section-title">Modules</h2>
-          <div id="cd-module-list">
+          <div class="cd-section-title">Modules</div>
+          <div class="cd-modulelist">
             ${modules.map(module => `
-              <div class="cd-module-card">
-                <img src="images/Module_Icon.jpg" alt="Module Icon" class="cd-list-icon">
-                <div class="cd-module-info">
-                  <h3>${module.moduleName}</h3>
-                  <p>${module.username}</p>
+              <div class="module-card" module-id="${module.langID}" onclick="showViewModule(this)">
+                <div class="cd-module-card">
+                  <img src="images/Module_Icon.jpg" alt="Module Icon" class="cd-list-icon">
+                  <div class="cd-module-info">
+                    <h3>${module.moduleName}</h3>
+                    <p>${module.username}</p>
+                  </div>
                 </div>
               </div>
             `).join('')}
@@ -2162,7 +2175,7 @@ Module Name, Module Description{
     document.getElementById('joinCreator').textContent = creator;
 
     // Show the overlay
-    showOverlay('joinOverlay', 'classroomOverlay');
+    showSubOverlay('joinOverlay');
   }
 
   function joinClassroom() {
@@ -2221,7 +2234,7 @@ Module Name, Module Description{
 
   function showViewModule(element) {
     console.log("View Module");
-    showOverlay('viewModuleOverlay', ['moduleOverlay']);
+    showSubOverlay('viewModuleOverlay');
 
     const moduleCard = element.closest('.module-card');
     const moduleID = moduleCard.getAttribute('module-id');
@@ -2337,7 +2350,7 @@ Module Name, Module Description{
   // Show View Lesson
   function showViewLesson(element) {
   console.log("View Lesson");
-  showOverlay('viewLessonOverlay', ['viewModuleOverlay','moduleOverlay']);
+  showSubOverlay('viewLessonOverlay');
 
   // Get the lesson ID from the clicked element
   const lessonCard = element.closest('.module-card');
