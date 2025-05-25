@@ -1648,6 +1648,7 @@
           <div class="cd-actions">
             <div class="cd-actions-right">
               <button></button>
+              <button class="cd-btn cd-btn-leave" onclick="leaveClass()">Leave</button>
               <button class="cd-btn cd-btn-close" onclick="hideSubOverlay('viewClassroomDetailsOverlay','classroomOverlay')">Close</button>
             </div>
           </div>
@@ -2156,7 +2157,7 @@ function showClassDetails(element) {
             const successDiv = document.createElement('div');
             successDiv.textContent = message;
 
-            successDiv.style.position = 'absolute';
+            successDiv.style.position = 'fixed';
             successDiv.style.display = 'flex';
             successDiv.style.margin = '20px auto';
             successDiv.style.padding = '15px 25px';
@@ -2177,7 +2178,20 @@ function showClassDetails(element) {
 
             document.body.appendChild(successDiv);
 
-            if (redirectUrl === 'reload')
+            const fadeOutAndRemove = () => {
+              successDiv.style.opacity = '0'; // trigger fade-out
+              setTimeout(() => successDiv.remove(), 1000); // remove after fade
+            };
+
+            if (redirectUrl === 'error' || redirectUrl === '' || redirectUrl == null){
+                // Fade out and stay on the same page when error
+                successDiv.style.backgroundColor = '#edd4d4';
+                successDiv.style.color = '#571515';
+                setTimeout(() => {
+                fadeOutAndRemove();
+            }, 3000);
+            }
+            else if (redirectUrl === 'reload' )
                 setTimeout(() => {
                 successDiv.remove();
                 window.location.reload();
@@ -2190,56 +2204,43 @@ function showClassDetails(element) {
         }
 
 
-/*
-  // Leaving
+  // Leave Class
   function leaveClass() {
-      // check if owner
-      const isOwner = checkOwner === 'true';
-      let confirmed = false;
+      let message = "Are you sure you want to leave this classroom?";
+      const confirmed = confirm(message);
 
-      if (isOwner) {
-          confirmed = confirm("Are you sure you want to leave this classroom? As the owner, leaving will permanently delete the classroom and all its contents.");
-      } else {
-          confirmed = confirm("Are you sure you want to leave this classroom?");
-      }
-
-      if (!confirmed) return;
-
-      fetch('', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-              leaveClassroom: true,
-              classID: selectedClassroomID,
-              role: "<?= $accountRole ?>",
-              owner: isOwner
+      if (confirmed) {
+          // Add classroom deletion process here
+          fetch('studentFunctions.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+              ,
+              body: JSON.stringify({
+                  action: 'leaveClass',
+                  classID: selectedClassroomID,
+              })
           })
-      })
-      .then(res => res.json())
-      .then(data => {
-          if (data.success) {
-              const message = isOwner 
-                  ? 'Classroom deleted successfully.' 
-                  : 'You have left the Classroom Successfully.';
-              // Redirect based on role
-              if (accountRole === 'Instructor') {
-                  notifyAndRedirect(message, 'Instructor.php');
-              } else if (accountRole === 'Student') {
-                  notifyAndRedirect(message, 'Student.php');
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json(); // Parse JSON response
+          })
+          .then(result => {
+              if (result.success) {
+                  notifyAndRedirect('You have left the classroom.', 'reload');
               } else {
-                  alert('No account role detected. Please login again.');
+                  notifyAndRedirect('Leaving the classroom failed. An error has occured.', 'error');
               }
-          } else {
-              alert('Failed to leave the classroom.');
-              console.error(data.error);
-          }
-      })
-      .catch(err => {
-          console.error('Error leaving classroom:', err);
-          alert('An error occurred while trying to leave the classroom.');
-      });
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred: ' + error.message);
+          });
+
+      }
+      else return;
   }
-*/
 
   var name = "";
   var desc = "";

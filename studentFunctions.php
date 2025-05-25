@@ -300,6 +300,28 @@
         }
     }
 
+    if ($action === 'leaveClass') {
+            $classID = trim($input['classID']);
+            $accountRole = $_SESSION['accountRole'];
+            $userID = $_SESSION['userID'];
+
+            $sql = "DELETE es FROM enrolledstudent es
+                    JOIN student s ON es.studentID = s.studentID
+                    JOIN users u ON s.userID = u.userID
+                    WHERE es.classroomID = ? AND u.userID = ?";
+                    
+            $stmt = $conn->prepare($sql);
+            if ($stmt) {
+                $stmt->bind_param("ss", $classID, $userID);
+                $stmt->execute();
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false, 'error' => $conn->error]);
+            }
+            exit;
+            
+        }
+
     // Handle GET requests for basic data retrieval
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $action = $_GET['action'] ?? null;
