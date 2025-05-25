@@ -8,7 +8,8 @@
 
   ob_start();
   session_start();
-  sessionCheck();
+
+  sessionCheck('Student');
   
 ?>
 

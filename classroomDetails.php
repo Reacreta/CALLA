@@ -8,7 +8,6 @@
 
     ob_start();
     session_start();
-    sessionCheck();
 
     $classid = $_GET['classid'] ?? null;
     $accountRole = $_SESSION['accountRole'];

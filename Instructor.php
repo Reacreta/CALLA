@@ -8,7 +8,8 @@
 
   ob_start();
   session_start();
-  sessionCheck();
+
+  sessionCheck('Instructor');
 
   // Insert into Classroom
   if(isset($_POST['createClassroom'])){

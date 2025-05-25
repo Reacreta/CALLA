@@ -148,9 +148,14 @@
         }
     }
 
-    function sessionCheck(){
-        if(!isset($_SESSION['userID'])){
-            redirect("index.php");
+    function sessionCheck($role){
+        if(!isset($_SESSION['userID']) || !isset($_SESSION['accountRole'])){
+            redirect('index.php');
+            exit();
+        }
+        else if ($_SESSION['accountRole'] != $role){
+            redirect('index.php');
+            exit();
         }
     }
 

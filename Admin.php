@@ -4,6 +4,8 @@ session_start();
 require_once 'database.php';
 require_once 'authFunctions.php';
 
+sessionCheck('Administrator');
+
 // Fetch all users
 $sql = "SELECT * FROM users";
 $result = $conn->query($sql);
@@ -645,7 +647,7 @@ if(isset($_POST["createPartner"])) {
     opacity: 0.9;
   }
 
-  .delete-btn {
+  .delete-btn, #viewPartnerOverlay .cd-edit-btn {
     background-color: #7b0000;
     color: white;
   }
