@@ -2376,9 +2376,9 @@ Module Name, Module Description{
     })
     .then(result => {
       if (result.success) {
-        location.reload(); // Optionally refresh the page
+         notifyAndRedirect('Module deleted succesfully!', 'reload')
       } else {
-        alert('Failed to delete module: ' + result.message);
+        notifyAndRedirect('Module delettion failed. An error has occured.', '');
       }
     })
     .catch(error => {
