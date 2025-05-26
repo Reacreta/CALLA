@@ -82,7 +82,7 @@
             $stmt->bind_param('sss', $adminID, $adminToken, $userID);
             debug_console("insert: ".$stmt->execute());
             logAction($conn, $userID, 'Registered as '.$usertype);
-            redirect('index.php');
+            redirect('index.php', 'registration.php');
             break;
 
           case "Instructor":
@@ -108,7 +108,7 @@
             $stmt->bind_param('ss', $instID, $userID);
             debug_console("insert: ".$stmt->execute());
             logAction($conn, $userID, 'Registered as '.$usertype);
-            redirect('index.php');
+            redirect('index.php', 'registration.php');
             break;
 
           case "Student":
@@ -134,7 +134,7 @@
             $stmt->bind_param('ss', $studentID, $userID);
             debug_console("insert: ".$stmt->execute());
             logAction($conn, $userID, 'Registered as '.$usertype);
-            redirect('index.php', 'registration.php');
+            redirect('index.php');
             break;
         }
       }

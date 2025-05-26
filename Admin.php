@@ -366,12 +366,14 @@ if(isset($_POST["createPartner"])) {
     flex: 1;
     height: 100%;
   }
+
   .dynamic-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
     height: 100%;
     overflow-y: scroll;
+    margin-right: 10px;
     scrollbar-width: thin; /* Firefox */
     scrollbar-color: #a00 #f0f0f0; /* Firefox */
   }
@@ -1382,7 +1384,16 @@ if(isset($_POST["createPartner"])) {
   /* Vocabulary section styling */
   #viewLessonWords {
     margin-top: 20px;
+    max-height: 300px;     /* You can adjust this height */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    scroll-behavior: smooth;scrollbar-width: thin;
+    scrollbar-color: #a00 #f0f0f0;
   }
+
 
   #viewLessonWordsTitle {
     font-size: 1.2rem;

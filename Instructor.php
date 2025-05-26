@@ -1065,6 +1065,14 @@
     /* Vocabulary section styling */
     #viewLessonWords {
       margin-top: 20px;
+      max-height: 300px;     /* You can adjust this height */
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 6px;
+      background-color: #f9f9f9;
+      scroll-behavior: smooth;scrollbar-width: thin;
+      scrollbar-color: #a00 #f0f0f0;
     }
 
     #viewLessonWordsTitle {

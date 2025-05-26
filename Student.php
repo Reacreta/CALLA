@@ -963,20 +963,21 @@
 
     #viewLessonOverlay {
       display: none;
-      position: absolute;
+      position: fixed;
       border: 2px solid white;
       border-radius: 6px 6px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      top: 10%;
-      left: 20%;
+      top: 44%;
+      left: 51%;
+      transform: translate(-50%, -50%);
       height: fit-content;
-      width: 50%;
+      width: 45%;
       background: rgba(241, 241, 241, 0.85);
       backdrop-filter: blur(5px);
       z-index: 20;
       padding: 20px;
       overflow-y: auto;
-    }
+      }
 
     #viewLessonTitle {
       display: flex;
@@ -1021,6 +1022,14 @@
     /* Vocabulary section styling */
     #viewLessonWords {
       margin-top: 20px;
+      max-height: 300px;     /* You can adjust this height */
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 6px;
+      background-color: #f9f9f9;
+      scroll-behavior: smooth;scrollbar-width: thin;
+      scrollbar-color: #a00 #f0f0f0;
     }
 
     #viewLessonWordsTitle {
@@ -1188,10 +1197,16 @@
 
         .game-title {
             color: #7b0000;
-            font-size: 1.8rem;
+            background: white;
+            width: 420px;
+            height: 60px;
+            border-radius: 10px;
+            font-size: 1.5rem;
             margin: 0;
             font-weight: 600;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            padding: 13px 0  0 10px;
         }
 
         .game-difficulty {
