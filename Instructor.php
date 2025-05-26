@@ -1885,11 +1885,11 @@ Module Name, Module Description{
         else
           document.getElementById('cd-actions').outerHTML = `
             <div id="cd-actions" class="cd-actions-right">
-              <button class="cd-btn cd-btn-partner" onclick="addPartnerModule()">Add Partner Module</button>
               <button class="cd-btn cd-btn-leave" onclick="leaveClass()">Leave</button>
               <button class="cd-btn cd-btn-close" onclick="hideSubOverlay('viewClassroomDetailsOverlay','classroomOverlay')">Close</button>
             </div>`; 
 
+        // <button class="cd-btn cd-btn-partner" onclick="addPartnerModule()">Add Partner Module</button> - Still Not Implemented
         const { classroomDetails, instructors, students, modules } = data;
         console.log("Classroom Details:", classroomDetails);
         console.log("Instructors:", instructors);

@@ -79,8 +79,8 @@
             display: flex;
             margin: 20px auto;
             padding: 15px 25px;
-            background-color: #d4edda;
-            color: #155724;
+            background-color: #edd4d4;
+            color: #571515;
             border: 1px solid #c3e6cb;
             border-radius: 8px;
             width: fit-content;
