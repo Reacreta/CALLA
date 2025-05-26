@@ -1851,8 +1851,7 @@
                     }
                 } else {
                 ?>
-                    <div class="no-modules-message">
-                        <img src="images/No_Content_Icon.jpg" alt="No Modules" class="no-content-icon">
+                    <div class="no-modules-message">  
                         <h3>No Modules Available</h3>
                         <p>You haven't enrolled in any classrooms with modules yet.</p>
                         <p>Join a classroom to access learning modules!</p>
