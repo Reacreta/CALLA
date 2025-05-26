@@ -149,11 +149,13 @@
     }
 
     function sessionCheck($role){
-        if(!isset($_SESSION['userID']) || !isset($_SESSION['accountRole'])){
+        if(!isset($_SESSION['userID']) || !isset($_SESSION['accountRole'])){ 
+            destroySession();
             redirect('index.php');
             exit();
         }
         else if ($_SESSION['accountRole'] != $role){
+            destroySession();
             redirect('index.php');
             exit();
         }

@@ -502,8 +502,7 @@
             }
             }
         }
-
-      header('Location: admin.php');
+      header('Location: Admin.php');
       exit();
     }
 ?>

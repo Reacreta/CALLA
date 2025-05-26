@@ -194,6 +194,7 @@ if(isset($_POST["createPartner"])) {
 
   .title{
     display: flex;
+    gap: 12px;
     flex-direction: row;
   }
 

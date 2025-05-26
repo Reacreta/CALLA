@@ -1856,7 +1856,7 @@
                         <p>You haven't enrolled in any classrooms with modules yet.</p>
                         <p>Join a classroom to access learning modules!</p>
                     </div>
-                <?php
+                <?php 
                 }
                 ?>
             </div>
