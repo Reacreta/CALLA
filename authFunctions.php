@@ -149,14 +149,30 @@
     }
 
     function sessionCheck($role){
+        debug_console("Running session check...");
         if(!isset($_SESSION['userID']) || !isset($_SESSION['accountRole'])){ 
             destroySession();
             redirect('index.php');
             exit();
         }
         else if ($_SESSION['accountRole'] != $role){
-            destroySession();
-            redirect('index.php');
+            if (isset($_SESSION['accountRole'])) $accountRole = $_SESSION['accountRole'];
+            else debug_console("Failed to get accountRole.");
+            switch($accountRole)
+            {
+                case 'Administrator':
+                    header('Location: Admin.php');
+                    break;
+                case 'Instructor':
+                    header('Location: Instructor.php');
+                    break;
+                case 'Student':
+                    header('Location: Student.php');
+                    break;
+                default:
+                    debug_console("Redirection Failed.");
+                    break;
+            }
             exit();
         }
     }

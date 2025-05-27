@@ -5,6 +5,8 @@
   require_once 'database.php';
   require_once 'authFunctions.php';
 
+  if (isset($_SESSION['accountRole'])) sessionCheck('index'); // literally anything can be put here, just placeholder for it to redirect back
+
   if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     destroySession();
     session_start(); 
